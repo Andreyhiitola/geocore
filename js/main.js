@@ -13,7 +13,22 @@ import { getCurrentHoles, setCurrentHoles, TEMPLATES } from './data/templates.js
 import { updateUI, updateScriptOnly } from './ui/stats.js';
 
 // Экспортируем глобальные переменные для window (для onclick в HTML)
-window.loadProject = null;
+window.loadProject = function(i) {
+  const p = loadProjects()[i];
+  if (!p?.holesData) return;
+  setCurrentHoles(p.holesData);
+  visualizeHoles(p.holesData);
+  updateUI(p.holesData, [], "idw", 1.0, p.standard);
+  setRunReady(true);
+  document.getElementById("sandbox")?.scrollIntoView({ behavior: "smooth" });
+};
+
+window.deleteProject = function(i) {
+  const p = loadProjects();
+  p.splice(i, 1);
+  saveProjects(p);
+  renderProjects();
+};
 window.deleteProject = null;
 
 export function wireEvents() {

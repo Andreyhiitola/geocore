@@ -98,6 +98,7 @@ export function runModel() {
     const rawBlocks = interpolateBlocks(holes, blockSize, method, cutoff);
     const classified = classifyJORC(rawBlocks, holes);
     setCurrentBlocks(classified);
+    window.currentBlocks = classified;
     visualizeBlocks(classified);
     updateUI(holes, classified, method, cutoff, standard);
     
