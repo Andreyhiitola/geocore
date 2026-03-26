@@ -32,8 +32,8 @@ export function visualizeHoles(holes) {
     
     h.intervals.forEach(([from, to, val]) => {
       if (val > 5) {
-        const sphereGeo = new THREE.SphereGeometry(0.5, 8, 8);
-        const sphereMat = new THREE.MeshStandardMaterial({ color: 0xffaa33, emissive: 0x331100 });
+        const sphereGeo = new THREE.SphereGeometry(0.65, 16, 16);
+        const sphereMat = new THREE.MeshStandardMaterial({ color: 0xffaa44, emissive: 0x552200, emissiveIntensity: 0.8 });
         const marker = new THREE.Mesh(sphereGeo, sphereMat);
         marker.position.set(h.x, -(from + to) / 2 * 0.5, h.z);
         holesGrp.add(marker);
@@ -48,31 +48,80 @@ export function visualizeBlocks(blocks) {
   clearGroup(blocksGrp);
   if (!blocks.length) return;
   
-  const geo = new THREE.BoxGeometry(4.4, 4.4, 4.4);
-  blocks.forEach(b => {
-    let color;
-    if (b.grade > 6) color = 0xff5522;
-    else if (b.grade > 3) color = 0xffaa66;
-    else if (b.grade > 1) color = 0x6a9aca;
-    else color = 0x2a5a8a;
+  const cutoff = document.getElementById('cutoff')?.value || 1.0;
+  const oreThresh = cutoff;
+  const maxGrade = blocks.reduce((m, b) => Math.max(m, b.grade), 0);
+
+  if (typeof renderer !== 'undefined') renderer.sortObjects = true;
+  const geo = new THREE.BoxGeometry(4.3, 4.3, 4.3);
+  const edgeGeo = new THREE.EdgesGeometry(new THREE.BoxGeometry(4.3, 4.3, 4.3));
+  const sorted = [...blocks].sort((a, b) => a.grade - b.grade);
+
+  sorted.forEach(b => {
+    const isOre = b.grade >= oreThresh;
     
-    const mat = new THREE.MeshStandardMaterial({ color, transparent: true, opacity: 0.85 });
+    // Для руды — яркие цвета от синего до красного
+    // Для породы — серые оттенки от тёмно-серого до светло-серого
+    let color, opacity, emissive;
+    
+    if (isOre) {
+      // Руда: яркие цвета
+      color = gradeToColor(b.grade, maxGrade);
+      opacity = Math.min(0.35 + (b.grade / maxGrade) * 0.65, 1.0);
+      emissive = b.grade > maxGrade * 0.7 ? 0x330800 : 0x000000;
+    } else {
+      // Порода: серые оттенки (чем выше содержание, тем светлее)
+      const grayValue = Math.floor(40 + (b.grade / oreThresh) * 80);
+      color = (grayValue << 16) | (grayValue << 8) | grayValue;
+      opacity = 0.15;  // полупрозрачная порода
+      emissive = 0x000000;
+    }
+
+    const mat = new THREE.MeshStandardMaterial({ 
+      color, 
+      emissive, 
+      transparent: true, 
+      opacity, 
+      depthWrite: isOre 
+    });
     const box = new THREE.Mesh(geo, mat);
     box.position.set(b.x, b.y, b.z);
+    box.renderOrder = isOre ? 2 : 0;
     blocksGrp.add(box);
-    
-    if (b.category) {
-      const edgeColor = b.category === 'Measured' ? 0x7ee787 : 
-                        b.category === 'Indicated' ? 0xffaa66 : 0xff8844;
-      const edgesGeo = new THREE.EdgesGeometry(geo);
-      const edgesMat = new THREE.LineBasicMaterial({ color: edgeColor });
-      const wire = new THREE.LineSegments(edgesGeo, edgesMat);
+
+    // Рёбра только у рудных блоков
+    if (isOre) {
+      const catColor = !b.category ? 0x888888
+                     : b.category === 'Measured' ? 0x7ee787
+                     : b.category === 'Indicated' ? 0xffdd44
+                     : 0xff9944;
+      const wire = new THREE.LineSegments(edgeGeo, new THREE.LineBasicMaterial({ color: catColor, transparent: true, opacity: 0.4 }));
       wire.position.copy(box.position);
+      wire.renderOrder = 3;
       blocksGrp.add(wire);
     }
   });
   
   console.log(`[3D] Визуализировано блоков: ${blocks.length}`);
+}
+function gradeToColor(grade, maxGrade) {
+  const t = Math.min(grade / Math.max(maxGrade, 1), 1);
+  const stops = [
+    { t: 0.0,  r: 0x10, g: 0x40, b: 0xaa },
+    { t: 0.25, r: 0x20, g: 0x80, b: 0xdd },
+    { t: 0.5,  r: 0xff, g: 0xdd, b: 0x00 },
+    { t: 0.75, r: 0xff, g: 0x77, b: 0x00 },
+    { t: 1.0,  r: 0xff, g: 0x11, b: 0x00 },
+  ];
+  let lo = stops[0], hi = stops[stops.length - 1];
+  for (let i = 0; i < stops.length - 1; i++) {
+    if (t >= stops[i].t && t <= stops[i+1].t) { lo = stops[i]; hi = stops[i+1]; break; }
+  }
+  const f = hi.t === lo.t ? 0 : (t - lo.t) / (hi.t - lo.t);
+  const r = Math.round(lo.r + (hi.r - lo.r) * f);
+  const g = Math.round(lo.g + (hi.g - lo.g) * f);
+  const b = Math.round(lo.b + (hi.b - lo.b) * f);
+  return (r << 16) | (g << 8) | b;
 }
 
 export function visualizeOreFromVertices(vertices, faces, holes = null) {
@@ -94,7 +143,7 @@ export function visualizeOreFromVertices(vertices, faces, holes = null) {
     color: color,
     side: THREE.DoubleSide, 
     transparent: true, 
-    opacity: 0.2,
+    opacity: 0.08,
     emissive: avgGrade > 5 ? 0x331100 : 0x000000
   });
   const shell = new THREE.Mesh(geometry, shellMaterial);
@@ -124,7 +173,7 @@ export function drawEllipsoidOreBody(avgGrade = 3.0) {
     color: color, 
     side: THREE.DoubleSide, 
     transparent: true, 
-    opacity: 0.2,
+    opacity: 0.08,
     emissive: avgGrade > 5 ? 0x331100 : 0x000000
   }));
   shell.scale.set(22, 18, 22);
@@ -174,7 +223,6 @@ export function drawCoalSeams() {
   oreGrp.add(lowerWire);
 }
 
-// Функция для управления видимостью полупрозрачной оболочки
 export function setOreShellVisibility(visible) {
   if (oreShellMeshes && oreShellMeshes.length) {
     oreShellMeshes.forEach(mesh => {
