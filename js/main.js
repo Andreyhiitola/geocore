@@ -12,15 +12,15 @@ import { visualizeHoles, visualizeOreFromVertices, drawEllipsoidOreBody, drawCoa
 import { getCurrentHoles, setCurrentHoles, TEMPLATES } from './data/templates.js';
 import { updateUI, updateScriptOnly } from './ui/stats.js';
 
-// Экспортируем глобальные переменные для window (для onclick в HTML)
+// Глобальные функции для onclick в HTML
 window.loadProject = function(i) {
   const p = loadProjects()[i];
   if (!p?.holesData) return;
   setCurrentHoles(p.holesData);
   visualizeHoles(p.holesData);
-  updateUI(p.holesData, [], "idw", 1.0, p.standard);
+  updateUI(p.holesData, [], 'idw', 1.0, p.standard);
   setRunReady(true);
-  document.getElementById("sandbox")?.scrollIntoView({ behavior: "smooth" });
+  document.getElementById('sandbox')?.scrollIntoView({ behavior: 'smooth' });
 };
 
 window.deleteProject = function(i) {
@@ -29,7 +29,6 @@ window.deleteProject = function(i) {
   saveProjects(p);
   renderProjects();
 };
-window.deleteProject = null;
 
 export function wireEvents() {
   console.log('[EVENTS] Настройка обработчиков событий');
@@ -127,101 +126,7 @@ export function wireEvents() {
       b.click();
     });
   }
-     // Экспорт блочной модели для Datamine Viewer
-  const exportBlockmodelBtn = document.getElementById('exportBlockmodelBtn');
-  if (exportBlockmodelBtn) {
-    exportBlockmodelBtn.addEventListener('click', () => {
-      if (!currentBlocks || !currentBlocks.length) {
-        alert('Сначала постройте блочную модель');
-        return;
-      }
-      
-      // Формат .blockmodel для Datamine (текстовый)
-      let content = '# Datamine Studio Block Model\n';
-      content += '# X Y Z Au_gpt Category\n';
-      currentBlocks.forEach(b => {
-        content += `${b.x.toFixed(1)} ${b.y.toFixed(1)} ${b.z.toFixed(1)} ${b.grade.toFixed(3)} ${b.category || 'Unknown'}\n`;
-      });
-      
-      const blob = new Blob([content], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `blockmodel_${new Date().toISOString().slice(0,19)}.blockmodel`;
-      a.click();
-      URL.revokeObjectURL(url);
-      console.log('[EXPORT] Блочная модель сохранена для Datamine Viewer');
-    });
-  }
 
-  // Экспорт каркаса рудного тела в формате WRL (VRML для Datamine)
-  const exportWireframeBtn = document.getElementById('exportWireframeBtn');
-  if (exportWireframeBtn) {
-    exportWireframeBtn.addEventListener('click', () => {
-      const oreGrpChildren = window.oreGrp?.children;
-      if (!oreGrpChildren || !oreGrpChildren.length) {
-        alert('Нет загруженного каркаса рудного тела');
-        return;
-      }
-      
-      // Ищем каркасную сетку (не оболочку)
-      let wireframeMesh = null;
-      for (let child of oreGrpChildren) {
-        if (child.isMesh && child.material && child.material.wireframe === true) {
-          wireframeMesh = child;
-          break;
-        }
-      }
-      
-      if (!wireframeMesh) {
-        alert('Каркас рудного тела не найден');
-        return;
-      }
-      
-      // Получаем геометрию и преобразуем в WRL (VRML) формат
-      const geometry = wireframeMesh.geometry;
-      const positions = geometry.attributes.position.array;
-      const indices = geometry.index.array;
-      
-      let wrl = '#VRML V2.0 utf8\n';
-      wrl += '# Экспортировано из GeoCore Academy\n';
-      wrl += 'Shape {\n';
-      wrl += '  appearance Appearance {\n';
-      wrl += '    material Material {\n';
-      wrl += '      diffuseColor 0.8 0.65 0.3\n';
-      wrl += '      emissiveColor 0.3 0.2 0.1\n';
-      wrl += '    }\n';
-      wrl += '  }\n';
-      wrl += '  geometry IndexedLineSet {\n';
-      wrl += '    coord Coordinate {\n';
-      wrl += '      point [\n';
-      
-      // Вершины
-      for (let i = 0; i < positions.length; i += 3) {
-        wrl += `        ${positions[i].toFixed(2)} ${positions[i+1].toFixed(2)} ${positions[i+2].toFixed(2)},\n`;
-      }
-      wrl += '      ]\n';
-      wrl += '    }\n';
-      wrl += '    coordIndex [\n';
-      
-      // Грани (рёбра)
-      for (let i = 0; i < indices.length; i += 3) {
-        wrl += `      ${indices[i]}, ${indices[i+1]}, ${indices[i+2]}, -1,\n`;
-      }
-      wrl += '    ]\n';
-      wrl += '  }\n';
-      wrl += '}\n';
-      
-      const blob = new Blob([wrl], { type: 'model/vrml' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `ore_body_${new Date().toISOString().slice(0,19)}.wrl`;
-      a.click();
-      URL.revokeObjectURL(url);
-      console.log('[EXPORT] Каркас сохранён в формате WRL для Datamine Viewer');
-    });
-  }
   // Сброс к золоту
   const resetBtn = document.getElementById('resetDemoBtn');
   if (resetBtn) resetBtn.addEventListener('click', () => loadTemplate('gold'));
@@ -273,7 +178,7 @@ export function wireEvents() {
   let showOreShell = true;
   let showHolesVis = true;
 
-   const toggleOreShellBtn = document.getElementById('toggleOreShell');
+  const toggleOreShellBtn = document.getElementById('toggleOreShell');
   if (toggleOreShellBtn) {
     toggleOreShellBtn.addEventListener('click', function() {
       showOreShell = !showOreShell;
@@ -301,47 +206,6 @@ export function wireEvents() {
     console.warn('[EVENTS] Кнопка toggleHoles не найдена');
   }
 
-          
-      // Вычисляем центр и размеры каркаса
-      let minX = Infinity, maxX = -Infinity;
-      let minY = Infinity, maxY = -Infinity;
-      let minZ = Infinity, maxZ = -Infinity;
-      
-      vertices.forEach(v => {
-        minX = Math.min(minX, v[0]); maxX = Math.max(maxX, v[0]);
-        minY = Math.min(minY, v[1]); maxY = Math.max(maxY, v[1]);
-        minZ = Math.min(minZ, v[2]); maxZ = Math.max(maxZ, v[2]);
-      });
-      
-      // Масштабируем как в визуализации
-      const scale = 1.3;
-      const scaleY = 1.4;
-      const posY = -8;
-      
-      const centerX = (minX + maxX) / 2 * scale;
-      const centerZ = (minZ + maxZ) / 2 * scale;
-      const centerY = (minY + maxY) / 2 * scaleY + posY;
-      
-      // Вычисляем оптимальное расстояние для камеры
-      const sizeX = (maxX - minX) * scale;
-      const sizeZ = (maxZ - minZ) * scale;
-      const maxSize = Math.max(sizeX, sizeZ, 30);
-      const distance = maxSize * 1.2;
-      
-      const camera = window.camera;
-      const controls = window.controls;
-      if (camera && controls) {
-        // Позиционируем камеру под углом 45°
-        camera.position.set(centerX + distance * 0.7, centerY + distance * 0.5, centerZ + distance * 0.7);
-        controls.target.set(centerX, centerY, centerZ);
-        controls.update();
-      }
-      console.log(`[VIS] Фокус на рудном теле: центр (${centerX.toFixed(1)}, ${centerY.toFixed(1)}, ${centerZ.toFixed(1)}), дистанция ${distance.toFixed(1)}`);
-    });
-    console.log('[EVENTS] Кнопка фокуса найдена');
-  } else {
-    console.warn('[EVENTS] Кнопка фокуса не найдена');
-  }
   // Автоматическое обновление алгоритма при изменении параметров
   const paramFields = ['blockSize', 'methodSel', 'cutoff', 'stdSel'];
   paramFields.forEach(id => {
