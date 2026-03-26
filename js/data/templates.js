@@ -8,7 +8,7 @@ import { visualizeHoles, visualizeOreFromVertices, drawEllipsoidOreBody, drawCoa
 export const TEMPLATES = {
   gold: { 
     csv: 'data/gold_demo.csv', 
-    obj: 'data/ore_body.obj', 
+    obj: 'data/ore_body_gold.obj', 
     standard: 'JORC',  
     label: 'золото (Au)',  
     field: 'Au_gpt',  
@@ -17,7 +17,7 @@ export const TEMPLATES = {
   },
   copper: { 
     csv: 'data/copper_demo.csv', 
-    obj: 'data/ore_body.obj', 
+    obj: 'data/ore_body_copper.obj', 
     standard: 'JORC',  
     label: 'медь (Cu)',   
     field: 'Cu_pct',  
@@ -26,7 +26,7 @@ export const TEMPLATES = {
   },
   coal: { 
     csv: 'data/coal_demo.csv',   
-    obj: null,                
+    obj: 'data/ore_body_coal.obj',                
     standard: 'ГКЗ',   
     label: 'уголь',       
     field: 'Coal_m',  
@@ -35,7 +35,6 @@ export const TEMPLATES = {
   },
 };
 
-// Экспортируем для доступа из других модулей
 export let currentHoles = [];
 export let currentBlocks = [];
 
@@ -65,27 +64,24 @@ export async function loadTemplate(type) {
     setStatus('csvStatus', `✓ ${cfg.label} — ${holes.length} скважин, ${holes.reduce((s,h)=>s+h.intervals.length,0)} интервалов`, '#7ee787');
 
     clearOreGrp();
-    if (cfg.obj) {
-      try {
-        const objResp = await fetch(cfg.obj, { cache: 'no-store' });
-        if (!objResp.ok) throw new Error(`HTTP ${objResp.status}: ${cfg.obj}`);
-        const objText = await objResp.text();
-        const { vertices, faces } = parseOBJ(objText);
-        if (vertices.length && faces.length) {
-          visualizeOreFromVertices(vertices, faces, holes);
-          setStatus('objStatus', `✓ Каркас загружен: ${vertices.length} вершин, ${faces.length} граней`, '#7ee787');
-        } else {
-          throw new Error('OBJ не содержит данных');
-        }
-      } catch (e) {
-        console.warn('[OBJ] Ошибка загрузки, используем эллипсоид:', e);
-        const avgGrade = calculateAverageGrade(holes);
-        drawEllipsoidOreBody(avgGrade);
-        setStatus('objStatus', '⚠ OBJ не найден — использован автоматический каркас', 'var(--gold)');
+    
+    // Загружаем OBJ каркас
+    try {
+      const objResp = await fetch(cfg.obj, { cache: 'no-store' });
+      if (!objResp.ok) throw new Error(`HTTP ${objResp.status}: ${cfg.obj}`);
+      const objText = await objResp.text();
+      const { vertices, faces } = parseOBJ(objText);
+      if (vertices.length && faces.length) {
+        visualizeOreFromVertices(vertices, faces, holes);
+        setStatus('objStatus', `✓ Каркас загружен: ${vertices.length} вершин, ${faces.length} граней`, '#7ee787');
+      } else {
+        throw new Error('OBJ не содержит данных');
       }
-    } else {
-      drawCoalSeams();
-      setStatus('objStatus', '✓ Угольные пласты отрисованы', '#7ee787');
+    } catch (e) {
+      console.warn('[OBJ] Ошибка загрузки, используем эллипсоид:', e);
+      const avgGrade = calculateAverageGrade(holes);
+      drawEllipsoidOreBody(avgGrade);
+      setStatus('objStatus', '⚠ OBJ не найден — использован автоматический каркас', 'var(--gold)');
     }
 
     document.getElementById('sandbox')?.scrollIntoView({ behavior: 'smooth' });
