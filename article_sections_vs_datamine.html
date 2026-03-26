@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Классический метод разрезов VS Datamine — GeoCore Academy</title>
+<meta name="description" content="Сравнение метода параллельных сечений и блочного моделирования в Datamine Studio RM. Потери точности, визуализация, таблица сравнения.">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --gold:#C9A84C;--gold-light:#E8C97A;--gold-dim:#7A6230;
+  --dark:#0A0A0B;--dark-2:#111114;--dark-3:#18181D;--dark-4:#1F1F26;
+  --surface:#252530;--text:#E8E6DE;--text-muted:#9A9890;--text-dim:#5C5B56;
+  --border:rgba(201,168,76,0.18);--border-dim:rgba(255,255,255,0.07);
+  --red:#8B3A2A;--green:#2a5a2a;
+}
+html{scroll-behavior:smooth;}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--dark);color:var(--text);line-height:1.7;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.3;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:64px;background:rgba(10,10,11,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.logo-hex{width:28px;height:28px;background:var(--gold);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);}
+.logo-text{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--text);}
+.logo-text span{color:var(--gold);}
+.nav-back{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);text-decoration:none;display:flex;align-items:center;gap:8px;transition:color .2s;}
+.nav-back:hover{color:var(--gold);}
+.nav-cta{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dark);background:var(--gold);padding:9px 20px;text-decoration:none;clip-path:polygon(7px 0%,100% 0%,calc(100% - 7px) 100%,0% 100%);}
+.nav-cta:hover{background:var(--gold-light);}
+
+/* ARTICLE LAYOUT */
+.art-wrap{max-width:780px;margin:0 auto;padding:120px 24px 80px;}
+
+/* HEADER */
+.art-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:10px;margin-bottom:20px;}
+.art-label::before{content:'';width:32px;height:1px;background:var(--gold);}
+h1.art-title{font-family:'Playfair Display',serif;font-size:clamp(32px,4vw,52px);font-weight:900;line-height:1.1;margin-bottom:20px;}
+.art-sub{font-size:17px;font-weight:300;line-height:1.75;color:var(--text-muted);margin-bottom:40px;border-left:3px solid var(--gold);padding-left:20px;}
+.art-meta{display:flex;gap:24px;align-items:center;padding:20px 0;border-top:1px solid var(--border-dim);border-bottom:1px solid var(--border-dim);margin-bottom:56px;}
+.art-meta-item{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);}
+.art-meta-item strong{color:var(--text-muted);}
+.art-tag{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold-dim);padding:3px 8px;}
+
+/* BODY */
+.art-body h2{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;line-height:1.2;margin:56px 0 20px;color:var(--text);}
+.art-body h3{font-family:'Playfair Display',serif;font-size:21px;font-weight:700;margin:40px 0 16px;color:var(--text);}
+.art-body p{font-size:16px;font-weight:300;line-height:1.8;color:var(--text-muted);margin-bottom:20px;}
+.art-body strong{color:var(--text);font-weight:600;}
+.art-body em{color:var(--text-muted);font-style:italic;}
+
+/* FORMULA */
+.formula-box{background:var(--dark-3);border:1px solid var(--border-dim);padding:24px 32px;margin:32px 0;text-align:center;position:relative;}
+.formula-box::before{content:'ФОРМУЛА';position:absolute;top:-10px;left:20px;font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.15em;color:var(--text-dim);background:var(--dark-3);padding:0 8px;}
+.formula{font-family:'IBM Plex Mono',monospace;font-size:20px;color:var(--gold);letter-spacing:.05em;}
+.formula-desc{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-dim);margin-top:10px;letter-spacing:.08em;}
+
+/* VISUAL BLOCKS */
+.vis-block{margin:36px 0;background:var(--dark-3);border:1px solid var(--border-dim);overflow:hidden;}
+.vis-header{padding:14px 20px;background:var(--dark-4);border-bottom:1px solid var(--border-dim);display:flex;align-items:center;gap:10px;}
+.vis-dot{width:8px;height:8px;border-radius:50%;}
+.vis-title{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;color:var(--text-dim);}
+.vis-canvas{padding:24px;display:flex;justify-content:center;align-items:center;min-height:180px;}
+.vis-caption{padding:12px 20px;border-top:1px solid var(--border-dim);font-size:12px;font-weight:300;color:var(--text-dim);font-style:italic;}
+
+/* SVG diagrams */
+svg{max-width:100%;height:auto;}
+
+/* LOSS LIST */
+.loss-list{list-style:none;display:flex;flex-direction:column;gap:12px;margin:20px 0 32px;}
+.loss-item{display:flex;gap:14px;align-items:flex-start;padding:14px 18px;background:rgba(139,58,42,.08);border:1px solid rgba(139,58,42,.2);}
+.loss-icon{font-size:18px;min-width:28px;}
+.loss-text{font-size:14px;font-weight:300;line-height:1.6;color:var(--text-muted);}
+.loss-text strong{color:#E87070;}
+
+.gain-list{list-style:none;display:flex;flex-direction:column;gap:12px;margin:20px 0 32px;}
+.gain-item{display:flex;gap:14px;align-items:flex-start;padding:14px 18px;background:rgba(42,90,42,.08);border:1px solid rgba(42,90,42,.2);}
+.gain-text{font-size:14px;font-weight:300;line-height:1.6;color:var(--text-muted);}
+.gain-text strong{color:#7ee787;}
+
+/* TABLE */
+.cmp-table{width:100%;border-collapse:collapse;margin:32px 0;font-size:13px;}
+.cmp-table th{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;padding:12px 16px;text-align:left;border-bottom:2px solid var(--border);}
+.cmp-table th:nth-child(1){color:var(--text-dim);}
+.cmp-table th:nth-child(2){color:#E87070;}
+.cmp-table th:nth-child(3){color:#7ee787;}
+.cmp-table td{padding:12px 16px;border-bottom:1px solid var(--border-dim);color:var(--text-muted);font-weight:300;}
+.cmp-table tr:nth-child(even) td{background:rgba(255,255,255,.02);}
+.cmp-table td:nth-child(2){color:#E87070;}
+.cmp-table td:nth-child(3){color:#7ee787;}
+.cmp-table td:nth-child(1){color:var(--text);font-weight:500;}
+
+/* DIVIDER */
+.art-hr{border:none;border-top:1px solid var(--border-dim);margin:48px 0;}
+
+/* HIGHLIGHT BOX */
+.highlight{background:var(--dark-3);border:1px solid var(--border);border-left:3px solid var(--gold);padding:24px 28px;margin:36px 0;}
+.highlight p{margin:0;color:var(--text-muted);}
+.highlight strong{color:var(--text);}
+
+/* CTA BOX */
+.cta-box{background:var(--dark-4);border:1px solid var(--border);padding:40px;margin:56px 0;text-align:center;}
+.cta-box h3{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;margin-bottom:16px;}
+.cta-box p{font-size:15px;font-weight:300;color:var(--text-muted);margin-bottom:28px;max-width:520px;margin-left:auto;margin-right:auto;}
+.cta-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+.btn-p{display:inline-flex;align-items:center;gap:9px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dark);background:var(--gold);padding:14px 30px;text-decoration:none;clip-path:polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%);transition:all .2s;}
+.btn-p:hover{background:var(--gold-light);}
+.btn-s{display:inline-flex;align-items:center;gap:9px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);border:1px solid var(--border);padding:14px 30px;text-decoration:none;transition:all .2s;}
+.btn-s:hover{border-color:var(--gold);color:var(--gold);}
+
+/* OFFER STRIP */
+.offer-strip{background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);padding:20px 24px;margin:32px 0;display:flex;align-items:flex-start;gap:16px;}
+.offer-icon{font-size:24px;min-width:32px;}
+.offer-text{font-size:14px;font-weight:300;line-height:1.65;color:var(--text-muted);}
+.offer-text strong{color:var(--gold);}
+
+/* FOOTER */
+footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:40px 48px;display:flex;justify-content:space-between;align-items:center;}
+.f-copy{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.07em;color:var(--text-dim);}
+.f-back{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);text-decoration:none;}
+.f-back:hover{color:var(--gold-light);}
+
+/* REVEAL */
+.rv{opacity:0;transform:translateY(24px);transition:opacity .65s ease,transform .65s ease;}
+.rv.vis{opacity:1;transform:none;}
+
+@media(max-width:768px){nav{padding:0 20px;}.nav-back span{display:none;}footer{flex-direction:column;gap:16px;text-align:center;}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="geocore_v2.html" class="nav-logo">
+    <div class="logo-hex"></div>
+    <span class="logo-text">Geo<span>Core</span></span>
+  </a>
+  <a href="geocore_v2.html#blog" class="nav-back">← <span>Назад к блогу</span></a>
+  <a href="geocore_v2.html#sandbox" class="nav-cta">Попробовать симулятор</a>
+</nav>
+
+<div class="art-wrap">
+
+  <!-- HEADER -->
+  <div class="rv">
+    <div class="art-label">Методика · Datamine</div>
+    <h1 class="art-title">Классический метод разрезов VS блочное моделирование в Datamine: что мы реально теряем при подсчёте запасов</h1>
+    <p class="art-sub">Одно и то же рудное тело — два метода. Показываем визуально, почему современные геологи переходят на Datamine Studio RM, и сколько точности теряет классика.</p>
+    <div class="art-meta">
+      <div class="art-meta-item"><strong>8</strong> мин чтения</div>
+      <div class="art-meta-item"><strong>GeoCore Academy</strong></div>
+      <div class="art-meta-item"><strong>2025</strong></div>
+      <span class="art-tag">Datamine Studio RM</span>
+      <span class="art-tag">JORC</span>
+      <span class="art-tag">Блочная модель</span>
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div class="art-body">
+
+    <p class="rv">Представьте сложное жильное или порфировое месторождение с раздувами, выклиниваниями и разломами. Одни и те же данные бурения. Два разных метода подсчёта. Разные результаты — иногда на десятки процентов.</p>
+
+    <p class="rv"><strong>Слева — классический метод параллельных сечений.</strong><br>
+    <strong>Справа — блочное моделирование в Datamine Studio RM.</strong></p>
+
+    <hr class="art-hr">
+
+    <!-- SECTION 1 -->
+    <h2 class="rv">Классический метод: как считали раньше</h2>
+
+    <p class="rv">Вы проводите серию параллельных разрезов, обводите контуры руды и считаете объём между ними по формуле призмы или усечённого конуса:</p>
+
+    <div class="formula-box rv">
+      <div class="formula">V = (S₁ + S₂) / 2 × L</div>
+      <div class="formula-desc">S₁, S₂ — площади сечений на соседних разрезах · L — расстояние между ними</div>
+    </div>
+
+    <p class="rv">Между разрезами геолог «додумывает» форму тела линейной интерполяцией. Именно здесь и прячутся основные потери.</p>
+
+    <!-- SVG: sections diagram -->
+    <div class="vis-block rv">
+      <div class="vis-header">
+        <div class="vis-dot" style="background:#E87070"></div>
+        <span class="vis-title">КЛАССИЧЕСКИЙ МЕТОД — параллельные сечения H₁, H₂, H₃</span>
+      </div>
+      <div class="vis-canvas">
+        <svg viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-height:200px">
+          <defs>
+            <linearGradient id="gr1" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#1A2A3A"/>
+              <stop offset="100%" style="stop-color:#0A121C"/>
+            </linearGradient>
+          </defs>
+          <rect width="600" height="200" fill="url(#gr1)"/>
+          <!-- Grid lines -->
+          <line x1="0" y1="40" x2="600" y2="40" stroke="#1F2F3F" stroke-width="1"/>
+          <line x1="0" y1="80" x2="600" y2="80" stroke="#1F2F3F" stroke-width="1"/>
+          <line x1="0" y1="120" x2="600" y2="120" stroke="#1F2F3F" stroke-width="1"/>
+          <line x1="0" y1="160" x2="600" y2="160" stroke="#1F2F3F" stroke-width="1"/>
+          <!-- Section lines H1 H2 H3 -->
+          <line x1="100" y1="10" x2="100" y2="190" stroke="#C9A84C" stroke-width="1.5" stroke-dasharray="4,3" opacity=".6"/>
+          <line x1="300" y1="10" x2="300" y2="190" stroke="#C9A84C" stroke-width="1.5" stroke-dasharray="4,3" opacity=".6"/>
+          <line x1="500" y1="10" x2="500" y2="190" stroke="#C9A84C" stroke-width="1.5" stroke-dasharray="4,3" opacity=".6"/>
+          <!-- Labels -->
+          <text x="100" y="22" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#C9A84C">H₁</text>
+          <text x="300" y="22" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#C9A84C">H₂</text>
+          <text x="500" y="22" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#C9A84C">H₃</text>
+          <!-- Ore body contours on sections -->
+          <ellipse cx="100" cy="120" rx="14" ry="40" fill="#C9A84C" opacity=".35"/>
+          <ellipse cx="300" cy="110" rx="24" ry="55" fill="#C9A84C" opacity=".45"/>
+          <ellipse cx="500" cy="125" rx="10" ry="30" fill="#C9A84C" opacity=".3"/>
+          <!-- Linear interpolation between sections (the "guessing" zone) -->
+          <path d="M100,80 C180,72 220,55 300,55 C380,55 420,80 500,95" stroke="#E87070" stroke-width="1.5" fill="none" opacity=".7" stroke-dasharray="3,2"/>
+          <path d="M100,160 C180,168 220,165 300,165 C380,165 420,155 500,155" stroke="#E87070" stroke-width="1.5" fill="none" opacity=".7" stroke-dasharray="3,2"/>
+          <!-- Fill interpolation zone -->
+          <path d="M100,80 C180,72 220,55 300,55 C380,55 420,80 500,95 L500,155 C420,155 380,165 300,165 C220,165 180,168 100,160 Z" fill="#E87070" opacity=".07"/>
+          <!-- Lost ore pocket annotation -->
+          <ellipse cx="210" cy="145" rx="28" ry="18" fill="none" stroke="#E87070" stroke-width="1.5" stroke-dasharray="2,2" opacity=".8"/>
+          <text x="210" y="178" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#E87070" opacity=".8">пропущено</text>
+          <!-- Drillholes -->
+          <line x1="150" y1="30" x2="150" y2="185" stroke="#3a6ea5" stroke-width="1.5" opacity=".6"/>
+          <line x1="220" y1="30" x2="220" y2="185" stroke="#3a6ea5" stroke-width="1.5" opacity=".6"/>
+          <line x1="380" y1="30" x2="380" y2="185" stroke="#3a6ea5" stroke-width="1.5" opacity=".6"/>
+          <circle cx="150" cy="148" r="4" fill="#ffaa33"/>
+          <circle cx="220" cy="138" r="4" fill="#ffaa33"/>
+          <circle cx="380" cy="130" r="4" fill="#ffaa33"/>
+          <text x="10" y="185" font-family="IBM Plex Mono" font-size="9" fill="#5C5B56">▶ Между разрезами — линейная интерполяция</text>
+        </svg>
+      </div>
+      <div class="vis-caption">Между H₁, H₂ и H₃ рудное тело «сглаживается». Богатые рудные столбы между разрезами пропускаются — они не попадают ни в одно сечение.</div>
+    </div>
+
+    <h3 class="rv">Что мы теряем в реальности</h3>
+
+    <ul class="loss-list rv">
+      <li class="loss-item"><div class="loss-icon">📉</div><div class="loss-text">До <strong>15–30% ошибки</strong> в тоннаже и металле — особенно при высокой вариабельности содержаний</div></li>
+      <li class="loss-item"><div class="loss-icon">🕳</div><div class="loss-text"><strong>Пропускаем богатые рудные столбы</strong> между разрезами — они просто не видны в сечениях</div></li>
+      <li class="loss-item"><div class="loss-icon">⚠️</div><div class="loss-text">Сложно учитывать <strong>разломы и субгоризонтальные изменения</strong> мощности рудного тела</div></li>
+      <li class="loss-item"><div class="loss-icon">🔄</div><div class="loss-text">При любом изменении одного сечения — <strong>полный пересчёт вручную</strong> всей модели</div></li>
+    </ul>
+
+    <!-- SVG: irregular ore body -->
+    <div class="vis-block rv">
+      <div class="vis-header">
+        <div class="vis-dot" style="background:#E87070"></div>
+        <span class="vis-title">РЕАЛЬНАЯ ГЕОЛОГИЯ — нерегулярное рудное тело по сечениям</span>
+      </div>
+      <div class="vis-canvas">
+        <svg viewBox="0 0 600 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-height:180px">
+          <rect width="600" height="180" fill="#0a121c"/>
+          <!-- Background rock texture -->
+          <rect x="0" y="0" width="600" height="180" fill="#0f1a24"/>
+          <!-- Irregular ore body -->
+          <path d="M50,140 C80,130 90,90 120,75 C150,60 170,50 210,55 C250,60 260,80 290,70 C320,60 330,40 370,45 C410,50 430,80 450,95 C470,110 460,140 440,150 C410,160 380,145 350,150 C320,155 290,165 260,160 C230,155 210,145 180,148 C150,151 120,155 90,150 C70,147 55,148 50,140 Z" fill="#C9A84C" opacity=".12" stroke="#C9A84C" stroke-width="1" stroke-opacity=".3"/>
+          <!-- High grade zones -->
+          <ellipse cx="200" cy="100" rx="35" ry="22" fill="#ff8844" opacity=".25"/>
+          <ellipse cx="350" cy="85" rx="28" ry="18" fill="#ff8844" opacity=".2"/>
+          <!-- Section lines -->
+          <line x1="100" y1="0" x2="100" y2="180" stroke="#C9A84C" stroke-width="1" stroke-dasharray="3,3" opacity=".5"/>
+          <line x1="250" y1="0" x2="250" y2="180" stroke="#C9A84C" stroke-width="1" stroke-dasharray="3,3" opacity=".5"/>
+          <line x1="400" y1="0" x2="400" y2="180" stroke="#C9A84C" stroke-width="1" stroke-dasharray="3,3" opacity=".5"/>
+          <line x1="550" y1="0" x2="550" y2="180" stroke="#C9A84C" stroke-width="1" stroke-dasharray="3,3" opacity=".5"/>
+          <!-- Section labels -->
+          <text x="100" y="14" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#C9A84C" opacity=".7">R-1</text>
+          <text x="250" y="14" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#C9A84C" opacity=".7">R-2</text>
+          <text x="400" y="14" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#C9A84C" opacity=".7">R-3</text>
+          <text x="550" y="14" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#C9A84C" opacity=".7">R-4</text>
+          <!-- Annotation: missed zone -->
+          <path d="M160,60 L185,75" stroke="#E87070" stroke-width="1" marker-end="url(#arr)"/>
+          <text x="120" y="58" font-family="IBM Plex Mono" font-size="9" fill="#E87070">±30%?</text>
+          <text x="10" y="170" font-family="IBM Plex Mono" font-size="9" fill="#5C5B56">▶ Между разрезами площадь контура меняется резко — интерполяция не успевает за реальной геологией</text>
+        </svg>
+      </div>
+      <div class="vis-caption">Нерегулярное рудное тело, подсчитанное по сечениям. Богатые зоны (оранжевые) между разрезами частично теряются.</div>
+    </div>
+
+    <hr class="art-hr">
+
+    <!-- SECTION 2 -->
+    <h2 class="rv">То же самое рудное тело в Datamine Studio RM</h2>
+
+    <p class="rv">Datamine строит 3D wireframe + блочную модель, учитывая <strong>все скважины одновременно</strong>. Интерполяция (IDW / Ordinary Kriging) работает по всему объёму сразу — без «мёртвых зон» между разрезами.</p>
+
+    <!-- SVG: block model -->
+    <div class="vis-block rv">
+      <div class="vis-header">
+        <div class="vis-dot" style="background:#7ee787"></div>
+        <span class="vis-title">DATAMINE STUDIO RM — блочная модель (IDW / Ordinary Kriging)</span>
+      </div>
+      <div class="vis-canvas" style="min-height:220px">
+        <svg viewBox="0 0 600 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-height:220px">
+          <rect width="600" height="220" fill="#0a121c"/>
+          <defs>
+            <linearGradient id="bg3d" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#0a141e"/>
+              <stop offset="100%" style="stop-color:#050b12"/>
+            </linearGradient>
+          </defs>
+          <rect width="600" height="220" fill="url(#bg3d)"/>
+          <!-- Grid -->
+          <g opacity=".2" stroke="#2244aa" stroke-width=".5">
+            <line x1="0" y1="55" x2="600" y2="55"/><line x1="0" y1="110" x2="600" y2="110"/>
+            <line x1="0" y1="165" x2="600" y2="165"/>
+            <line x1="100" y1="0" x2="100" y2="220"/><line x1="200" y1="0" x2="200" y2="220"/>
+            <line x1="300" y1="0" x2="300" y2="220"/><line x1="400" y1="0" x2="400" y2="220"/>
+            <line x1="500" y1="0" x2="500" y2="220"/>
+          </g>
+          <!-- Blocks colored by Au grade -->
+          <!-- Low grade (blue) -->
+          <g opacity=".75">
+            <rect x="55" y="65" width="38" height="38" fill="#2a5a8a" rx="1"/><rect x="95" y="65" width="38" height="38" fill="#3a6a9a" rx="1"/>
+            <rect x="55" y="105" width="38" height="38" fill="#3a6a9a" rx="1"/><rect x="95" y="105" width="38" height="38" fill="#4a7aaa" rx="1"/>
+            <rect x="455" y="65" width="38" height="38" fill="#2a5a8a" rx="1"/><rect x="495" y="65" width="38" height="38" fill="#3a6a9a" rx="1"/>
+            <rect x="455" y="105" width="38" height="38" fill="#3a6a9a" rx="1"/>
+          </g>
+          <!-- Mid grade -->
+          <g opacity=".85">
+            <rect x="135" y="55" width="38" height="38" fill="#5a8aba" rx="1"/><rect x="175" y="55" width="38" height="38" fill="#6a9aca" rx="1"/>
+            <rect x="135" y="95" width="38" height="38" fill="#7aabdb" rx="1"/><rect x="175" y="95" width="38" height="38" fill="#8abbeb" rx="1"/>
+            <rect x="135" y="135" width="38" height="38" fill="#6a9aca" rx="1"/><rect x="175" y="135" width="38" height="38" fill="#7aabdb" rx="1"/>
+            <rect x="375" y="55" width="38" height="38" fill="#5a8aba" rx="1"/><rect x="415" y="55" width="38" height="38" fill="#6a9aca" rx="1"/>
+            <rect x="375" y="95" width="38" height="38" fill="#6a9aca" rx="1"/><rect x="415" y="95" width="38" height="38" fill="#7aabdb" rx="1"/>
+            <rect x="375" y="135" width="38" height="38" fill="#5a8aba" rx="1"/>
+          </g>
+          <!-- High grade (gold→orange→red) -->
+          <g opacity=".95">
+            <rect x="215" y="45" width="40" height="40" fill="#ffaa66" rx="1"/>
+            <rect x="255" y="40" width="42" height="42" fill="#ff8844" rx="1"/>
+            <rect x="215" y="87" width="40" height="42" fill="#ff8844" rx="1"/>
+            <rect x="255" y="85" width="42" height="44" fill="#ff5522" rx="1"/>
+            <rect x="297" y="50" width="40" height="40" fill="#ffaa66" rx="1"/>
+            <rect x="297" y="92" width="40" height="42" fill="#ff8844" rx="1"/>
+            <rect x="215" y="131" width="40" height="38" fill="#ffaa66" rx="1"/><rect x="255" y="131" width="42" height="38" fill="#ff8844" rx="1"/>
+            <rect x="297" y="136" width="40" height="36" fill="#ffaa66" rx="1"/>
+          </g>
+          <!-- Wireframe outline -->
+          <path d="M135,40 L415,40 L495,80 L495,175 L375,195 L135,175 L55,135 L55,80 Z" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-dasharray="5,3" opacity=".4"/>
+          <!-- Drillholes -->
+          <line x1="180" y1="10" x2="180" y2="210" stroke="#3a6ea5" stroke-width="1.5" opacity=".5"/>
+          <line x1="270" y1="10" x2="270" y2="210" stroke="#3a6ea5" stroke-width="1.5" opacity=".5"/>
+          <line x1="350" y1="10" x2="350" y2="210" stroke="#3a6ea5" stroke-width="1.5" opacity=".5"/>
+          <!-- Grade markers -->
+          <circle cx="180" cy="116" r="4" fill="#ffaa33"/><circle cx="270" cy="106" r="4" fill="#ff5522"/>
+          <circle cx="350" cy="112" r="4" fill="#ffaa33"/>
+          <!-- Legend -->
+          <rect x="10" y="10" width="12" height="12" fill="#2a5a8a"/><text x="26" y="20" font-family="IBM Plex Mono" font-size="9" fill="#9A9890">0–3 г/т</text>
+          <rect x="70" y="10" width="12" height="12" fill="#7aabdb"/><text x="86" y="20" font-family="IBM Plex Mono" font-size="9" fill="#9A9890">3–6 г/т</text>
+          <rect x="130" y="10" width="12" height="12" fill="#ff8844"/><text x="146" y="20" font-family="IBM Plex Mono" font-size="9" fill="#9A9890">&gt;6 г/т</text>
+          <text x="10" y="212" font-family="IBM Plex Mono" font-size="9" fill="#5C5B56">▶ Блочная модель: все данные бурения учтены, каждый блок 5×5×5 м имеет расчётное содержание Au</text>
+        </svg>
+      </div>
+      <div class="vis-caption">Блочная модель Datamine Studio RM. Цвет блока = расчётное содержание Au. Богатые зоны (оранжево-красные) точно локализованы — ни одна не пропущена.</div>
+    </div>
+
+    <h3 class="rv">Что мы выигрываем</h3>
+
+    <ul class="gain-list rv">
+      <li class="gain-item"><div class="loss-icon">🎯</div><div class="gain-text"><strong>Точность ±5–10%</strong> вместо ±15–30% — все скважины участвуют в интерполяции одновременно</div></li>
+      <li class="gain-item"><div class="loss-icon">⚡</div><div class="gain-text"><strong>Пересчёт за секунды</strong> при добавлении новых скважин — модель обновляется автоматически</div></li>
+      <li class="gain-item"><div class="loss-icon">🔄</div><div class="gain-text"><strong>Полноценная 3D-модель</strong> — вращается, режется в любом направлении, экспортируется в отчёт</div></li>
+      <li class="gain-item"><div class="loss-icon">📋</div><div class="gain-text"><strong>Автоматический отчёт</strong> по JORC/ГКЗ (MODRES, TONGRAD) — не надо считать вручную</div></li>
+    </ul>
+
+    <hr class="art-hr">
+
+    <!-- COMPARISON TABLE -->
+    <h2 class="rv">Сравнение напрямую</h2>
+
+    <table class="cmp-table rv">
+      <thead>
+        <tr>
+          <th>Параметр</th>
+          <th>⚠ Метод разрезов</th>
+          <th>✓ Datamine (блочная модель)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Точность при сложной геологии</td><td>±15–30%</td><td>±5–10%</td></tr>
+        <tr><td>Учёт данных бурения</td><td>Только на выбранных разрезах</td><td>Все скважины + wireframe</td></tr>
+        <tr><td>Скорость пересчёта</td><td>Часы / дни вручную</td><td>Секунды (автоматически)</td></tr>
+        <tr><td>Визуализация</td><td>2D чертежи и разрезы</td><td>Полноценная 3D-модель</td></tr>
+        <tr><td>Учёт разломов и выклиниваний</td><td>Сложно, вручную</td><td>Wireframe + код блоков</td></tr>
+        <tr><td>Подготовка отчёта JORC/ГКЗ</td><td>Ручная компиляция</td><td>MODRES, TONGRAD (авто)</td></tr>
+        <tr><td>Метод интерполяции</td><td>Линейная между разрезами</td><td>IDW / Ordinary Kriging</td></tr>
+        <tr><td>Риск систематической ошибки</td><td>Высокий</td><td>Минимальный</td></tr>
+      </tbody>
+    </table>
+
+    <div class="highlight rv">
+      <p><strong>Вывод:</strong> Классический метод по-прежнему полезен на ранней разведке, когда данных мало. Но когда дело доходит до реального подсчёта запасов, отчётности по JORC/ГКЗ и планирования горных работ — <strong>Datamine даёт значительно более точный и безопасный результат</strong>.</p>
+    </div>
+
+    <hr class="art-hr">
+
+    <!-- CTA: Simulator -->
+    <div class="cta-box rv">
+      <h3>Хотите увидеть разницу на своих данных?</h3>
+      <p>Загрузите CSV с опробованием + OBJ каркас рудного тела — получите 3D блочную модель, подсчёт ресурсов (Indicated/Inferred) и готовый макрос для Datamine прямо в браузере.</p>
+      <div class="cta-btns">
+        <a href="geocore_v2.html#sandbox" class="btn-p">
+          ▶ Открыть симулятор блочной модели
+        </a>
+        <a href="geocore_v2.html#consult" class="btn-s">Записаться на консультацию</a>
+      </div>
+    </div>
+
+    <div class="offer-strip rv">
+      <div class="offer-icon">🎁</div>
+      <div class="offer-text">
+        <strong>Бесплатно для первых 5 человек в этом месяце:</strong> сравнительный анализ вашей модели (классика vs Datamine). Напишите в Telegram слово <strong>«Разбор»</strong> — сделаю разбор на ваших данных и покажу разницу в цифрах.
+      </div>
+    </div>
+
+  </div><!-- /art-body -->
+</div><!-- /art-wrap -->
+
+<footer>
+  <span class="f-copy">© 2025 GeoCore Academy</span>
+  <a href="geocore_v2.html#blog" class="f-back">← Все статьи блога</a>
+</footer>
+
+<script>
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('vis');});
+},{threshold:.08,rootMargin:'0px 0px -20px 0px'});
+document.querySelectorAll('.rv').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
