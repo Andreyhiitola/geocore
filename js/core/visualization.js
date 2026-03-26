@@ -202,24 +202,55 @@ export function drawEllipsoidOreBody(avgGrade = 3.0) {
 
 export function drawCoalSeams() {
   clearGroup(oreGrp);
-  const mat = new THREE.MeshPhongMaterial({ color: 0x4a4a4a, side: THREE.DoubleSide, transparent: true, opacity: 0.2 });
-  [-12.5, -19].forEach(y => {
-    const seam = new THREE.Mesh(new THREE.PlaneGeometry(55, 55), mat);
-    seam.rotation.x = -Math.PI / 2;
-    seam.position.y = y;
-    oreGrp.add(seam);
-    oreShellMeshes.push(seam);
+  
+  // Верхний пласт (глубина ~20-28 м) — мощность 5-8 м, ярче
+  const upperMat = new THREE.MeshPhongMaterial({ 
+    color: 0x5a5a5a, 
+    side: THREE.DoubleSide, 
+    transparent: true, 
+    opacity: 0.6,
+    emissive: 0x221100
   });
-  const edgesGeo = new THREE.EdgesGeometry(new THREE.PlaneGeometry(55, 55));
+  const upperSeam = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), upperMat);
+  upperSeam.rotation.x = -Math.PI / 2;
+  upperSeam.position.y = -14;  // центр пласта на глубине 14 м (реальная глубина 20-28 м)
+  upperSeam.scale.set(1.2, 1.2, 1.2);
+  oreGrp.add(upperSeam);
+  oreShellMeshes.push(upperSeam);
+  
+  // Нижний пласт (глубина ~33-42 м) — мощность 5-8 м
+  const lowerMat = new THREE.MeshPhongMaterial({ 
+    color: 0x4a4a4a, 
+    side: THREE.DoubleSide, 
+    transparent: true, 
+    opacity: 0.6,
+    emissive: 0x110800
+  });
+  const lowerSeam = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), lowerMat);
+  lowerSeam.rotation.x = -Math.PI / 2;
+  lowerSeam.position.y = -23;  // центр пласта на глубине 23 м (реальная глубина 33-42 м)
+  lowerSeam.scale.set(1.2, 1.2, 1.2);
+  oreGrp.add(lowerSeam);
+  oreShellMeshes.push(lowerSeam);
+  
+  // Добавляем рёбра для лучшей видимости
+  const edgesGeo = new THREE.EdgesGeometry(new THREE.PlaneGeometry(60, 60));
   const edgesMat = new THREE.LineBasicMaterial({ color: 0xc9a84c });
-  [-12.5, -19].forEach(y => {
-    const wire = new THREE.LineSegments(edgesGeo, edgesMat);
-    wire.rotation.x = -Math.PI / 2;
-    wire.position.y = y;
-    oreGrp.add(wire);
-  });
+  
+  const upperWire = new THREE.LineSegments(edgesGeo, edgesMat);
+  upperWire.rotation.x = -Math.PI / 2;
+  upperWire.position.y = -14;
+  upperWire.scale.set(1.2, 1.2, 1.2);
+  oreGrp.add(upperWire);
+  
+  const lowerWire = new THREE.LineSegments(edgesGeo, edgesMat);
+  lowerWire.rotation.x = -Math.PI / 2;
+  lowerWire.position.y = -23;
+  lowerWire.scale.set(1.2, 1.2, 1.2);
+  oreGrp.add(lowerWire);
+  
+  console.log(`[3D] Угольные пласты отрисованы (мощность 5-8 м, два пласта)`);
 }
-
 export function setOreShellVisibility(visible) {
   if (oreShellMeshes && oreShellMeshes.length) {
     oreShellMeshes.forEach(mesh => { if (mesh && mesh.isMesh) mesh.visible = visible; });
