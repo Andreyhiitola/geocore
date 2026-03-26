@@ -502,8 +502,13 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:5
       </div>
       <div class="rv">
         <div class="canvas-wrap"><canvas id="c3d"></canvas><div class="canvas-hint">🖱 Вращение · ПКМ панорама · Scroll масштаб</div></div>
-        <div class="legend"><div class="leg-item"><div class="leg-dot" style="background:#3a6ea5"></div>Скважины</div><div class="leg-item"><div class="leg-dot" style="background:#ffaa33"></div>Высокое содержание</div><div class="leg-item"><div class="leg-dot" style="background:#7aabdb;opacity:.8"></div>Блочная модель</div><div class="leg-item"><div class="leg-dot" style="background:#c9a84c;opacity:.6"></div>Каркас / пласты</div></div>
-      </div>
+       <div class="legend">
+       <div class="leg-item"><div class="leg-dot" style="background:#3a6ea5"></div>Скважины</div>
+       <div class="leg-item"><div class="leg-dot" style="background:#ffaa33"></div>Высокое содержание (>5 г/т)</div>
+       <div class="leg-item"><div class="leg-dot" style="background: linear-gradient(90deg, #0040ff, #00aaff, #ffdd00, #ff8800, #ff2200); width: 40px;"></div>Блочная модель (цвет = содержание)</div>
+       <div class="leg-item"><div class="leg-dot" style="background:#c9a84c; opacity:0.6"></div>Каркас рудного тела</div>
+   </div> 
+  </div>
                 <!-- ССЫЛКА НА DATAMINE VIEWER -->
           <div class="sb-feat">
             <div class="sb-fi">📥</div>
