@@ -301,15 +301,7 @@ export function wireEvents() {
     console.warn('[EVENTS] Кнопка toggleHoles не найдена');
   }
 
-    const focusBtn = document.getElementById('focusOnOreBody');
-  if (focusBtn) {
-    focusBtn.addEventListener('click', () => {
-      const vertices = window.currentWireframeVertices;
-      if (!vertices || !vertices.length) {
-        alert('Сначала загрузите каркас рудного тела (OBJ файл)');
-        return;
-      }
-      
+          
       // Вычисляем центр и размеры каркаса
       let minX = Infinity, maxX = -Infinity;
       let minY = Infinity, maxY = -Infinity;
