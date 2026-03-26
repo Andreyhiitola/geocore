@@ -507,19 +507,58 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:5
 <!-- ── FOOTER ── -->
 <footer>
   <div class="fi">
-    <div><a href="#" class="nav-logo" style="text-decoration:none"><div class="logo-hex"></div><span class="logo-text">Geo<span>Core</span></span></a><p class="fb-d">Профессиональное обучение оценке месторождений. Россия, СНГ и международный рынок.</p></div>
-    <div><div class="fc-t">Курсы</div><ul class="fl"><li><a href="#">Datamine Studio</a></li><li><a href="#">Leapfrog Geo</a></li><li><a href="#">Surpac</a></li><li><a href="#">Методика JORC</a></li><li><a href="#">Геостатистика</a></li></ul></div>
-    <div><div class="fc-t">Платформа</div><ul class="fl"><li><a href="#sandbox">Песочница</a></li><li><a href="#templates">Шаблоны</a></li><li><a href="#consult">Консультации</a></li><li><a href="#blog">Блог</a></li></ul></div>
-    <div><div class="fc-t">Контакты</div><ul class="fl"><li><a href="#">Telegram</a></li><li><a href="#">LinkedIn</a></li><li><a href="#">Email</a></li><li><a href="#">Корпоративным</a></li></ul></div>
+    <div>
+      <a href="#" class="nav-logo" style="text-decoration:none">
+        <div class="logo-hex"></div>
+        <span class="logo-text">Geo<span>Core</span></span>
+      </a>
+      <p class="fb-d">Профессиональное обучение оценке месторождений. Россия, СНГ и международный рынок.</p>
+    </div>
+    <div>
+      <div class="fc-t">Курсы</div>
+      <ul class="fl">
+        <li><a href="#">Datamine Studio</a></li>
+        <li><a href="#">Leapfrog Geo</a></li>
+        <li><a href="#">Surpac</a></li>
+        <li><a href="#">Методика JORC</a></li>
+        <li><a href="#">Геостатистика</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="fc-t">Платформа</div>
+      <ul class="fl">
+        <li><a href="#sandbox">Песочница</a></li>
+        <li><a href="#templates">Шаблоны</a></li>
+        <li><a href="#consult">Консультации</a></li>
+        <li><a href="#blog">Блог</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="fc-t">Контакты</div>
+      <ul class="fl">
+        <li><a href="#">Telegram</a></li>
+        <li><a href="#">LinkedIn</a></li>
+        <li><a href="#">Email</a></li>
+        <li><a href="#">Корпоративным</a></li>
+      </ul>
+    </div>
   </div>
-  <div class="fb"><div class="fc">© 2025 GeoCore Academy · Все права защищены</div><div class="fl-langs"><span class="fl-lang act">RU</span><span class="fl-lang">EN</span></div></div>
+  <div class="fb">
+    <div class="fc">© 2025 GeoCore Academy · Все права защищены</div>
+    <div class="fl-langs">
+      <span class="fl-lang act">RU</span>
+      <span class="fl-lang">EN</span>
+    </div>
+  </div>
 </footer>
 
-<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js"}}</script>
-<script type="module">
-  import { init3D, wireEvents } from './script.js';
-  init3D();
-  wireEvents();
+<script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.128.0/build/three.module.js"
+    }
+  }
 </script>
+<script type="module" src="js/main.js"></script>
 </body>
 </html>
