@@ -1,5 +1,7 @@
 # GeoCore Academy
 
+https://andreyhiitola.github.io/geocore/
+
 Образовательная платформа по оценке месторождений.
 
 ## Структура проекта
