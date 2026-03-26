@@ -28,39 +28,25 @@ export function calculateVariogram(holes) {
   };
 }
 
-// Сферическая модель вариограммы
 function sphericalModel(h, nugget, sill, range_) {
-  let gamma;
   if (h <= range_) {
-    gamma = nugget + sill * (1.5 * h / range_ - 0.5 * Math.pow(h / range_, 3));
-  } else {
-    gamma = nugget + sill;
+    return nugget + sill * (1.5 * h / range_ - 0.5 * Math.pow(h / range_, 3));
   }
-  return gamma;
+  return nugget + sill;
 }
 
-// Автоматический подбор параметров (упрощённый)
 function fitVariogram(distances, gammas) {
   if (distances.length < 4) return null;
-  
-  // Находим последнюю точку для приблизительного силла
   const lastGamma = gammas[gammas.length - 1];
   const lastDist = distances[distances.length - 1];
-  
-  // Приблизительные значения
   let nugget = gammas[0] || 0.1;
   let sill = Math.max(lastGamma - nugget, 0.5);
   let range_ = lastDist * 0.7;
-  
-  // Простая оптимизация (поиск лучшего range)
   let bestR2 = -Infinity;
   let bestParams = { nugget, sill, range_ };
-  
   for (let r = range_ * 0.5; r <= range_ * 1.5; r += range_ * 0.1) {
-    let ssRes = 0;
-    let ssTot = 0;
+    let ssRes = 0, ssTot = 0;
     const meanGamma = gammas.reduce((a, b) => a + b, 0) / gammas.length;
-    
     for (let i = 0; i < distances.length; i++) {
       const pred = sphericalModel(distances[i], nugget, sill, r);
       ssRes += Math.pow(gammas[i] - pred, 2);
@@ -72,13 +58,7 @@ function fitVariogram(distances, gammas) {
       bestParams = { nugget, sill, range_: r };
     }
   }
-  
-  return {
-    nugget: bestParams.nugget,
-    sill: bestParams.sill,
-    range: bestParams.range_,
-    r2: bestR2
-  };
+  return { nugget: bestParams.nugget, sill: bestParams.sill, range: bestParams.range_, r2: bestR2 };
 }
 
 export function drawVariogram(vg, targetId = 'variogramPlotLarge') {
@@ -99,17 +79,15 @@ export function drawVariogram(vg, targetId = 'variogramPlotLarge') {
   
   let maxG = 0, maxD = 0;
   all.forEach(p => { maxG = Math.max(maxG, p.gamma); maxD = Math.max(maxD, p.dist); });
-  maxG *= 1.15;
-  maxD *= 1.1;
+  maxG *= 1.15; maxD *= 1.1;
   
-  const left = 70, right = 40, top = 45, bottom = 60;
+  const left = 70, right = 40, top = 45, bottom = 70;
   const plotW = W - left - right;
   const plotH = H - top - bottom;
   
   ctx.fillStyle = '#0a121c';
   ctx.fillRect(0, 0, W, H);
   
-  // Сетка
   ctx.strokeStyle = '#2a3a4a';
   ctx.lineWidth = 1;
   for (let i = 0; i <= 5; i++) {
@@ -119,7 +97,6 @@ export function drawVariogram(vg, targetId = 'variogramPlotLarge') {
     ctx.beginPath(); ctx.moveTo(left, y); ctx.lineTo(left + plotW, y); ctx.stroke();
   }
   
-  // Оси
   ctx.strokeStyle = '#c9a84c';
   ctx.lineWidth = 2;
   ctx.beginPath();
@@ -129,7 +106,6 @@ export function drawVariogram(vg, targetId = 'variogramPlotLarge') {
   ctx.lineTo(left, top + plotH);
   ctx.stroke();
   
-  // Подписи
   ctx.fillStyle = '#9A9890';
   ctx.font = '12px monospace';
   ctx.fillText('Расстояние (м)', left + plotW / 2 - 50, top + plotH + 30);
@@ -139,23 +115,19 @@ export function drawVariogram(vg, targetId = 'variogramPlotLarge') {
   ctx.fillText('γ(h)', -20, 0);
   ctx.restore();
   
-  // Легенда и точки
   const colors = { strike: '#E87070', dip: '#7ee787', perp: '#C9A84C' };
   const labels = { strike: 'Простирание', dip: 'Падение', perp: 'Поперечное' };
   
   let legendY = top + 10;
-  let fittedParams = {};
+  const fittedParams = {};
   
   for (const [key, data] of Object.entries(vg)) {
     if (!data?.length) continue;
-    
-    // Подбираем модель
     const distances = data.map(p => p.dist);
     const gammas = data.map(p => p.gamma);
     const fit = fitVariogram(distances, gammas);
     if (fit) fittedParams[key] = fit;
     
-    // Рисуем точки
     data.forEach(p => {
       const x = left + (p.dist / maxD) * plotW;
       const y = top + plotH - (p.gamma / maxG) * plotH;
@@ -169,7 +141,6 @@ export function drawVariogram(vg, targetId = 'variogramPlotLarge') {
       ctx.fill();
     });
     
-    // Рисуем подобранную модель
     if (fit && distances.length > 0) {
       ctx.beginPath();
       let first = true;
@@ -189,7 +160,6 @@ export function drawVariogram(vg, targetId = 'variogramPlotLarge') {
       ctx.setLineDash([]);
     }
     
-    // Легенда
     ctx.fillStyle = colors[key];
     ctx.fillRect(left + plotW - 140, legendY, 12, 12);
     ctx.fillStyle = '#9A9890';
@@ -205,7 +175,6 @@ export function drawVariogram(vg, targetId = 'variogramPlotLarge') {
     }
   }
   
-  // Линия силла
   const allGammas = all.map(p => p.gamma);
   const sill = allGammas.reduce((a, b) => a + b, 0) / allGammas.length;
   const sillY = top + plotH - (sill / maxG) * plotH;
@@ -223,6 +192,35 @@ export function drawVariogram(vg, targetId = 'variogramPlotLarge') {
   ctx.fillStyle = '#9A9890';
   ctx.fillText(`${maxD.toFixed(0)} м`, left + plotW - 40, top + plotH + 22);
   
-  // Возвращаем параметры для отображения в статистике
+  // Пояснение о форме тела
+  if (Object.keys(fittedParams).length > 0) {
+    const strike = fittedParams.strike?.range || 0;
+    const dip = fittedParams.dip?.range || 0;
+    const perp = fittedParams.perp?.range || 0;
+    
+    ctx.fillStyle = '#C9A84C';
+    ctx.font = 'bold 11px monospace';
+    ctx.fillText('📐 Форма рудного тела:', left + 10, top + plotH - 55);
+    
+    if (strike > dip * 1.5) {
+      ctx.fillStyle = '#E87070';
+      ctx.fillText('➡️ Вытянутое (жильное)', left + 10, top + plotH - 38);
+    } else if (perp < strike * 0.5) {
+      ctx.fillStyle = '#88aaff';
+      ctx.fillText('📏 Пластообразное', left + 10, top + plotH - 38);
+    } else if (Math.abs(strike - dip) < 10 && Math.abs(strike - perp) < 10) {
+      ctx.fillStyle = '#7ee787';
+      ctx.fillText('⬜ Изометричное', left + 10, top + plotH - 38);
+    } else {
+      ctx.fillStyle = '#C9A84C';
+      ctx.fillText('🔄 Анизотропное (наклонное)', left + 10, top + plotH - 38);
+    }
+    
+    ctx.fillStyle = '#9A9890';
+    ctx.font = '9px monospace';
+    ctx.fillText(`Простирание: ${strike.toFixed(0)}м | Падение: ${dip.toFixed(0)}м | Поперечное: ${perp.toFixed(0)}м`, 
+                 left + 10, top + plotH - 20);
+  }
+  
   return fittedParams;
 }
