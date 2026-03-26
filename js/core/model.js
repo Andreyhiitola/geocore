@@ -3,17 +3,66 @@ import { visualizeBlocks } from './visualization.js';
 import { updateUI } from '../ui/stats.js';
 import { getParam } from '../utils/helpers.js';
 
+// Определяем область модели по данным скважин
+function getModelRange(holes) {
+  if (!holes.length) return { 
+    xMin: -50, xMax: 50, 
+    zMin: -50, zMax: 50, 
+    yMin: -45, yMax: -5,
+    xSize: 100, zSize: 100, ySize: 40
+  };
+  
+  let minX = Infinity, maxX = -Infinity;
+  let minZ = Infinity, maxZ = -Infinity;
+  let minY = Infinity, maxY = -Infinity;
+  
+  holes.forEach(h => {
+    minX = Math.min(minX, h.x);
+    maxX = Math.max(maxX, h.x);
+    minZ = Math.min(minZ, h.z);
+    maxZ = Math.max(maxZ, h.z);
+    minY = Math.min(minY, -h.depth);
+    maxY = Math.max(maxY, 0);
+  });
+  
+  // Добавляем запас 20 метров по краям
+  const margin = 20;
+  return {
+    xMin: minX - margin,
+    xMax: maxX + margin,
+    zMin: minZ - margin,
+    zMax: maxZ + margin,
+    yMin: minY - margin,
+    yMax: maxY + margin,
+    xSize: (maxX - minX) + margin * 2,
+    zSize: (maxZ - minZ) + margin * 2,
+    ySize: (maxY - minY) + margin * 2
+  };
+}
+
 function interpolateBlocks(holes, blockSize, method, cutoff) {
   console.log(`[MODEL] Начало интерполяции: метод=${method}, блок=${blockSize}м, cutoff=${cutoff}`);
-  const blocks = [], range = 50;
-  const steps = Math.floor(range * 2 / blockSize);
   
-  for (let ix = 0; ix <= steps; ix++) {
-    for (let iz = 0; iz <= steps; iz++) {
-      for (let iy = 0; iy <= 8; iy++) {
-        const bx = -range + ix * blockSize;
-        const bz = -range + iz * blockSize;
-        const by = -5 - iy * blockSize;
+  // Динамическая область модели на основе данных скважин
+  const range = getModelRange(holes);
+  const stepsX = Math.floor(range.xSize / blockSize);
+  const stepsZ = Math.floor(range.zSize / blockSize);
+  const stepsY = Math.floor(range.ySize / blockSize);
+  
+  console.log(`[MODEL] Область модели: X ${range.xMin.toFixed(0)}..${range.xMax.toFixed(0)} (${range.xSize.toFixed(0)} м, шагов: ${stepsX})`);
+  console.log(`[MODEL] Область модели: Z ${range.zMin.toFixed(0)}..${range.zMax.toFixed(0)} (${range.zSize.toFixed(0)} м, шагов: ${stepsZ})`);
+  console.log(`[MODEL] Область модели: Y ${range.yMin.toFixed(0)}..${range.yMax.toFixed(0)} (${range.ySize.toFixed(0)} м, шагов: ${stepsY})`);
+  
+  const blocks = [];
+  let processed = 0;
+  const totalBlocks = (stepsX + 1) * (stepsZ + 1) * (stepsY + 1);
+  
+  for (let ix = 0; ix <= stepsX; ix++) {
+    for (let iz = 0; iz <= stepsZ; iz++) {
+      for (let iy = 0; iy <= stepsY; iy++) {
+        const bx = range.xMin + ix * blockSize;
+        const bz = range.zMin + iz * blockSize;
+        const by = range.yMin + iy * blockSize;
         let grade = 0, wSum = 0;
         
         holes.forEach(h => {
@@ -39,11 +88,16 @@ function interpolateBlocks(holes, blockSize, method, cutoff) {
         
         if (method !== 'nn' && wSum > 0) grade /= wSum;
         if (grade > cutoff * 0.2) blocks.push({ x: bx, y: by, z: bz, grade });
+        
+        processed++;
+        if (processed % 1000 === 0) {
+          console.log(`[MODEL] Прогресс: ${Math.round(processed / totalBlocks * 100)}%`);
+        }
       }
     }
   }
   
-  console.log(`[MODEL] Интерполяция завершена: ${blocks.length} блоков`);
+  console.log(`[MODEL] Интерполяция завершена: ${blocks.length} блоков из ${totalBlocks} возможных`);
   return blocks;
 }
 
