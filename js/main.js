@@ -321,3 +321,46 @@ document.addEventListener('DOMContentLoaded', () => {
       if (e.target === modalBg) modalBg.style.display = 'none';
     });
   }
+
+// Функция для автообновления вариограммы (если модальное окно открыто)
+function autoUpdateVariogram() {
+  const modal = document.getElementById('variogramModal');
+  if (modal && modal.style.display === 'flex') {
+    const holes = getCurrentHoles();
+    if (holes.length) {
+      const vg = calculateVariogram(holes);
+      if (vg) {
+        const fittedParams = drawVariogram(vg, 'variogramPlotLarge');
+        if (fittedParams) {
+          let paramsHtml = '';
+          for (const [dir, params] of Object.entries(fittedParams)) {
+            if (params) {
+              const color = dir === 'strike' ? '#E87070' : dir === 'dip' ? '#7ee787' : '#C9A84C';
+              const label = dir === 'strike' ? 'Простирание' : dir === 'dip' ? 'Падение' : 'Поперечное';
+              paramsHtml += `<div style="margin-top: 8px;"><span style="color:${color}">${label}</span><br>`;
+              paramsHtml += `  Nugget: ${params.nugget.toFixed(3)} | Sill: ${params.sill.toFixed(3)} | Range: ${params.range.toFixed(1)} м | R²: ${params.r2.toFixed(3)}</div>`;
+            }
+          }
+          const statsDiv = document.getElementById('variogramStatsLarge');
+          if (statsDiv) statsDiv.innerHTML = paramsHtml + '<br><small>⚡ Автообновление: данные изменены</small>';
+        }
+      }
+    }
+  }
+}
+
+// Подписываемся на события смены данных
+const originalLoadTemplate = loadTemplate;
+window.loadTemplate = async function(type) {
+  await originalLoadTemplate(type);
+  autoUpdateVariogram();
+};
+
+// Также обновляем при загрузке CSV
+const csvIn = document.getElementById('csvIn');
+if (csvIn) {
+  const originalHandler = csvIn.onchange;
+  csvIn.addEventListener('change', () => {
+    setTimeout(autoUpdateVariogram, 500);
+  });
+}
