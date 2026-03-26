@@ -324,24 +324,55 @@ export function wireEvents() {
     console.warn('[EVENTS] Кнопка toggleHoles не найдена');
   }
 
-  const resetCameraBtn = document.getElementById('resetCamera');
-  if (resetCameraBtn) {
-    resetCameraBtn.addEventListener('click', () => {
+    const focusBtn = document.getElementById('focusOnOreBody');
+  if (focusBtn) {
+    focusBtn.addEventListener('click', () => {
+      const vertices = window.currentWireframeVertices;
+      if (!vertices || !vertices.length) {
+        alert('Сначала загрузите каркас рудного тела (OBJ файл)');
+        return;
+      }
+      
+      // Вычисляем центр и размеры каркаса
+      let minX = Infinity, maxX = -Infinity;
+      let minY = Infinity, maxY = -Infinity;
+      let minZ = Infinity, maxZ = -Infinity;
+      
+      vertices.forEach(v => {
+        minX = Math.min(minX, v[0]); maxX = Math.max(maxX, v[0]);
+        minY = Math.min(minY, v[1]); maxY = Math.max(maxY, v[1]);
+        minZ = Math.min(minZ, v[2]); maxZ = Math.max(maxZ, v[2]);
+      });
+      
+      // Масштабируем как в визуализации
+      const scale = 1.3;
+      const scaleY = 1.4;
+      const posY = -8;
+      
+      const centerX = (minX + maxX) / 2 * scale;
+      const centerZ = (minZ + maxZ) / 2 * scale;
+      const centerY = (minY + maxY) / 2 * scaleY + posY;
+      
+      // Вычисляем оптимальное расстояние для камеры
+      const sizeX = (maxX - minX) * scale;
+      const sizeZ = (maxZ - minZ) * scale;
+      const maxSize = Math.max(sizeX, sizeZ, 30);
+      const distance = maxSize * 1.2;
+      
       const camera = window.camera;
       const controls = window.controls;
       if (camera && controls) {
-        camera.position.set(50, 40, 55);
-        camera.lookAt(0, -8, 0);
-        controls.target.set(0, -8, 0);
+        // Позиционируем камеру под углом 45°
+        camera.position.set(centerX + distance * 0.7, centerY + distance * 0.5, centerZ + distance * 0.7);
+        controls.target.set(centerX, centerY, centerZ);
         controls.update();
       }
-      console.log('[VIS] Камера сброшена');
+      console.log(`[VIS] Фокус на рудном теле: центр (${centerX.toFixed(1)}, ${centerY.toFixed(1)}, ${centerZ.toFixed(1)}), дистанция ${distance.toFixed(1)}`);
     });
-    console.log('[EVENTS] Кнопка resetCamera найдена');
+    console.log('[EVENTS] Кнопка фокуса найдена');
   } else {
-    console.warn('[EVENTS] Кнопка resetCamera не найдена');
+    console.warn('[EVENTS] Кнопка фокуса не найдена');
   }
-
   // Автоматическое обновление алгоритма при изменении параметров
   const paramFields = ['blockSize', 'methodSel', 'cutoff', 'stdSel'];
   paramFields.forEach(id => {
