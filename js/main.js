@@ -178,21 +178,35 @@ export function wireEvents() {
   let showOreShell = true;
   let showHolesVis = true;
 
-  const toggleOreShellBtn = document.getElementById('toggleOreShell');
+  const toggleOreShellBtn = document.getElementById("toggleOreShell");
+
   if (toggleOreShellBtn) {
-    toggleOreShellBtn.addEventListener('click', function() {
+
+    toggleOreShellBtn.addEventListener("click", function() {
+
       showOreShell = !showOreShell;
-      this.classList.toggle('active', showOreShell);
+
+      this.classList.toggle("active", showOreShell);
+
       const oreGrp = window.oreGrp;
+
       if (oreGrp) oreGrp.visible = showOreShell;
-      console.log(`[VIS] Оболочка руды ${showOreShell ? 'показана' : 'скрыта'}`);
+
+      console.log(`[VIS] Каркас рудного тела ${showOreShell ? "показан" : "скрыт"}`);
+
     });
-    console.log('[EVENTS] Кнопка toggleOreShell найдена');
+
+    console.log("[EVENTS] Кнопка toggleOreShell (каркас) найдена");
+
   } else {
-    console.warn('[EVENTS] Кнопка toggleOreShell не найдена');
+
+    console.warn("[EVENTS] Кнопка toggleOreShell не найдена");
+
   }
 
-  const toggleHolesBtn = document.getElementById('toggleHoles');
+
+
+  const toggleHolesBtn = document.getElementById("toggleHoles");
   if (toggleHolesBtn) {
     toggleHolesBtn.addEventListener('click', function() {
       showHolesVis = !showHolesVis;
