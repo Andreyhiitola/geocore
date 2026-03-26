@@ -3,12 +3,12 @@ import { clearGroup, calculateAverageGrade } from '../utils/helpers.js';
 import * as THREE from 'three';
 
 export let oreShellMeshes = [];
-export let oreWireframe = null; // для хранения каркаса
+export let currentWireframeVertices = null;
+export let currentWireframeFaces = null;
 
 export function clearOreGrp() { 
   clearGroup(oreGrp); 
   oreShellMeshes = [];
-  oreWireframe = null;
 }
 
 function getColorByGrade(grade) {
@@ -37,29 +37,41 @@ export function visualizeHoles(holes) {
   console.log(`[3D] Визуализировано скважин: ${holes.length}`);
 }
 
+// Функция плавного градиента от синего (низкое) до красного (высокое)
 function gradeToColor(grade, maxGrade) {
-  const t = Math.min(grade / Math.max(maxGrade, 1), 1);
+  const t = Math.min(grade / Math.max(maxGrade, 0.1), 1);
+  
+  // 5 опорных цветов для плавного перехода
   const stops = [
-    { t: 0.0, r: 0x10, g: 0x40, b: 0xaa }, { t: 0.25, r: 0x20, g: 0x80, b: 0xdd },
-    { t: 0.5, r: 0xff, g: 0xdd, b: 0x00 }, { t: 0.75, r: 0xff, g: 0x77, b: 0x00 },
-    { t: 1.0, r: 0xff, g: 0x11, b: 0x00 }
+    { t: 0.0,  r: 0x10, g: 0x40, b: 0xaa }, // синий (низкое)
+    { t: 0.25, r: 0x30, g: 0x80, b: 0xdd }, // голубой
+    { t: 0.5,  r: 0xff, g: 0xdd, b: 0x00 }, // жёлтый
+    { t: 0.75, r: 0xff, g: 0x88, b: 0x00 }, // оранжевый
+    { t: 1.0,  r: 0xff, g: 0x22, b: 0x00 }, // красный (высокое)
   ];
+  
   let lo = stops[0], hi = stops[stops.length - 1];
   for (let i = 0; i < stops.length - 1; i++) {
-    if (t >= stops[i].t && t <= stops[i+1].t) { lo = stops[i]; hi = stops[i+1]; break; }
+    if (t >= stops[i].t && t <= stops[i+1].t) {
+      lo = stops[i];
+      hi = stops[i+1];
+      break;
+    }
   }
+  
   const f = hi.t === lo.t ? 0 : (t - lo.t) / (hi.t - lo.t);
   const r = Math.round(lo.r + (hi.r - lo.r) * f);
   const g = Math.round(lo.g + (hi.g - lo.g) * f);
   const b = Math.round(lo.b + (hi.b - lo.b) * f);
+  
   return (r << 16) | (g << 8) | b;
 }
 
-// Функция для проверки, находится ли точка внутри каркаса (простая проверка по bounding box)
+// Проверка, находится ли точка внутри каркаса рудного тела
 function isPointInsideWireframe(x, y, z, vertices, faces) {
-  if (!vertices || !faces.length) return true; // если нет каркаса, считаем всё рудой
+  if (!vertices || !vertices.length) return true;
   
-  // Простая проверка: находимся ли в пределах bounding box каркаса
+  // Находим bounding box каркаса
   let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity, minZ = Infinity, maxZ = -Infinity;
   vertices.forEach(v => {
     minX = Math.min(minX, v[0]); maxX = Math.max(maxX, v[0]);
@@ -75,44 +87,64 @@ function isPointInsideWireframe(x, y, z, vertices, faces) {
   const sy = (y - posY) / 1.4;
   const sz = z / scale;
   
-  return sx >= minX && sx <= maxX && sy >= minY && sy <= maxY && sz >= minZ && sz <= maxZ;
+  return sx >= minX - 2 && sx <= maxX + 2 && 
+         sy >= minY - 2 && sy <= maxY + 2 && 
+         sz >= minZ - 2 && sz <= maxZ + 2;
 }
-
-export let currentWireframeVertices = null;
-export let currentWireframeFaces = null;
 
 export function visualizeBlocks(blocks) {
   clearGroup(blocksGrp);
   if (!blocks.length) return;
   
-  const cutoffInput = document.getElementById('cutoff');
-  const cutoff = cutoffInput ? parseFloat(cutoffInput.value) : 2.0;
-  const maxGrade = blocks.reduce((m, b) => Math.max(m, b.grade), 0);
-
+  const maxGrade = Math.max(...blocks.map(b => b.grade), 0.1);
+  
   if (typeof renderer !== 'undefined') renderer.sortObjects = true;
   const geo = new THREE.BoxGeometry(4.3, 4.3, 4.3);
+  const edgeGeo = new THREE.EdgesGeometry(new THREE.BoxGeometry(4.3, 4.3, 4.3));
   
   let oreCount = 0;
+  let lowCount = 0, midCount = 0, highCount = 0;
   
   blocks.forEach(b => {
-    // Проверяем, находится ли блок внутри каркаса рудного тела
+    // Проверяем, находится ли блок внутри каркаса
     const inside = currentWireframeVertices ? 
       isPointInsideWireframe(b.x, b.y, b.z, currentWireframeVertices, currentWireframeFaces) : true;
     
-    if (inside) {
-      // Только блоки внутри каркаса — это руда
+    if (inside && b.grade > 0.1) {
+      // Цвет блока зависит от содержания (градиент)
       const color = gradeToColor(b.grade, maxGrade);
-      const mat = new THREE.MeshStandardMaterial({ color, transparent: true, opacity: 0.35, depthWrite: true });
+      
+      // Непрозрачность: чем выше содержание, тем плотнее блок
+      const opacity = Math.min(0.4 + (b.grade / maxGrade) * 0.5, 0.9);
+      
+      const mat = new THREE.MeshStandardMaterial({ 
+        color, 
+        transparent: true, 
+        opacity: opacity,
+        emissive: b.grade > maxGrade * 0.7 ? 0x331100 : 0,
+        emissiveIntensity: b.grade > maxGrade * 0.7 ? 0.3 : 0
+      });
       const box = new THREE.Mesh(geo, mat);
       box.position.set(b.x, b.y, b.z);
       box.renderOrder = 2;
       blocksGrp.add(box);
+      
+      // Тонкие рёбра для контура блоков (как в Datamine)
+      const wireColor = b.grade > maxGrade * 0.7 ? 0xff8866 : 0xcccccc;
+      const wire = new THREE.LineSegments(edgeGeo, new THREE.LineBasicMaterial({ color: wireColor, transparent: true, opacity: 0.25 }));
+      wire.position.copy(box.position);
+      wire.renderOrder = 3;
+      blocksGrp.add(wire);
+      
       oreCount++;
+      if (b.grade > maxGrade * 0.7) highCount++;
+      else if (b.grade > maxGrade * 0.3) midCount++;
+      else lowCount++;
     }
-    // Блоки снаружи каркаса — не рисуем (пустая порода)
   });
   
-  console.log(`[3D] Визуализировано блоков внутри каркаса: ${oreCount} из ${blocks.length}`);
+  console.log(`[3D] Блоков внутри каркаса: ${oreCount}`);
+  console.log(`     Высокое (>70%): ${highCount}, Среднее (30-70%): ${midCount}, Низкое (<30%): ${lowCount}`);
 }
 
 export function visualizeOreFromVertices(vertices, faces, holes = null) {
@@ -126,7 +158,8 @@ export function visualizeOreFromVertices(vertices, faces, holes = null) {
   const avgGrade = holes ? calculateAverageGrade(holes) : 3.0;
   const color = getColorByGrade(avgGrade);
   
-  console.log(`[OBJ] Каркас загружен, вершин: ${vertices.length}, граней: ${faces.length}`);
+  console.log(`[OBJ] Каркас загружен: ${vertices.length} вершин, ${faces.length} граней`);
+  console.log(`      Среднее содержание: ${avgGrade.toFixed(2)} г/т → цвет: ${color.toString(16)}`);
   
   const geometry = new THREE.BufferGeometry();
   const positions = new Float32Array(vertices.flat());
@@ -134,7 +167,7 @@ export function visualizeOreFromVertices(vertices, faces, holes = null) {
   geometry.setIndex(faces.flatMap(f => f.v));
   geometry.computeVertexNormals();
 
-  // Полупрозрачная оболочка (едва заметная)
+  // Едва заметная полупрозрачная оболочка (для ориентира)
   const shell = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial({ 
     color, side: THREE.DoubleSide, transparent: true, opacity: 0.05, emissive: avgGrade > 5 ? 0x331100 : 0
   }));
@@ -143,7 +176,7 @@ export function visualizeOreFromVertices(vertices, faces, holes = null) {
   oreGrp.add(shell);
   oreShellMeshes.push(shell);
 
-  // Яркая каркасная сетка (главный элемент)
+  // Яркая золотистая каркасная сетка (граница рудного тела)
   const wire = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ 
     color: 0xc9a84c, wireframe: true, transparent: true, opacity: 0.85 
   }));
