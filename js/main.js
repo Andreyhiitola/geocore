@@ -270,33 +270,10 @@ export function wireEvents() {
   }
 
   // ── Toggle visibility buttons ──────────────────────────────
-  let showGangue = true;
   let showOreShell = true;
   let showHolesVis = true;
 
-  const toggleGangueBtn = document.getElementById('toggleGangue');
-  if (toggleGangueBtn) {
-    toggleGangueBtn.addEventListener('click', function() {
-      showGangue = !showGangue;
-      this.classList.toggle('active', showGangue);
-      const blocksGrp = window.blocksGrp;
-      if (blocksGrp) {
-        let gangueCount = 0;
-        blocksGrp.children.forEach(child => {
-          if (child.isMesh && child.renderOrder === 0) {
-            child.visible = showGangue;
-            gangueCount++;
-          }
-        });
-        console.log(`[VIS] Пустая порода ${showGangue ? 'показана' : 'скрыта'}, найдено ${gangueCount} блоков породы`);
-      }
-    });
-    console.log('[EVENTS] Кнопка toggleGangue найдена');
-  } else {
-    console.warn('[EVENTS] Кнопка toggleGangue не найдена');
-  }
-
-  const toggleOreShellBtn = document.getElementById('toggleOreShell');
+   const toggleOreShellBtn = document.getElementById('toggleOreShell');
   if (toggleOreShellBtn) {
     toggleOreShellBtn.addEventListener('click', function() {
       showOreShell = !showOreShell;
