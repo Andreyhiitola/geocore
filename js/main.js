@@ -159,50 +159,9 @@ export function wireEvents() {
   }
 
   // Вариограмма
-  const varioBtn = document.getElementById("calcVariogramBtn");
-
+  const varioBtn = document.getElementById('calcVariogramBtn');
   if (varioBtn) {
-
-    varioBtn.addEventListener("click", () => {
-
-      const holes = getCurrentHoles();
-
-      if (!holes.length) { alert("Загрузите данные"); return; }
-
-      const vg = calculateVariogram(holes);
-
-      if (!vg) { alert("Недостаточно точек (минимум 10)"); return; }
-
-      const modal = document.getElementById("variogramModal");
-
-      if (modal) modal.style.display = "flex";
-
-      drawVariogram(vg, "variogramPlotLarge");
-
-      const statsDiv = document.getElementById("variogramStatsLarge");
-
-      if (statsDiv) {
-
-        const strikeRange = vg.strike.length ? vg.strike[vg.strike.length-1]?.dist.toFixed(1) : "?";
-
-        const dipRange = vg.dip.length ? vg.dip[vg.dip.length-1]?.dist.toFixed(1) : "?";
-
-        statsDiv.innerHTML = `📊 Простирание: ранг ~${strikeRange} м | Падение: ранг ~${dipRange} м`;
-
-      }
-
-    });
-
-  }
-
-  const closeModal = document.getElementById("closeVariogramModal");
-
-  if (closeModal) closeModal.addEventListener("click", () => { const m = document.getElementById("variogramModal"); if (m) m.style.display = "none"; });
-
-  const modalBg = document.getElementById("variogramModal");
-
-  if (modalBg) modalBg.addEventListener("click", (e) => { if (e.target === modalBg) modalBg.style.display = "none"; });
-
+    varioBtn.addEventListener('click', () => {
       const holes = getCurrentHoles();
       if (!holes.length) { alert('Загрузите данные'); return; }
       const vg = calculateVariogram(holes);
@@ -327,3 +286,38 @@ document.addEventListener('DOMContentLoaded', () => {
   init3D();
   wireEvents();
 });
+
+  // Вариограмма (добавляем в конец wireEvents)
+  const varioBtn = document.getElementById('calcVariogramBtn');
+  if (varioBtn) {
+    varioBtn.addEventListener('click', () => {
+      const holes = getCurrentHoles();
+      if (!holes.length) { alert('Загрузите данные'); return; }
+      const vg = calculateVariogram(holes);
+      if (!vg) { alert('Недостаточно точек (минимум 10)'); return; }
+      const modal = document.getElementById('variogramModal');
+      if (modal) modal.style.display = 'flex';
+      drawVariogram(vg, 'variogramPlotLarge');
+      const statsDiv = document.getElementById('variogramStatsLarge');
+      if (statsDiv) {
+        const strikeRange = vg.strike.length ? vg.strike[vg.strike.length-1]?.dist.toFixed(1) : '?';
+        const dipRange = vg.dip.length ? vg.dip[vg.dip.length-1]?.dist.toFixed(1) : '?';
+        statsDiv.innerHTML = `📊 Простирание: ранг ~${strikeRange} м | Падение: ранг ~${dipRange} м`;
+      }
+    });
+  }
+  
+  const closeModal = document.getElementById('closeVariogramModal');
+  if (closeModal) {
+    closeModal.addEventListener('click', () => {
+      const modal = document.getElementById('variogramModal');
+      if (modal) modal.style.display = 'none';
+    });
+  }
+  
+  const modalBg = document.getElementById('variogramModal');
+  if (modalBg) {
+    modalBg.addEventListener('click', (e) => {
+      if (e.target === modalBg) modalBg.style.display = 'none';
+    });
+  }
