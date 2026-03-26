@@ -67,7 +67,7 @@ export function wireEvents() {
     });
   }
 
-    // Кнопка запуска модели
+  // Кнопка запуска модели
   const runBtn = document.getElementById('runBtn');
   if (runBtn) {
     console.log('[EVENTS] runBtn найден, добавляем обработчик');
@@ -159,18 +159,76 @@ export function wireEvents() {
       if (statsDiv) statsDiv.textContent = 'Экспериментальная вариограмма построена.';
     });
   }
-    // Переключатель видимости оболочки рудного тела
-  const toggleShell = document.getElementById('toggleOreShell');
-  if (toggleShell) {
-    toggleShell.addEventListener('change', (e) => {
-      import('./core/visualization.js').then(module => {
-        module.setOreShellVisibility(e.target.checked);
-      });
+
+  // ── Toggle visibility buttons (с использованием глобальных переменных) ──
+  let showGangue = true;
+  let showOreShell = true;
+  let showHolesVis = true;
+
+  const toggleGangueBtn = document.getElementById('toggleGangue');
+  if (toggleGangueBtn) {
+    toggleGangueBtn.addEventListener('click', function() {
+      showGangue = !showGangue;
+      this.classList.toggle('active', showGangue);
+      const blocksGrp = window.blocksGrp;
+      if (blocksGrp) {
+        blocksGrp.children.forEach(child => {
+          if (child.isMesh && child.renderOrder === 0) child.visible = showGangue;
+        });
+      }
+      console.log(`[VIS] Пустая порода ${showGangue ? 'показана' : 'скрыта'}`);
     });
-    console.log('[EVENTS] Переключатель оболочки найден');
+    console.log('[EVENTS] Кнопка toggleGangue найдена');
   } else {
-    console.warn('[EVENTS] Переключатель toggleOreShell не найден');
+    console.warn('[EVENTS] Кнопка toggleGangue не найдена');
   }
+
+  const toggleOreShellBtn = document.getElementById('toggleOreShell');
+  if (toggleOreShellBtn) {
+    toggleOreShellBtn.addEventListener('click', function() {
+      showOreShell = !showOreShell;
+      this.classList.toggle('active', showOreShell);
+      const oreGrp = window.oreGrp;
+      if (oreGrp) oreGrp.visible = showOreShell;
+      console.log(`[VIS] Оболочка руды ${showOreShell ? 'показана' : 'скрыта'}`);
+    });
+    console.log('[EVENTS] Кнопка toggleOreShell найдена');
+  } else {
+    console.warn('[EVENTS] Кнопка toggleOreShell не найдена');
+  }
+
+  const toggleHolesBtn = document.getElementById('toggleHoles');
+  if (toggleHolesBtn) {
+    toggleHolesBtn.addEventListener('click', function() {
+      showHolesVis = !showHolesVis;
+      this.classList.toggle('active', showHolesVis);
+      const holesGrp = window.holesGrp;
+      if (holesGrp) holesGrp.visible = showHolesVis;
+      console.log(`[VIS] Скважины ${showHolesVis ? 'показаны' : 'скрыты'}`);
+    });
+    console.log('[EVENTS] Кнопка toggleHoles найдена');
+  } else {
+    console.warn('[EVENTS] Кнопка toggleHoles не найдена');
+  }
+
+  const resetCameraBtn = document.getElementById('resetCamera');
+  if (resetCameraBtn) {
+    resetCameraBtn.addEventListener('click', () => {
+      const camera = window.camera;
+      const controls = window.controls;
+      if (camera && controls) {
+        camera.position.set(50, 40, 55);
+        camera.lookAt(0, -8, 0);
+        controls.target.set(0, -8, 0);
+        controls.update();
+      }
+      console.log('[VIS] Камера сброшена');
+    });
+    console.log('[EVENTS] Кнопка resetCamera найдена');
+  } else {
+    console.warn('[EVENTS] Кнопка resetCamera не найдена');
+  }
+
   // Автоматическое обновление алгоритма при изменении параметров
   const paramFields = ['blockSize', 'methodSel', 'cutoff', 'stdSel'];
   paramFields.forEach(id => {
