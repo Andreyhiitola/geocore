@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JORC vs ГКЗ: реальная разница для геолога — GeoCore Academy</title>
+<meta name="description" content="Сравнение международного кодекса JORC и российского ГКЗ. Категории запасов, требования к данным, Competent Person, практические примеры.">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --gold:#C9A84C; --gold-light:#E8C97A; --gold-dim:#7A6230;
+  --dark:#0A0A0B; --dark-2:#111114; --dark-3:#18181D; --dark-4:#1F1F26;
+  --surface:#252530; --text:#E8E6DE; --text-muted:#9A9890; --text-dim:#5C5B56;
+  --border:rgba(201,168,76,0.18); --border-dim:rgba(255,255,255,0.07);
+  --red:#8B3A2A; --green:#2a5a2a;
+}
+html{scroll-behavior:smooth;}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--dark);color:var(--text);line-height:1.7;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.3;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:64px;background:rgba(10,10,11,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.logo-hex{width:28px;height:28px;background:var(--gold);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);}
+.logo-text{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--text);}
+.logo-text span{color:var(--gold);}
+.nav-back{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);text-decoration:none;display:flex;align-items:center;gap:8px;transition:color .2s;}
+.nav-back:hover{color:var(--gold);}
+.nav-cta{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dark);background:var(--gold);padding:9px 20px;text-decoration:none;clip-path:polygon(7px 0%,100% 0%,calc(100% - 7px) 100%,0% 100%);}
+.nav-cta:hover{background:var(--gold-light);}
+
+/* ARTICLE LAYOUT */
+.art-wrap{max-width:780px;margin:0 auto;padding:120px 24px 80px;}
+
+/* HEADER */
+.art-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:10px;margin-bottom:20px;}
+.art-label::before{content:'';width:32px;height:1px;background:var(--gold);}
+h1.art-title{font-family:'Playfair Display',serif;font-size:clamp(32px,4vw,52px);font-weight:900;line-height:1.1;margin-bottom:20px;}
+.art-sub{font-size:17px;font-weight:300;line-height:1.75;color:var(--text-muted);margin-bottom:40px;border-left:3px solid var(--gold);padding-left:20px;}
+.art-meta{display:flex;gap:24px;align-items:center;padding:20px 0;border-top:1px solid var(--border-dim);border-bottom:1px solid var(--border-dim);margin-bottom:56px;}
+.art-meta-item{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);}
+.art-meta-item strong{color:var(--text-muted);}
+.art-tag{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold-dim);padding:3px 8px;}
+
+/* BODY */
+.art-body h2{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;line-height:1.2;margin:56px 0 20px;color:var(--text);}
+.art-body h3{font-family:'Playfair Display',serif;font-size:21px;font-weight:700;margin:40px 0 16px;color:var(--text);}
+.art-body p{font-size:16px;font-weight:300;line-height:1.8;color:var(--text-muted);margin-bottom:20px;}
+.art-body strong{color:var(--text);font-weight:600;}
+.art-body em{color:var(--text-muted);font-style:italic;}
+
+/* COMPARISON TABLES */
+.cmp-table{width:100%;border-collapse:collapse;margin:32px 0;font-size:13px;}
+.cmp-table th{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;padding:12px 16px;text-align:left;border-bottom:2px solid var(--border);}
+.cmp-table th:nth-child(1){color:var(--text-dim);}
+.cmp-table th:nth-child(2){color:#E87070;}
+.cmp-table th:nth-child(3){color:#7ee787;}
+.cmp-table td{padding:12px 16px;border-bottom:1px solid var(--border-dim);color:var(--text-muted);font-weight:300;}
+.cmp-table tr:nth-child(even) td{background:rgba(255,255,255,.02);}
+.cmp-table td:nth-child(2){color:#E87070;}
+.cmp-table td:nth-child(3){color:#7ee787;}
+.cmp-table td:nth-child(1){color:var(--text);font-weight:500;}
+
+/* CATEGORIES CARDS */
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:32px 0;}
+.cat-card{background:var(--dark-3);border:1px solid var(--border-dim);padding:24px;border-left:3px solid var(--gold);}
+.cat-card h4{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;margin-bottom:12px;color:var(--gold);}
+.cat-card p{font-size:14px;line-height:1.6;margin-bottom:8px;}
+.cat-card small{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-dim);}
+
+/* INFO BOX */
+.info-box{background:var(--dark-3);border:1px solid var(--border-dim);padding:24px;margin:32px 0;position:relative;}
+.info-box::before{content:'CPR / ТКЗ';position:absolute;top:-10px;left:20px;font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.15em;color:var(--text-dim);background:var(--dark-3);padding:0 8px;}
+.info-box p{margin:0;}
+
+/* HIGHLIGHT BOX */
+.highlight{background:var(--dark-3);border:1px solid var(--border);border-left:3px solid var(--gold);padding:24px 28px;margin:36px 0;}
+.highlight p{margin:0;color:var(--text-muted);}
+.highlight strong{color:var(--text);}
+
+/* CTA BOX */
+.cta-box{background:var(--dark-4);border:1px solid var(--border);padding:40px;margin:56px 0;text-align:center;}
+.cta-box h3{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;margin-bottom:16px;}
+.cta-box p{font-size:15px;font-weight:300;color:var(--text-muted);margin-bottom:28px;max-width:520px;margin-left:auto;margin-right:auto;}
+.cta-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+.btn-p{display:inline-flex;align-items:center;gap:9px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dark);background:var(--gold);padding:14px 30px;text-decoration:none;clip-path:polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%);transition:all .2s;}
+.btn-p:hover{background:var(--gold-light);}
+.btn-s{display:inline-flex;align-items:center;gap:9px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);border:1px solid var(--border);padding:14px 30px;text-decoration:none;transition:all .2s;}
+.btn-s:hover{border-color:var(--gold);color:var(--gold);}
+
+/* FOOTER */
+footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:40px 48px;display:flex;justify-content:space-between;align-items:center;}
+.f-copy{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.07em;color:var(--text-dim);}
+.f-back{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);text-decoration:none;}
+.f-back:hover{color:var(--gold-light);}
+
+/* REVEAL */
+.rv{opacity:0;transform:translateY(24px);transition:opacity .65s ease,transform .65s ease;}
+.rv.vis{opacity:1;transform:none;}
+
+@media(max-width:768px){
+  nav{padding:0 20px;}.nav-back span{display:none;}
+  .cat-grid{grid-template-columns:1fr;}
+  footer{flex-direction:column;gap:16px;text-align:center;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">
+    <div class="logo-hex"></div>
+    <span class="logo-text">Geo<span>Core</span></span>
+  </a>
+  <a href="index.html#blog" class="nav-back">← <span>Назад к блогу</span></a>
+  <a href="index.html#sandbox" class="nav-cta">Попробовать симулятор</a>
+</nav>
+
+<div class="art-wrap">
+
+  <!-- HEADER -->
+  <div class="rv">
+    <div class="art-label">Стандарты · Методика</div>
+    <h1 class="art-title">JORC vs ГКЗ: в чём реальная разница для геолога</h1>
+    <p class="art-sub">Категории запасов, требования к данным, Competent Person — сравниваем два стандарта на практических примерах.</p>
+    <div class="art-meta">
+      <div class="art-meta-item"><strong>10</strong> мин чтения</div>
+      <div class="art-meta-item"><strong>GeoCore Academy</strong></div>
+      <div class="art-meta-item"><strong>2025</strong></div>
+      <span class="art-tag">JORC</span>
+      <span class="art-tag">ГКЗ</span>
+      <span class="art-tag">Категории запасов</span>
+      <span class="art-tag">Competent Person</span>
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div class="art-body">
+
+    <p class="rv">Каждый геолог, работающий с оценкой месторождений, рано или поздно сталкивается с выбором: отчитываться по международному кодексу JORC или по российским правилам ГКЗ. Оба подхода имеют глубокие корни, но философия классификации, требования к данным и роль эксперта принципиально отличаются.</p>
+
+    <h2 class="rv">1. Философия классификации</h2>
+    <p class="rv">JORC (Joint Ore Reserves Committee) — это кодекс, основанный на принципе «степени уверенности». Он не предписывает жёсткую сеть скважин, а оценивает геологическую достоверность, техническую и экономическую обоснованность. ГКЗ (Государственная комиссия по запасам) — система, построенная на «степени изученности»: фиксированные категории A, B, C₁, C₂, требования к плотности разведочной сети и обязательная экспертиза.</p>
+
+    <div class="cat-grid rv">
+      <div class="cat-card">
+        <h4>📘 JORC (2012)</h4>
+        <p><strong>Measured</strong> — измеренные ресурсы, максимальная уверенность (обычно плотная сеть, статистически надёжные данные).</p>
+        <p><strong>Indicated</strong> — указанные ресурсы, разумная уверенность.</p>
+        <p><strong>Inferred</strong> — предполагаемые ресурсы, низкая уверенность.</p>
+        <small>Запасы (Reserves) выделяются после учёта потерь, разубоживания и экономических факторов.</small>
+      </div>
+      <div class="cat-card">
+        <h4>🏛️ ГКЗ (Россия)</h4>
+        <p><strong>A</strong> — детально разведанные, точные контуры.</p>
+        <p><strong>B</strong> — предварительно разведанные, границы определены с меньшей точностью.</p>
+        <p><strong>C₁</strong> — разведанные месторождения сложного строения или участки, примыкающие к более высоким категориям.</p>
+        <p><strong>C₂</strong> — оценённые запасы (прогнозные).</p>
+        <small>Категории чётко привязаны к плотности разведочной сети и методике подсчёта.</small>
+      </div>
+    </div>
+
+    <h2 class="rv">2. Требования к данным: жёсткость vs гибкость</h2>
+    <p class="rv">Главное различие — в подходе к доказательной базе.</p>
+
+    <table class="cmp-table rv">
+      <thead>
+        <tr><th>Параметр</th><th>JORC</th><th>ГКЗ</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Плотность разведочной сети</td><td>Не регламентируется; определяется геологом на основе геостатистики</td><td>Жёсткие нормативы (например, для угля 500×500 м для категории B)</td></tr>
+        <tr><td>Метод подсчёта</td><td>Любой геостатистический или геометрический (блочные модели, кригинг, сечения)</td><td>Преимущественно метод разрезов или геологических блоков, строгая привязка к контурам</td></tr>
+        <tr><td>Геостатистика</td><td>Приветствуется, вариограммы, кригинг, условная симуляция</td><td>Допускается, но не является обязательным; часто используют средние содержания по выработкам</td></tr>
+        <tr><td>Учёт горных потерь</td><td>Обязателен для перевода ресурсов в запасы (Reserves)</td><td>Выделяются промышленные и забалансовые запасы, потери нормируются</td></tr>
+      </tbody>
+    </table>
+
+    <div class="info-box rv">
+      <p><strong>⚖️ Практический пример:</strong> Для золоторудного месторождения с высокой вариабельностью содержаний JORC позволит применить кригинг и построить блочную модель даже при нерегулярной сети скважин. ГКЗ потребует сгущения сети до нормативной и обоснования метода подсчёта через разрезы, что может затянуть процесс на годы.</p>
+    </div>
+
+    <h2 class="rv">3. Competent Person vs Комиссия ГКЗ</h2>
+    <p class="rv">В системе JORC ключевая фигура — <strong>Competent Person (CP)</strong>. Это геолог с не менее чем 5-летним опытом, член признанной профессиональной организации (AusIMM, AIG, CIMM и др.). CP несёт персональную ответственность за отчёт и может подписывать документы для бирж (ASX, TSX, LSE).</p>
+    <p class="rv">В ГКЗ решения принимаются коллегиально на заседаниях комиссии. Проект отчёта готовит организация-недропользователь, затем он проходит экспертизу (научную, технологическую, экономическую). Результат — протокол ГКЗ, который становится официальным документом для постановки запасов на баланс.</p>
+
+    <div class="highlight rv">
+      <p><strong>Ключевое отличие:</strong> CP — это живой эксперт, которого можно привлечь к ответственности. ГКЗ — это бюрократическая процедура, дающая государственный статус запасам, но требующая больше времени и формальных согласований.</p>
+    </div>
+
+    <h2 class="rv">4. Реальные кейсы: когда какой стандарт выбирать</h2>
+    <h3 class="rv">🔹 Кейс 1: IPO на бирже TSX (Канада)</h3>
+    <p class="rv">Канадские регуляторы (NI 43-101) основаны на принципах JORC. Если компания хочет привлечь зарубежные инвестиции, отчёт Competent Person обязателен. Блочная модель в Datamine, геостатистика, категории Measured/Indicated/Inferred — стандартный набор.</p>
+    <h3 class="rv">🔹 Кейс 2: Лицензия на добычу в РФ</h3>
+    <p class="rv">Для разработки месторождения на территории России необходима государственная экспертиза запасов. Даже если у вас есть JORC-отчёт, без протокола ГКЗ вы не получите лицензию. Поэтому крупные компании ведут двойной учёт: модель в Datamine (для инвесторов) и классический подсчёт по ГКЗ (для регулятора).</p>
+    <h3 class="rv">🔹 Кейс 3: Сложное полиметаллическое месторождение</h3>
+    <p class="rv">JORC позволяет использовать условную симуляцию для оценки рисков и вероятностного подхода. ГКЗ работает с детерминированными значениями. При высокой вариабельности JORC даст более реалистичную картину, но для отчёта в ГКЗ потребуются дополнительные обоснования.</p>
+
+    <h2 class="rv">5. Сравнительная таблица итогов</h2>
+    <table class="cmp-table rv">
+      <thead>
+        <tr><th>Параметр</th><th>JORC</th><th>ГКЗ</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Основа классификации</td><td>Степень уверенности (геологическая, техническая, экономическая)</td><td>Степень изученности (плотность сети)</td></tr>
+        <tr><td>Категории ресурсов</td><td>Measured, Indicated, Inferred</td><td>A, B, C₁, C₂ (забалансовые)</td></tr>
+        <tr><td>Запасы (Reserves)</td><td>Probable, Proved (с учётом потерь и экономики)</td><td>Промышленные (балансовые)</td></tr>
+        <tr><td>Ответственное лицо</td><td>Competent Person (индивидуальная ответственность)</td><td>Комиссия ГКЗ (коллегиальное решение)</td></tr>
+        <tr><td>Геостатистика</td><td>Обязательна (вариограммы, кригинг)</td><td>Опциональна</td></tr>
+        <tr><td>Сроки</td><td>1–3 месяца (при наличии данных)</td><td>6–18 месяцев (включая экспертизу)</td></tr>
+        <tr><td>Применение</td><td>Международные биржи, IPO, инвесторы</td><td>Лицензирование в РФ, госучёт</td></tr>
+      </tbody>
+    </table>
+
+    <div class="highlight rv">
+      <p><strong>Главный вывод:</strong> JORC и ГКЗ не исключают друг друга. Современная стратегия — <strong>двойная отчётность</strong>: создаётся единая геологическая модель (например, в Datamine), на основе которой готовится JORC-отчёт для инвесторов и параллельно формируется паспорт ГКЗ с требуемыми разрезами и таблицами. Это позволяет сохранить гибкость и соответствовать обоим регуляторам.</p>
+    </div>
+
+    <hr class="art-hr">
+
+    <!-- CTA: Simulator -->
+    <div class="cta-box rv">
+      <h3>Хотите попробовать классификацию на своих данных?</h3>
+      <p>Загрузите CSV опробования в 3D-песочницу — система автоматически покажет категории Indicated/Inferred на основе плотности данных и стандарта JORC. Экспортируйте отчёт в формате, близком к JORC или ГКЗ.</p>
+      <div class="cta-btns">
+        <a href="index.html#sandbox" class="btn-p">
+          ▶ Открыть песочницу
+        </a>
+        <a href="index.html#consult" class="btn-s">Записаться на консультацию</a>
+      </div>
+    </div>
+
+  </div><!-- /art-body -->
+</div><!-- /art-wrap -->
+
+<footer>
+  <span class="f-copy">© 2025 GeoCore Academy</span>
+  <a href="index.html#blog" class="f-back">← Все статьи блога</a>
+</footer>
+
+<script>
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('vis');});
+},{threshold:.08,rootMargin:'0px 0px -20px 0px'});
+document.querySelectorAll('.rv').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>

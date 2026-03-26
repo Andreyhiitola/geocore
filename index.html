@@ -409,158 +409,45 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:5
       <p class="sec-d">Выберите шаблон выше или загрузите свои файлы. Получите 3D-модель, оценку запасов и готовый скрипт Datamine.</p>
     </div>
     <div class="sb-grid">
-      <!-- CONTROL PANEL -->
       <div class="sb-panel rv">
         <div class="sb-ph">
           <div class="sb-ph-t">📂 Данные проекта</div>
           <div class="sb-ph-d">CSV скважины · OBJ каркас · или выберите шаблон выше</div>
         </div>
         <div class="sb-body">
-
-          <!-- FILES -->
-          <div class="sb-feat">
-            <div class="sb-fi">📋</div>
-            <div style="flex:1">
-              <div class="sb-ft">1. CSV (скважины)</div>
-              <div class="sb-fd">Формат: HoleID, From, To, Au_gpt</div>
-              <input type="file" id="csvIn" accept=".csv,.txt" class="file-in">
-              <div id="csvStatus" class="status-line" style="color:var(--text-dim)">Демо-данные загружены автоматически</div>
-            </div>
-          </div>
-          <div class="sb-feat">
-            <div class="sb-fi">🔷</div>
-            <div style="flex:1">
-              <div class="sb-ft">2. OBJ (каркас рудного тела)</div>
-              <div class="sb-fd">Wavefront OBJ — вершины и грани</div>
-              <input type="file" id="objIn" accept=".obj,.txt" class="file-in">
-              <div id="objStatus" class="status-line" style="color:var(--text-dim)"></div>
-            </div>
-          </div>
-
-          <!-- PARAMS -->
-          <div class="sb-feat">
-            <div class="sb-fi">⚙️</div>
-            <div style="flex:1">
-              <div class="sb-ft">3. Параметры блочной модели</div>
-              <div class="params-grid">
-                <div><div class="param-label">Размер блока (м)</div><input type="number" id="blockSize" class="param-input" value="5" min="1" max="20"></div>
-                <div><div class="param-label">Метод интерполяции</div><select id="methodSel" class="param-input"><option value="idw">IDW (расстояние)</option><option value="kriging">Кригинг (упрощ.)</option><option value="nn">Nearest Neighbour</option></select></div>
-                <div><div class="param-label">Cutoff (г/т или %)</div><input type="number" id="cutoff" class="param-input" value="1.0" step="0.5"></div>
-                <div><div class="param-label">Стандарт</div><select id="stdSel" class="param-input"><option value="JORC">JORC</option><option value="ГКЗ">ГКЗ</option><option value="NI 43-101">NI 43-101</option></select></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- VARIOGRAM -->
-          <div class="sb-feat">
-            <div class="sb-fi">📈</div>
-            <div style="flex:1">
-              <div class="sb-ft">Экспериментальная вариограмма</div>
-              <div class="sb-fd">Анализ пространственной корреляции по трём направлениям.</div>
-              <button id="calcVariogramBtn" class="vari-btn">📊 Построить вариограмму</button>
-              <div id="variogramCanvas">
-                <canvas id="variogramPlot" width="500" height="260" style="width:100%;background:#0a121c;"></canvas>
-                <div id="variogramStats"></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- RUN -->
-          <button class="run-btn" id="runBtn" disabled>
-            <span id="runBtnText">▶ Загрузите CSV для запуска</span>
-          </button>
-
-          <!-- STATS -->
-          <div class="sb-feat">
-            <div class="sb-fi">📊</div>
-            <div style="flex:1">
-              <div class="sb-ft">Статистика и оценка запасов</div>
-              <div class="stats-out" id="statsOut">Загрузите CSV или выберите шаблон…</div>
-            </div>
-          </div>
-
-          <!-- SCRIPT -->
-          <div class="sb-feat">
-            <div class="sb-fi">📜</div>
-            <div style="flex:1">
-              <div class="sb-ft">Шаблон скрипта Datamine</div>
-              <div class="script-out" id="scriptOut">Загрузите данные…</div>
-              <button class="copy-btn" id="copyBtn">📋 Копировать скрипт</button>
-              <button class="export-btn" id="exportBtn">📎 Экспорт отчёта (CSV + текст)</button>
-            </div>
-          </div>
-
-          <!-- ACTIONS -->
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="save-btn" id="resetDemoBtn" style="background:var(--dark-4);color:var(--gold);border:1px solid var(--border);flex:1">⟳ Сброс к золоту</button>
-            <button class="save-btn" id="saveProjectBtn" style="flex:2">💾 Сохранить проект</button>
-          </div>
-
-        </div><!-- /sb-body -->
-      </div><!-- /sb-panel -->
-
-      <!-- 3D CANVAS -->
-      <div class="rv">
-        <div class="canvas-wrap">
-          <canvas id="c3d"></canvas>
-          <div class="canvas-hint">🖱 Вращение · ПКМ панорама · Scroll масштаб</div>
-        </div>
-        <div class="legend">
-          <div class="leg-item"><div class="leg-dot" style="background:#3a6ea5"></div>Скважины</div>
-          <div class="leg-item"><div class="leg-dot" style="background:#ffaa33"></div>Высокое содержание</div>
-          <div class="leg-item"><div class="leg-dot" style="background:#7aabdb;opacity:.8"></div>Блочная модель</div>
-          <div class="leg-item"><div class="leg-dot" style="background:#c9a84c;opacity:.6"></div>Каркас / пласты</div>
+          <div class="sb-feat"><div class="sb-fi">📋</div><div style="flex:1"><div class="sb-ft">1. CSV (скважины)</div><div class="sb-fd">Формат: HoleID, From, To, Au_gpt</div><input type="file" id="csvIn" accept=".csv,.txt" class="file-in"><div id="csvStatus" class="status-line" style="color:var(--text-dim)">Демо-данные загружены автоматически</div></div></div>
+          <div class="sb-feat"><div class="sb-fi">🔷</div><div style="flex:1"><div class="sb-ft">2. OBJ (каркас рудного тела)</div><div class="sb-fd">Wavefront OBJ — вершины и грани</div><input type="file" id="objIn" accept=".obj,.txt" class="file-in"><div id="objStatus" class="status-line" style="color:var(--text-dim)"></div></div></div>
+          <div class="sb-feat"><div class="sb-fi">⚙️</div><div style="flex:1"><div class="sb-ft">3. Параметры блочной модели</div><div class="params-grid"><div><div class="param-label">Размер блока (м)</div><input type="number" id="blockSize" class="param-input" value="5" min="1" max="20"></div><div><div class="param-label">Метод интерполяции</div><select id="methodSel" class="param-input"><option value="idw">IDW (расстояние)</option><option value="kriging">Кригинг (упрощ.)</option><option value="nn">Nearest Neighbour</option></select></div><div><div class="param-label">Cutoff (г/т или %)</div><input type="number" id="cutoff" class="param-input" value="1.0" step="0.5"></div><div><div class="param-label">Стандарт</div><select id="stdSel" class="param-input"><option value="JORC">JORC</option><option value="ГКЗ">ГКЗ</option><option value="NI 43-101">NI 43-101</option></select></div></div></div></div>
+          <div class="sb-feat"><div class="sb-fi">📈</div><div style="flex:1"><div class="sb-ft">Экспериментальная вариограмма</div><div class="sb-fd">Анализ пространственной корреляции по трём направлениям.</div><button id="calcVariogramBtn" class="vari-btn">📊 Построить вариограмму</button><div id="variogramCanvas"><canvas id="variogramPlot" width="500" height="260" style="width:100%;background:#0a121c;"></canvas><div id="variogramStats"></div></div></div></div>
+          <button class="run-btn" id="runBtn" disabled><span id="runBtnText">▶ Загрузите CSV для запуска</span></button>
+          <div class="sb-feat"><div class="sb-fi">📊</div><div style="flex:1"><div class="sb-ft">Статистика и оценка запасов</div><div class="stats-out" id="statsOut">Загрузите CSV или выберите шаблон…</div></div></div>
+          <div class="sb-feat"><div class="sb-fi">📜</div><div style="flex:1"><div class="sb-ft">Шаблон скрипта Datamine</div><div class="script-out" id="scriptOut">Загрузите данные…</div><button class="copy-btn" id="copyBtn">📋 Копировать скрипт</button><button class="export-btn" id="exportBtn">📎 Экспорт отчёта (CSV + текст)</button></div></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="save-btn" id="resetDemoBtn" style="background:var(--dark-4);color:var(--gold);border:1px solid var(--border);flex:1">⟳ Сброс к золоту</button><button class="save-btn" id="saveProjectBtn" style="flex:2">💾 Сохранить проект</button></div>
         </div>
       </div>
-    </div><!-- /sb-grid -->
+      <div class="rv">
+        <div class="canvas-wrap"><canvas id="c3d"></canvas><div class="canvas-hint">🖱 Вращение · ПКМ панорама · Scroll масштаб</div></div>
+        <div class="legend"><div class="leg-item"><div class="leg-dot" style="background:#3a6ea5"></div>Скважины</div><div class="leg-item"><div class="leg-dot" style="background:#ffaa33"></div>Высокое содержание</div><div class="leg-item"><div class="leg-dot" style="background:#7aabdb;opacity:.8"></div>Блочная модель</div><div class="leg-item"><div class="leg-dot" style="background:#c9a84c;opacity:.6"></div>Каркас / пласты</div></div>
+      </div>
+    </div>
   </div>
 </section>
 
 <!-- ── PROJECTS ── -->
 <section class="proj-sec sec" id="projects">
   <div class="inner">
-    <div class="proj-header rv">
-      <div><div class="sec-lbl">Мои проекты</div><h2 class="sec-t" style="font-size:clamp(28px,2.8vw,40px)">Сохранённые проекты</h2></div>
-      <button class="save-btn" id="clearAll">🗑 Очистить всё</button>
-    </div>
-    <div class="proj-grid" id="projGrid">
-      <div class="no-proj">Нет сохранённых проектов.<br>Загрузите данные и нажмите «Сохранить проект».</div>
-    </div>
+    <div class="proj-header rv"><div><div class="sec-lbl">Мои проекты</div><h2 class="sec-t" style="font-size:clamp(28px,2.8vw,40px)">Сохранённые проекты</h2></div><button class="save-btn" id="clearAll">🗑 Очистить всё</button></div>
+    <div class="proj-grid" id="projGrid"><div class="no-proj">Нет сохранённых проектов.<br>Загрузите данные и нажмите «Сохранить проект».</div></div>
   </div>
 </section>
 
 <!-- ── CHAT ── -->
 <section class="chat-sec sec" id="consult">
   <div class="inner">
-    <div class="rv">
-      <div class="sec-lbl">Экспертные консультации · AI-ассистент</div>
-      <h2 class="sec-t">Помощь по вашему<br>конкретному проекту</h2>
-      <p class="sec-d">Задавайте вопросы по Datamine, JORC, геостатистике или опишите свой проект для консультации.</p>
-    </div>
+    <div class="rv"><div class="sec-lbl">Экспертные консультации · AI-ассистент</div><h2 class="sec-t">Помощь по вашему<br>конкретному проекту</h2><p class="sec-d">Задавайте вопросы по Datamine, JORC, геостатистике или опишите свой проект для консультации.</p></div>
     <div class="chat-layout">
-      <div class="consult-steps rv">
-        <div class="cs"><div class="cs-connector"></div><div class="cs-num">01</div><div><div class="cs-t">Опишите проект</div><div class="cs-d">Тип месторождения, стадия, стандарт. Ассистент задаст уточняющие вопросы.</div></div></div>
-        <div class="cs"><div class="cs-connector"></div><div class="cs-num">02</div><div><div class="cs-t">Получите анализ</div><div class="cs-d">Рекомендации по методике, ПО, параметрам интерполяции.</div></div></div>
-        <div class="cs"><div class="cs-connector"></div><div class="cs-num">03</div><div><div class="cs-t">Запись к эксперту</div><div class="cs-d">Бот помогает сформировать бриф и предлагает удобное время.</div></div></div>
-        <div class="cs"><div class="cs-num">04</div><div><div class="cs-t">NDA и сессия</div><div class="cs-d">Для конфиденциальных проектов — соглашение о неразглашении.</div></div></div>
-      </div>
-      <div class="chat-box rv">
-        <div class="chat-hd">
-          <div class="ch-av">⛏</div>
-          <div>
-            <div class="ch-name">GeoCore Assistant</div>
-            <div class="ch-status">online · горное дело · оценка месторождений</div>
-          </div>
-        </div>
-        <div class="chat-msgs" id="chatMsgs">
-          <div class="msg bot"><div class="msg-b">Здравствуйте! Задайте вопрос по Datamine, Surpac, Leapfrog, методике JORC/ГКЗ или геостатистике.</div><div class="msg-t">сейчас</div></div>
-        </div>
-        <div class="chat-inp">
-          <input type="text" id="chatInput" placeholder="Вопрос по Datamine, JORC, геостатистике…">
-          <button class="chat-send" id="chatSend">Отправить</button>
-        </div>
-        <div class="api-notice">Локальный ассистент · для AI-ответов подключите API-ключ</div>
-      </div>
+      <div class="consult-steps rv"><div class="cs"><div class="cs-connector"></div><div class="cs-num">01</div><div><div class="cs-t">Опишите проект</div><div class="cs-d">Тип месторождения, стадия, стандарт. Ассистент задаст уточняющие вопросы.</div></div></div><div class="cs"><div class="cs-connector"></div><div class="cs-num">02</div><div><div class="cs-t">Получите анализ</div><div class="cs-d">Рекомендации по методике, ПО, параметрам интерполяции.</div></div></div><div class="cs"><div class="cs-connector"></div><div class="cs-num">03</div><div><div class="cs-t">Запись к эксперту</div><div class="cs-d">Бот помогает сформировать бриф и предлагает удобное время.</div></div></div><div class="cs"><div class="cs-num">04</div><div><div class="cs-t">NDA и сессия</div><div class="cs-d">Для конфиденциальных проектов — соглашение о неразглашении.</div></div></div></div>
+      <div class="chat-box rv"><div class="chat-hd"><div class="ch-av">⛏</div><div><div class="ch-name">GeoCore Assistant</div><div class="ch-status">online · горное дело · оценка месторождений</div></div></div><div class="chat-msgs" id="chatMsgs"><div class="msg bot"><div class="msg-b">Здравствуйте! Задайте вопрос по Datamine, Surpac, Leapfrog, методике JORC/ГКЗ или геостатистике.</div><div class="msg-t">сейчас</div></div></div><div class="chat-inp"><input type="text" id="chatInput" placeholder="Вопрос по Datamine, JORC, геостатистике…"><button class="chat-send" id="chatSend">Отправить</button></div><div class="api-notice">Локальный ассистент · для AI-ответов подключите API-ключ</div></div>
     </div>
   </div>
 </section>
@@ -568,11 +455,7 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:5
 <!-- ── PRICING ── -->
 <section class="price-sec sec" id="pricing">
   <div class="inner">
-    <div class="rv" style="text-align:center">
-      <div class="sec-lbl" style="justify-content:center">Стоимость</div>
-      <h2 class="sec-t">Выберите формат</h2>
-      <p class="sec-d" style="margin:0 auto">Курсы, подписка или персональная консультация.</p>
-    </div>
+    <div class="rv" style="text-align:center"><div class="sec-lbl" style="justify-content:center">Стоимость</div><h2 class="sec-t">Выберите формат</h2><p class="sec-d" style="margin:0 auto">Курсы, подписка или персональная консультация.</p></div>
     <div class="pg stg">
       <div class="pc"><div class="pt">Отдельный курс</div><div class="pp"><span>от </span>9 900</div><div class="pperiod">рублей · разовая оплата</div><ul class="pf"><li class="hl">Полный доступ к курсу</li><li>Практические задания</li><li>Шаблоны файлов</li><li>Сертификат об окончании</li><li>Доступ в Telegram-чат</li></ul><a href="#" class="pb out">Выбрать курс</a></div>
       <div class="pc feat"><div class="pt">Подписка Pro</div><div class="pp"><span>₽</span>3 900</div><div class="pperiod">в месяц · все курсы включены</div><ul class="pf"><li class="hl">Все курсы платформы</li><li class="hl">Песочница без ограничений</li><li class="hl">Новые курсы сразу</li><li>Все шаблоны и скрипты</li><li>Скидка 20% на консультации</li></ul><a href="#" class="pb fil">Оформить подписку</a></div>
@@ -593,19 +476,19 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:5
         <div class="bc-meta"><span class="bc-tag">Datamine</span><span class="bc-tag">Блочная модель</span><span class="bc-tag">JORC</span></div>
         <div class="bc-footer"><span class="bc-read">Читать статью →</span><span class="bc-time">8 мин</span></div>
       </article>
-      <article class="blog-card">
+      <article class="blog-card" onclick="window.open('Variogramma_article.html','_blank')">
         <div class="bc-label">Геостатистика</div>
         <h3 class="bc-title">Вариограмма: как правильно настроить перед кригингом</h3>
-        <p class="bc-desc">Шаг за шагом: направления, экспериментальная вариограмма, подбор модели.</p>
+        <p class="bc-desc">Шаг за шагом: направления, экспериментальная вариограмма, подбор модели. Типичные ошибки начинающих.</p>
         <div class="bc-meta"><span class="bc-tag">Геостатистика</span><span class="bc-tag">Кригинг</span></div>
-        <div class="bc-footer"><span class="bc-read">Скоро →</span><span class="bc-time">12 мин</span></div>
+        <div class="bc-footer"><span class="bc-read">Читать статью →</span><span class="bc-time">12 мин</span></div>
       </article>
-      <article class="blog-card">
+      <article class="blog-card" onclick="window.open('JORC_vs_GKZ_articel.html','_blank')">
         <div class="bc-label">Стандарты</div>
         <h3 class="bc-title">JORC vs ГКЗ: в чём реальная разница для геолога</h3>
-        <p class="bc-desc">Категории запасов, Competent Person — сравниваем два стандарта на практических примерах.</p>
+        <p class="bc-desc">Категории запасов, требования к данным, Competent Person — сравниваем два стандарта на практических примерах.</p>
         <div class="bc-meta"><span class="bc-tag">JORC</span><span class="bc-tag">ГКЗ</span></div>
-        <div class="bc-footer"><span class="bc-read">Скоро →</span><span class="bc-time">10 мин</span></div>
+        <div class="bc-footer"><span class="bc-read">Читать статью →</span><span class="bc-time">10 мин</span></div>
       </article>
     </div>
   </div>
@@ -617,31 +500,21 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:5
     <div class="cta-ey">Начните сегодня</div>
     <h2 class="cta-t">Первый урок — бесплатно</h2>
     <p class="cta-s">Откройте вводный урок любого курса без регистрации. Убедитесь в качестве материала перед покупкой.</p>
-    <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
-      <a href="#" class="btn-p">Смотреть бесплатный урок</a>
-      <a href="#templates" class="btn-s">Выбрать шаблон</a>
-    </div>
+    <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap"><a href="#" class="btn-p">Смотреть бесплатный урок</a><a href="#templates" class="btn-s">Выбрать шаблон</a></div>
   </div>
 </section>
 
 <!-- ── FOOTER ── -->
 <footer>
   <div class="fi">
-    <div>
-      <a href="#" class="nav-logo" style="text-decoration:none"><div class="logo-hex"></div><span class="logo-text">Geo<span>Core</span></span></a>
-      <p class="fb-d">Профессиональное обучение оценке месторождений. Россия, СНГ и международный рынок.</p>
-    </div>
+    <div><a href="#" class="nav-logo" style="text-decoration:none"><div class="logo-hex"></div><span class="logo-text">Geo<span>Core</span></span></a><p class="fb-d">Профессиональное обучение оценке месторождений. Россия, СНГ и международный рынок.</p></div>
     <div><div class="fc-t">Курсы</div><ul class="fl"><li><a href="#">Datamine Studio</a></li><li><a href="#">Leapfrog Geo</a></li><li><a href="#">Surpac</a></li><li><a href="#">Методика JORC</a></li><li><a href="#">Геостатистика</a></li></ul></div>
     <div><div class="fc-t">Платформа</div><ul class="fl"><li><a href="#sandbox">Песочница</a></li><li><a href="#templates">Шаблоны</a></li><li><a href="#consult">Консультации</a></li><li><a href="#blog">Блог</a></li></ul></div>
     <div><div class="fc-t">Контакты</div><ul class="fl"><li><a href="#">Telegram</a></li><li><a href="#">LinkedIn</a></li><li><a href="#">Email</a></li><li><a href="#">Корпоративным</a></li></ul></div>
   </div>
-  <div class="fb">
-    <div class="fc">© 2025 GeoCore Academy · Все права защищены</div>
-    <div class="fl-langs"><span class="fl-lang act">RU</span><span class="fl-lang">EN</span></div>
-  </div>
+  <div class="fb"><div class="fc">© 2025 GeoCore Academy · Все права защищены</div><div class="fl-langs"><span class="fl-lang act">RU</span><span class="fl-lang">EN</span></div></div>
 </footer>
 
-<!-- ── SCRIPTS ── -->
 <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js"}}</script>
 <script type="module">
   import { init3D, wireEvents } from './script.js';

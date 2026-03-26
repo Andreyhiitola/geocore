@@ -1,0 +1,66 @@
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE and editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+*.swp
+*.swo
+*~
+.ropeproject
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+*.cache
+*.crdownload
+
+# Node modules (if any)
+node_modules/
+package-lock.json
+
+# Python cache (if using local server)
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local server files
+.serve/
+.vercel/
+.netlify/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Archive files (not needed in repo)
+*.zip
+*.tar.gz
+*.rar
+
+# Local build artifacts
+dist/
+build/
+out/
+
+# User-specific files
+*.user
+*.userosscache
+*.sln.docstates
