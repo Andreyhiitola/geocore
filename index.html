@@ -490,7 +490,7 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:5
             <div style="flex:1">
               <div class="sb-ft">Визуализация</div>
               <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;">
-                <button id="toggleOreShell" class="btn-s" style="padding: 6px 12px; background: var(--dark-4);">🔮 Оболочка руды</button>
+                <button id="toggleOreShell" class="btn-s" style="padding: 6px 12px; background: var(--dark-4);">🔮 Каркас рудного тела</button>
                 <button id="toggleHoles" class="btn-s" style="padding: 6px 12px; background: var(--dark-4);">🕳️ Скважины</button>
                </div>
               <div class="sb-fd" style="margin-top: 6px;">Включите/выключите отображение элементов</div>
@@ -503,12 +503,11 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:5
       <div class="rv">
         <div class="canvas-wrap"><canvas id="c3d"></canvas><div class="canvas-hint">🖱 Вращение · ПКМ панорама · Scroll масштаб</div></div>
        <div class="legend">
-       <div class="leg-item"><div class="leg-dot" style="background:#3a6ea5"></div>Скважины</div>
-       <div class="leg-item"><div class="leg-dot" style="background:#ffaa33"></div>Высокое содержание (>5 г/т)</div>
-       <div class="leg-item"><div class="leg-dot" style="background: linear-gradient(90deg, #0040ff, #00aaff, #ffdd00, #ff8800, #ff2200); width: 40px;"></div>Блочная модель (цвет = содержание)</div>
-       <div class="leg-item"><div class="leg-dot" style="background:#c9a84c; opacity:0.6"></div>Каркас рудного тела</div>
-   </div> 
-  </div>
+  <div class="leg-item"><div class="leg-dot" style="background:#3a6ea5"></div>Скважины</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#ffaa33"></div>Высокое содержание (>5 г/т)</div>
+  <div class="leg-item"><div class="leg-dot" style="background: linear-gradient(90deg, #0040ff, #00aaff, #ffdd00, #ff8800, #ff2200); width: 40px;"></div>Блочная модель (цвет = содержание)</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#c9a84c; opacity:0.8; width: 12px; height: 12px; border-radius: 1px;"></div>Каркас рудного тела (сетка)</div>
+</div>
                 <!-- ССЫЛКА НА DATAMINE VIEWER -->
           <div class="sb-feat">
             <div class="sb-fi">📥</div>
