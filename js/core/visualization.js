@@ -20,23 +20,58 @@ function getColorByGrade(grade) {
 export function visualizeHoles(holes) {
   clearGroup(holesGrp);
   const COLORS = [0x3a6ea5, 0x4a7eb5, 0x5a8ec5, 0x6a9ed5];
+  
+  // Определяем тип месторождения по первому интервалу
+  let depositType = 'gold'; // по умолчанию
+  if (holes.length > 0 && holes[0].intervals.length > 0) {
+    const firstVal = holes[0].intervals[0][2];
+    if (firstVal < 3 && firstVal > 0.1) depositType = 'copper';
+    else if (firstVal > 3 && firstVal < 10) depositType = 'gold';
+    else if (firstVal > 10) depositType = 'coal';
+  }
+  
+  // Пороги для маркеров
+  let highThreshold = 5;      // золото: >5 г/т
+  let markerColor = 0xffaa44;
+  let markerEmissive = 0x552200;
+  
+  if (depositType === 'copper') {
+    highThreshold = 1.2;       // медь: >1.2% Cu
+    markerColor = 0xff8844;
+    markerEmissive = 0x442200;
+  } else if (depositType === 'coal') {
+    highThreshold = 4;          // уголь: мощность >4 м
+    markerColor = 0x88aaff;
+    markerEmissive = 0x224466;
+  }
+  
   holes.forEach((h, i) => {
     const points = [];
-    for (let y = 0; y <= h.depth; y += 2) points.push(new THREE.Vector3(h.x, -y * 0.5, h.z));
+    for (let y = 0; y <= h.depth; y += 2) {
+      points.push(new THREE.Vector3(h.x, -y * 0.5, h.z));
+    }
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
     const material = new THREE.LineBasicMaterial({ color: COLORS[i % 4] });
     holesGrp.add(new THREE.Line(geometry, material));
+    
     h.intervals.forEach(([from, to, val]) => {
-      if (val > 5) {
-        const marker = new THREE.Mesh(new THREE.SphereGeometry(0.65, 16, 16), new THREE.MeshStandardMaterial({ color: 0xffaa44, emissive: 0x552200, emissiveIntensity: 0.8 }));
+      // Маркеры для высоких содержаний (разные пороги для разных типов)
+      if (val > highThreshold) {
+        const sphereGeo = new THREE.SphereGeometry(0.65, 16, 16);
+        const sphereMat = new THREE.MeshStandardMaterial({ 
+          color: markerColor, 
+          emissive: markerEmissive, 
+          emissiveIntensity: 0.8 
+        });
+        const marker = new THREE.Mesh(sphereGeo, sphereMat);
         marker.position.set(h.x, -(from + to) / 2 * 0.5, h.z);
         holesGrp.add(marker);
       }
     });
   });
-  console.log(`[3D] Визуализировано скважин: ${holes.length}`);
+  
+  console.log(`[3D] Визуализировано скважин: ${holes.length}, тип: ${depositType}, порог: ${highThreshold}`);
 }
-
 // Функция плавного градиента от синего (низкое) до красного (высокое)
 function gradeToColor(grade, maxGrade) {
   const t = Math.min(grade / Math.max(maxGrade, 0.1), 1);
