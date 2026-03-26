@@ -112,7 +112,101 @@ export function wireEvents() {
       b.click();
     });
   }
+     // Экспорт блочной модели для Datamine Viewer
+  const exportBlockmodelBtn = document.getElementById('exportBlockmodelBtn');
+  if (exportBlockmodelBtn) {
+    exportBlockmodelBtn.addEventListener('click', () => {
+      if (!currentBlocks || !currentBlocks.length) {
+        alert('Сначала постройте блочную модель');
+        return;
+      }
+      
+      // Формат .blockmodel для Datamine (текстовый)
+      let content = '# Datamine Studio Block Model\n';
+      content += '# X Y Z Au_gpt Category\n';
+      currentBlocks.forEach(b => {
+        content += `${b.x.toFixed(1)} ${b.y.toFixed(1)} ${b.z.toFixed(1)} ${b.grade.toFixed(3)} ${b.category || 'Unknown'}\n`;
+      });
+      
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `blockmodel_${new Date().toISOString().slice(0,19)}.blockmodel`;
+      a.click();
+      URL.revokeObjectURL(url);
+      console.log('[EXPORT] Блочная модель сохранена для Datamine Viewer');
+    });
+  }
 
+  // Экспорт каркаса рудного тела в формате WRL (VRML для Datamine)
+  const exportWireframeBtn = document.getElementById('exportWireframeBtn');
+  if (exportWireframeBtn) {
+    exportWireframeBtn.addEventListener('click', () => {
+      const oreGrpChildren = window.oreGrp?.children;
+      if (!oreGrpChildren || !oreGrpChildren.length) {
+        alert('Нет загруженного каркаса рудного тела');
+        return;
+      }
+      
+      // Ищем каркасную сетку (не оболочку)
+      let wireframeMesh = null;
+      for (let child of oreGrpChildren) {
+        if (child.isMesh && child.material && child.material.wireframe === true) {
+          wireframeMesh = child;
+          break;
+        }
+      }
+      
+      if (!wireframeMesh) {
+        alert('Каркас рудного тела не найден');
+        return;
+      }
+      
+      // Получаем геометрию и преобразуем в WRL (VRML) формат
+      const geometry = wireframeMesh.geometry;
+      const positions = geometry.attributes.position.array;
+      const indices = geometry.index.array;
+      
+      let wrl = '#VRML V2.0 utf8\n';
+      wrl += '# Экспортировано из GeoCore Academy\n';
+      wrl += 'Shape {\n';
+      wrl += '  appearance Appearance {\n';
+      wrl += '    material Material {\n';
+      wrl += '      diffuseColor 0.8 0.65 0.3\n';
+      wrl += '      emissiveColor 0.3 0.2 0.1\n';
+      wrl += '    }\n';
+      wrl += '  }\n';
+      wrl += '  geometry IndexedLineSet {\n';
+      wrl += '    coord Coordinate {\n';
+      wrl += '      point [\n';
+      
+      // Вершины
+      for (let i = 0; i < positions.length; i += 3) {
+        wrl += `        ${positions[i].toFixed(2)} ${positions[i+1].toFixed(2)} ${positions[i+2].toFixed(2)},\n`;
+      }
+      wrl += '      ]\n';
+      wrl += '    }\n';
+      wrl += '    coordIndex [\n';
+      
+      // Грани (рёбра)
+      for (let i = 0; i < indices.length; i += 3) {
+        wrl += `      ${indices[i]}, ${indices[i+1]}, ${indices[i+2]}, -1,\n`;
+      }
+      wrl += '    ]\n';
+      wrl += '  }\n';
+      wrl += '}\n';
+      
+      const blob = new Blob([wrl], { type: 'model/vrml' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ore_body_${new Date().toISOString().slice(0,19)}.wrl`;
+      a.click();
+      URL.revokeObjectURL(url);
+      console.log('[EXPORT] Каркас сохранён в формате WRL для Datamine Viewer');
+    });
+  }
   // Сброс к золоту
   const resetBtn = document.getElementById('resetDemoBtn');
   if (resetBtn) resetBtn.addEventListener('click', () => loadTemplate('gold'));
@@ -160,7 +254,7 @@ export function wireEvents() {
     });
   }
 
-  // ── Toggle visibility buttons (с использованием глобальных переменных) ──
+  // ── Toggle visibility buttons ──────────────────────────────
   let showGangue = true;
   let showOreShell = true;
   let showHolesVis = true;
@@ -172,11 +266,15 @@ export function wireEvents() {
       this.classList.toggle('active', showGangue);
       const blocksGrp = window.blocksGrp;
       if (blocksGrp) {
+        let gangueCount = 0;
         blocksGrp.children.forEach(child => {
-          if (child.isMesh && child.renderOrder === 0) child.visible = showGangue;
+          if (child.isMesh && child.renderOrder === 0) {
+            child.visible = showGangue;
+            gangueCount++;
+          }
         });
+        console.log(`[VIS] Пустая порода ${showGangue ? 'показана' : 'скрыта'}, найдено ${gangueCount} блоков породы`);
       }
-      console.log(`[VIS] Пустая порода ${showGangue ? 'показана' : 'скрыта'}`);
     });
     console.log('[EVENTS] Кнопка toggleGangue найдена');
   } else {

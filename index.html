@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="ru">
+<!DOCTYPE html><html lang="ru">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -417,10 +416,24 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:5
         <div class="sb-body">
           <div class="sb-feat"><div class="sb-fi">📋</div><div style="flex:1"><div class="sb-ft">1. CSV (скважины)</div><div class="sb-fd">Формат: HoleID, From, To, Au_gpt</div><input type="file" id="csvIn" accept=".csv,.txt" class="file-in"><div id="csvStatus" class="status-line" style="color:var(--text-dim)">Демо-данные загружены автоматически</div></div></div>
           <div class="sb-feat"><div class="sb-fi">🔷</div><div style="flex:1"><div class="sb-ft">2. OBJ (каркас рудного тела)</div><div class="sb-fd">Wavefront OBJ — вершины и грани</div><input type="file" id="objIn" accept=".obj,.txt" class="file-in"><div id="objStatus" class="status-line" style="color:var(--text-dim)"></div></div></div>
-          <div class="sb-feat"><div class="sb-fi">⚙️</div><div style="flex:1"><div class="sb-ft">3. Параметры блочной модели</div><div class="params-grid"><div><div class="param-label">Размер блока (м)</div><input type="number" id="blockSize" class="param-input" value="5" min="1" max="20"></div><div><div class="param-label">Метод интерполяции</div><select id="methodSel" class="param-input"><option value="idw">IDW (расстояние)</option><option value="kriging">Кригинг (упрощ.)</option><option value="nn">Nearest Neighbour</option></select></div><div><div class="param-label">Cutoff (г/т или %)</div><input type="number" id="cutoff" class="param-input" value="1.0" step="0.5"></div><div><div class="param-label">Стандарт</div><select id="stdSel" class="param-input"><option value="JORC">JORC</option><option value="ГКЗ">ГКЗ</option><option value="NI 43-101">NI 43-101</option></select></div></div></div></div>
+          <div class="sb-feat"><div class="sb-fi">⚙️</div><div style="flex:1"><div class="sb-ft">3. Параметры блочной модели</div><div class="params-grid"><div><div class="param-label">Размер блока (м)</div><input type="number" id="blockSize" class="param-input" value="5" min="1" max="20"></div><div><div class="param-label">Метод интерполяции</div><select id="methodSel" class="param-input"><option value="idw">IDW (расстояние)</option><option value="kriging">Кригинг (упрощ.)</option><option value="nn">Nearest Neighbour</option></select></div><div><div class="param-label">Cutoff (г/т или %)</div><input type="number" id="cutoff" class="param-input" value="2.0" step="0.5"></div><div><div class="param-label">Стандарт</div><select id="stdSel" class="param-input"><option value="JORC">JORC</option><option value="ГКЗ">ГКЗ</option><option value="NI 43-101">NI 43-101</option></select></div></div></div></div>
           <div class="sb-feat"><div class="sb-fi">📈</div><div style="flex:1"><div class="sb-ft">Экспериментальная вариограмма</div><div class="sb-fd">Анализ пространственной корреляции по трём направлениям.</div><button id="calcVariogramBtn" class="vari-btn">📊 Построить вариограмму</button><div id="variogramCanvas"><canvas id="variogramPlot" width="500" height="260" style="width:100%;background:#0a121c;"></canvas><div id="variogramStats"></div></div></div></div>
           <button class="run-btn" id="runBtn" disabled><span id="runBtnText">▶ Загрузите CSV для запуска</span></button>
           <div class="sb-feat"><div class="sb-fi">📊</div><div style="flex:1"><div class="sb-ft">Статистика и оценка запасов</div><div class="stats-out" id="statsOut">Загрузите CSV или выберите шаблон…</div></div></div>
+                    <!-- КНОПКИ УПРАВЛЕНИЯ ВИДИМОСТЬЮ -->
+          <div class="sb-feat">
+            <div class="sb-fi">👁️</div>
+            <div style="flex:1">
+              <div class="sb-ft">Визуализация</div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;">
+                <button id="toggleGangue" class="btn-s" style="padding: 6px 12px; background: var(--dark-4);">🗻 Пустая порода</button>
+                <button id="toggleOreShell" class="btn-s" style="padding: 6px 12px; background: var(--dark-4);">🔮 Оболочка руды</button>
+                <button id="toggleHoles" class="btn-s" style="padding: 6px 12px; background: var(--dark-4);">🕳️ Скважины</button>
+                <button id="resetCamera" class="btn-s" style="padding: 6px 12px; background: var(--dark-4);">🎥 Сброс камеры</button>
+              </div>
+              <div class="sb-fd" style="margin-top: 6px;">Включите/выключите отображение элементов</div>
+            </div>
+          </div>
           <div class="sb-feat"><div class="sb-fi">📜</div><div style="flex:1"><div class="sb-ft">Шаблон скрипта Datamine</div><div class="script-out" id="scriptOut">Загрузите данные…</div><button class="copy-btn" id="copyBtn">📋 Копировать скрипт</button><button class="export-btn" id="exportBtn">📎 Экспорт отчёта (CSV + текст)</button></div></div>
           <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="save-btn" id="resetDemoBtn" style="background:var(--dark-4);color:var(--gold);border:1px solid var(--border);flex:1">⟳ Сброс к золоту</button><button class="save-btn" id="saveProjectBtn" style="flex:2">💾 Сохранить проект</button></div>
         </div>
@@ -429,6 +442,24 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:5
         <div class="canvas-wrap"><canvas id="c3d"></canvas><div class="canvas-hint">🖱 Вращение · ПКМ панорама · Scroll масштаб</div></div>
         <div class="legend"><div class="leg-item"><div class="leg-dot" style="background:#3a6ea5"></div>Скважины</div><div class="leg-item"><div class="leg-dot" style="background:#ffaa33"></div>Высокое содержание</div><div class="leg-item"><div class="leg-dot" style="background:#7aabdb;opacity:.8"></div>Блочная модель</div><div class="leg-item"><div class="leg-dot" style="background:#c9a84c;opacity:.6"></div>Каркас / пласты</div></div>
       </div>
+                <!-- ССЫЛКА НА DATAMINE VIEWER -->
+          <div class="sb-feat">
+            <div class="sb-fi">📥</div>
+            <div style="flex:1">
+              <div class="sb-ft">Экспорт для Datamine Viewer</div>
+              <div class="sb-fd" style="margin-bottom: 8px;">
+                Скачайте блочную модель и каркас, чтобы открыть их в бесплатном просмотрщике Datamine Studio Viewer.
+              </div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button id="exportBlockmodelBtn" class="btn-s" style="padding: 6px 12px; background: var(--dark-4);">📦 Скачать .blockmodel</button>
+                <button id="exportWireframeBtn" class="btn-s" style="padding: 6px 12px; background: var(--dark-4);">🔷 Скачать каркас (.wrl)</button>
+                <a href="https://www.dataminesoftware.com/products/studio-viewer" target="_blank" class="btn-s" style="padding: 6px 12px; background: var(--dark-4); text-decoration: none;">🔗 Datamine Viewer (бесплатно)</a>
+              </div>
+              <div class="sb-fd" style="margin-top: 6px; font-size: 10px;">
+                📌 Studio Viewer позволяет открывать блочные модели и каркасы без лицензии Datamine.
+              </div>
+            </div>
+          </div>
     </div>
   </div>
 </section>
