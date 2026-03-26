@@ -44,11 +44,11 @@ export function visualizeHoles(holes) {
 function gradeToColor(grade, maxGrade) {
   const t = Math.min(grade / Math.max(maxGrade, 0.1), 1);
   const stops = [
-    { t: 0.0, r: 0x00, g: 0x40, b: 0xff },
-    { t: 0.25, r: 0x00, g: 0xaa, b: 0xff },
-    { t: 0.5, r: 0xff, g: 0xdd, b: 0x00 },
-    { t: 0.75, r: 0xff, g: 0x88, b: 0x00 },
-    { t: 1.0, r: 0xff, g: 0x22, b: 0x00 }
+    { t: 0.0, r: 0x30, g: 0x80, b: 0xff },
+    { t: 0.25, r: 0x00, g: 0xcc, b: 0xff },
+    { t: 0.5, r: 0xff, g: 0xee, b: 0x44 },
+    { t: 0.75, r: 0xff, g: 0xaa, b: 0x00 },
+    { t: 1.0, r: 0xff, g: 0x44, b: 0x00 }
   ];
   let lo = stops[0], hi = stops[stops.length - 1];
   for (let i = 0; i < stops.length - 1; i++) {
@@ -92,7 +92,6 @@ export function visualizeBlocks(blocks) {
   
   if (typeof renderer !== 'undefined') renderer.sortObjects = true;
   
-  // Размер блока уменьшаем на 0.8, чтобы был зазор между блоками
   const blockSize = 3.8;
   const geo = new THREE.BoxGeometry(blockSize, blockSize, blockSize);
   const edgeGeo = new THREE.EdgesGeometry(new THREE.BoxGeometry(blockSize, blockSize, blockSize));
@@ -105,34 +104,31 @@ export function visualizeBlocks(blocks) {
     
     if (inside && b.grade > 0.1) {
       const color = gradeToColor(b.grade, maxGrade);
-      // Прозрачность рудных блоков: 0.45 (видно сквозь них)
-      const opacity = 0.45;
+      const opacity = 0.15;
       
       const mat = new THREE.MeshStandardMaterial({ 
         color, 
         transparent: true, 
         opacity: opacity,
         emissive: b.grade > maxGrade * 0.7 ? 0x331100 : 0,
-        emissiveIntensity: 0.3
+        emissiveIntensity: 0.2
       });
       const box = new THREE.Mesh(geo, mat);
       box.position.set(b.x, b.y, b.z);
       box.renderOrder = 2;
       blocksGrp.add(box);
       
-      // Тонкие рёбра для контура
       const wireColor = b.grade > maxGrade * 0.7 ? 0xff8866 : 0x88aaff;
-      const wire = new THREE.LineSegments(edgeGeo, new THREE.LineBasicMaterial({ color: wireColor, transparent: true, opacity: 0.35 }));
+      const wire = new THREE.LineSegments(edgeGeo, new THREE.LineBasicMaterial({ color: wireColor, transparent: true, opacity: 0.2 }));
       wire.position.copy(box.position);
       wire.renderOrder = 3;
       blocksGrp.add(wire);
       
       oreCount++;
     }
-    // Порода вообще не отображается
   });
   
-  console.log(`[3D] Визуализировано блоков руды: ${oreCount} из ${blocks.length}`);
+  console.log(`[3D] Визуализировано блоков руды: ${oreCount} из ${blocks.length} (opacity: 0.15)`);
 }
 
 export function visualizeOreFromVertices(vertices, faces, holes = null) {
