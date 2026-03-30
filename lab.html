@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Лаборатория данных — GeoCore Academy</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --gold:#C9A84C; --gold-light:#E8C97A; --gold-dim:#7A6230;
+  --dark:#0A0A0B; --dark-2:#111114; --dark-3:#18181D; --dark-4:#1F1F26;
+  --surface:#252530; --text:#E8E6DE; --text-muted:#9A9890; --text-dim:#5C5B56;
+  --border:rgba(201,168,76,0.18); --border-dim:rgba(255,255,255,0.07);
+}
+body.light{
+  --dark:#F5F3EE; --dark-2:#EDE9E0; --dark-3:#E4DED2; --dark-4:#D9D2C5;
+  --surface:#FFFFFF; --text:#1A1916; --text-muted:#5A5650; --text-dim:#9A9080;
+  --border:rgba(139,105,27,0.2); --border-dim:rgba(0,0,0,0.06);
+}
+html{scroll-behavior:smooth;}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--dark);color:var(--text);transition:background .3s,color .3s;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.35;}
+body.light::before{display:none;}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:68px;background:rgba(10,10,11,.88);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+body.light nav{background:rgba(245,243,238,.92);}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.logo-hex{width:32px;height:32px;background:var(--gold);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);}
+.logo-text{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--text);}
+.logo-text span{color:var(--gold);}
+.nav-links{display:flex;gap:36px;list-style:none;}
+.nav-links a{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);text-decoration:none;transition:color .2s;}
+.nav-links a:hover{color:var(--gold);}
+.nav-right{display:flex;align-items:center;gap:12px;}
+.theme-btn{background:none;border:1px solid var(--border);color:var(--text-muted);width:34px;height:34px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.theme-btn:hover{border-color:var(--gold);color:var(--gold);}
+.nav-cta{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dark);background:var(--gold);padding:9px 22px;text-decoration:none;clip-path:polygon(7px 0%,100% 0%,calc(100% - 7px) 100%,0% 100%);}
+.nav-cta:hover{background:var(--gold-light);}
+.nav-back{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);text-decoration:none;display:flex;align-items:center;gap:8px;}
+.nav-back:hover{color:var(--gold);}
+
+.lab-page{max-width:1400px;margin:0 auto;padding:100px 48px 80px;}
+.page-header{margin-bottom:48px;}
+.page-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:10px;margin-bottom:20px;}
+.page-eyebrow::before{content:'';width:32px;height:1px;background:var(--gold);}
+h1.page-title{font-family:'Playfair Display',serif;font-size:clamp(40px,4vw,56px);font-weight:900;line-height:1.1;margin-bottom:20px;}
+.page-desc{font-size:16px;font-weight:300;line-height:1.75;color:var(--text-muted);max-width:680px;margin-bottom:32px;}
+
+.access-card{background:linear-gradient(135deg, var(--dark-3) 0%, var(--dark-4) 100%);border:1px solid var(--border);border-radius:24px;padding:48px;text-align:center;max-width:500px;margin:80px auto;}
+.access-icon{font-size:64px;margin-bottom:20px;}
+.access-title{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;margin-bottom:12px;}
+.access-desc{font-size:14px;color:var(--text-muted);margin-bottom:28px;}
+.access-input{width:100%;background:var(--dark-4);border:1px solid var(--border-dim);color:var(--text);padding:14px 16px;font-family:'IBM Plex Mono',monospace;font-size:14px;margin-bottom:16px;border-radius:8px;}
+.access-input:focus{outline:none;border-color:var(--gold);}
+.access-btn{background:var(--gold);border:none;color:var(--dark);padding:12px 32px;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.1em;cursor:pointer;border-radius:40px;transition:all .2s;}
+.access-btn:hover{background:var(--gold-light);transform:translateY(-2px);}
+.access-error{color:#E87070;font-size:12px;margin-top:12px;}
+
+.tool-container{display:none;}
+.tool-container.visible{display:block;}
+
+.lab-intro{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start;margin-bottom:60px;}
+.lab-desc{font-size:15px;font-weight:300;line-height:1.8;color:var(--text-muted);}
+.lab-steps{display:flex;flex-direction:column;gap:0;}
+.lab-step{display:flex;gap:16px;padding:16px 0;border-bottom:1px solid var(--border-dim);}
+.lab-step-num{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--gold);min-width:36px;font-weight:700;}
+.lab-step-text{font-size:13px;font-weight:300;line-height:1.5;color:var(--text-muted);}
+.lab-step-text strong{color:var(--text);}
+
+.prep-tool{background:var(--dark-3);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+.prep-header{padding:20px 28px;border-bottom:1px solid var(--border-dim);background:var(--dark-4);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.prep-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;}
+.prep-badge{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold-dim);padding:4px 12px;border-radius:20px;}
+.prep-body{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+.prep-left{padding:32px;border-right:1px solid var(--border-dim);}
+.prep-right{padding:32px;background:var(--dark-4);}
+.prep-upload{border:2px dashed var(--border);border-radius:16px;padding:32px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:24px;}
+.prep-upload:hover{border-color:var(--gold);background:rgba(201,168,76,.04);}
+.prep-upload-icon{font-size:48px;margin-bottom:12px;}
+.prep-upload-text{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.1em;color:var(--text-dim);}
+.prep-upload-sub{font-size:11px;font-weight:300;color:var(--text-dim);margin-top:6px;}
+.file-status{font-family:'IBM Plex Mono',monospace;font-size:10px;color:#7ee787;margin-bottom:20px;padding:8px 12px;background:var(--dark-3);border-radius:8px;}
+.prep-ops{display:flex;flex-direction:column;gap:10px;margin-bottom:24px;}
+.prep-op{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--dark-4);border:1px solid var(--border-dim);border-radius:12px;cursor:pointer;}
+.prep-op:hover{border-color:var(--border);background:var(--dark-3);}
+.prep-op input[type=checkbox]{accent-color:var(--gold);width:16px;height:16px;cursor:pointer;}
+.prep-op-label{font-size:13px;font-weight:300;color:var(--text-muted);flex:1;}
+.prep-op-label strong{color:var(--text);}
+.prep-op-tag{font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.1em;color:var(--text-dim);border:1px solid var(--border-dim);padding:2px 8px;border-radius:20px;}
+.params-row{display:flex;gap:16px;margin-bottom:24px;}
+.params-row > div{flex:1;}
+.param-label{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--text-dim);margin-bottom:6px;}
+.param-input{width:100%;background:var(--dark-4);border:1px solid var(--border-dim);color:var(--text);padding:10px 12px;font-family:'IBM Plex Mono',monospace;font-size:13px;border-radius:8px;outline:none;}
+.param-input:focus{border-color:var(--gold);}
+.prep-run{width:100%;background:var(--dark-4);border:2px solid var(--border-dim);border-radius:40px;color:var(--text-dim);padding:14px;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;cursor:not-allowed;transition:all .3s;margin-bottom:16px;}
+.prep-run.ready{background:var(--gold);border-color:var(--gold);color:var(--dark);cursor:pointer;}
+.prep-run.ready:hover{background:var(--gold-light);transform:translateY(-2px);}
+.prep-result{display:none;flex-direction:column;gap:12px;}
+.prep-result.visible{display:flex;}
+.prep-result-item{background:var(--dark-3);border:1px solid var(--border-dim);border-radius:12px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.pri-label{font-size:12px;font-weight:300;color:var(--text-muted);}
+.pri-status{font-family:'IBM Plex Mono',monospace;font-size:10px;color:#7ee787;}
+.pri-status.warn{color:var(--gold);}
+.pri-download{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.08em;color:var(--gold);background:transparent;border:1px solid var(--gold-dim);padding:6px 14px;border-radius:20px;cursor:pointer;}
+.pri-download:hover{background:var(--gold);color:var(--dark);}
+.stats-content{font-family:'IBM Plex Mono',monospace;font-size:10px;line-height:1.8;color:var(--text-muted);margin-top:8px;white-space:pre-wrap;}
+.prep-placeholder{display:flex;align-items:center;justify-content:center;min-height:300px;border:1px dashed var(--border-dim);border-radius:16px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-dim);text-align:center;flex-direction:column;gap:12px;}
+.info-note{margin-top:20px;padding:16px;background:rgba(201,168,76,.08);border:1px solid var(--border-dim);border-radius:12px;}
+.info-note-title{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--gold);margin-bottom:8px;}
+.info-note-text{font-size:12px;font-weight:300;line-height:1.65;color:var(--text-muted);}
+footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:40px 48px;margin-top:60px;display:flex;justify-content:space-between;align-items:center;}
+.f-copy{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.07em;color:var(--text-dim);}
+.f-back{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);text-decoration:none;}
+@media(max-width:1080px){
+  nav{padding:0 20px;}.nav-links{display:none;}
+  .lab-page{padding:80px 20px 60px;}
+  .lab-intro{grid-template-columns:1fr;gap:32px;}
+  .prep-body{grid-template-columns:1fr;}
+  .prep-left{border-right:none;border-bottom:1px solid var(--border-dim);}
+  .params-row{flex-direction:column;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div style="display: flex; align-items: center; gap: 24px;">
+    <a href="index.html" class="nav-logo">
+      <div class="logo-hex"></div>
+      <span class="logo-text">Geo<span>Core</span></span>
+    </a>
+    <a href="index.html" class="nav-back">← На главную</a>
+  </div>
+  <ul class="nav-links">
+    <li><a href="index.html#courses">Курсы</a></li>
+    <li><a href="index.html#sandbox">Песочница</a></li>
+    <li><a href="lab.html">Лаборатория</a></li>
+    <li><a href="index.html#blog">Блог</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="theme-btn" id="themeBtn">🌙</button>
+    <a href="index.html#pricing" class="nav-cta">Начать обучение</a>
+  </div>
+</nav>
+
+<main class="lab-page">
+  <div class="page-header">
+    <div class="page-eyebrow">🔐 Лаборатория</div>
+    <h1 class="page-title">Подготовка данных</h1>
+    <p class="page-desc">Валидация, композитирование, декластеризация, построение каркасов OBJ и генерация .mac скриптов для Datamine Studio RM.</p>
+  </div>
+
+  <div id="accessBlock" class="access-card">
+    <div class="access-icon">🔐</div>
+    <div class="access-title">Доступ к лаборатории</div>
+    <div class="access-desc">Введите ключ доступа для работы с инструментами</div>
+    <input type="password" id="accessKey" class="access-input" placeholder="Ключ доступа">
+    <button class="access-btn" id="unlockBtn">▶ Получить доступ</button>
+    <div id="accessError" class="access-error"></div>
+    <div style="margin-top: 20px; font-size: 11px; color: var(--text-dim);">* Для получения ключа обратитесь к администратору</div>
+  </div>
+
+  <div id="toolContainer" class="tool-container">
+    <div class="lab-intro">
+      <div>
+        <div style="margin-bottom: 20px;">
+          <div class="sec-lbl" style="margin-bottom: 12px;">Лаборатория · Данные и инструменты</div>
+          <h2 style="font-family:'Playfair Display',serif;font-size:32px;font-weight:700;margin-bottom:16px;">Подготовка данных<br>для Datamine Studio RM</h2>
+        </div>
+        <p class="lab-desc">Загрузите свои данные опробования — система автоматически проверит формат, выполнит композитирование, декластеризацию и построит каркас рудного тела. На выходе — файлы готовые для импорта в Datamine и готовый макрос <code style="font-family:'IBM Plex Mono',monospace;color:var(--gold)">.mac</code>.</p>
+        <p class="lab-desc" style="margin-top: 16px;">Или скачайте демонстрационные данные из <a href="index.html#sandbox" style="color:var(--gold);">архива в песочнице</a> — 7 типов месторождений с реалистичными параметрами.</p>
+      </div>
+      <div class="lab-steps">
+        <div class="lab-step"><div class="lab-step-num">01</div><div class="lab-step-text"><strong>Загрузить CSV</strong> — данные опробования скважин</div></div>
+        <div class="lab-step"><div class="lab-step-num">02</div><div class="lab-step-text"><strong>Валидация</strong> — проверка формата, пропусков, выбросов</div></div>
+        <div class="lab-step"><div class="lab-step-num">03</div><div class="lab-step-text"><strong>Обработка</strong> — композитирование, декластеризация</div></div>
+        <div class="lab-step"><div class="lab-step-num">04</div><div class="lab-step-text"><strong>Каркас OBJ</strong> — автопостроение по контурам скважин</div></div>
+        <div class="lab-step"><div class="lab-step-num">05</div><div class="lab-step-text"><strong>Скрипт .mac</strong> — готовый макрос для Datamine Studio RM</div></div>
+      </div>
+    </div>
+
+    <div class="prep-tool">
+      <div class="prep-header">
+        <div class="prep-title">⚗️ Подготовка данных к импорту в Datamine Studio RM</div>
+        <div class="prep-badge">Python · Open Source</div>
+      </div>
+      <div class="prep-body">
+        <div class="prep-left">
+          <div class="prep-upload" id="prepUploadZone">
+            <div class="prep-upload-icon">📂</div>
+            <div class="prep-upload-text">Загрузить CSV с данными опробования</div>
+            <div class="prep-upload-sub">HoleID, From, To, Au_gpt (или Cu_pct, Coal_m, Fe_pct)</div>
+            <input type="file" id="prepCsvIn" accept=".csv,.txt" style="display:none">
+          </div>
+          <div id="prepFileStatus" class="file-status" style="display:none;"></div>
+          <div class="prep-ops">
+            <label class="prep-op"><input type="checkbox" id="opValidate" checked><span class="prep-op-label"><strong>Валидация</strong> — формат, пропуски, выбросы (IQR)</span><span class="prep-op-tag">шаг 1</span></label>
+            <label class="prep-op"><input type="checkbox" id="opComposite" checked><span class="prep-op-label"><strong>Композитирование</strong> — приведение к единой длине интервала</span><span class="prep-op-tag">шаг 2</span></label>
+            <label class="prep-op"><input type="checkbox" id="opDecluster"><span class="prep-op-label"><strong>Декластеризация</strong> — сотовый метод (ячейка = блок)</span><span class="prep-op-tag">шаг 3</span></label>
+            <label class="prep-op"><input type="checkbox" id="opWireframe" checked><span class="prep-op-label"><strong>Каркас OBJ</strong> — convex hull по скважинам</span><span class="prep-op-tag">шаг 4</span></label>
+            <label class="prep-op"><input type="checkbox" id="opScript" checked><span class="prep-op-label"><strong>Скрипт .mac</strong> — макрос для Datamine Studio RM</span><span class="prep-op-tag">шаг 5</span></label>
+          </div>
+          <div class="params-row">
+            <div><div class="param-label">Длина композита (м)</div><input type="number" id="prepCompLen" class="param-input" value="2" min="0.5" max="10" step="0.5"></div>
+            <div><div class="param-label">Cutoff (г/т или %)</div><input type="number" id="prepCutoff" class="param-input" value="1.0" min="0" step="0.5"></div>
+          </div>
+          <button class="prep-run" id="prepRunBtn" disabled><span id="prepRunText">▶ Загрузите CSV для запуска</span></button>
+          <div class="info-note"><div class="info-note-title">ℹ Примечание</div><div class="info-note-text">Предварительная обработка на open-source алгоритмах (Python/NumPy). Для официального подсчёта запасов по JORC/ГКЗ — используйте результаты в Datamine Studio RM с верификацией Competent Person.</div></div>
+        </div>
+        <div class="prep-right">
+          <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;margin-bottom:20px;">Результаты обработки</div>
+          <div id="prepPlaceholder" class="prep-placeholder"><span>📂</span>Загрузите CSV<br>или выберите датасет из архива</div>
+          <div class="prep-result" id="prepResult">
+            <div class="prep-result-item"><div class="pri-label">📊 Валидация CSV</div><span class="pri-status" id="resValidate">—</span></div>
+            <div class="prep-result-item"><div class="pri-label">🔗 Композиты</div><div><span class="pri-status" id="resComposite">—</span><button class="pri-download" id="dlComposite" style="display:none">↓ CSV</button></div></div>
+            <div class="prep-result-item"><div class="pri-label">🔷 Каркас рудного тела</div><div><span class="pri-status" id="resWireframe">—</span><button class="pri-download" id="dlWireframe" style="display:none">↓ OBJ</button></div></div>
+            <div class="prep-result-item"><div class="pri-label">📜 Скрипт Datamine</div><div><span class="pri-status" id="resScript">—</span><button class="pri-download" id="dlScript" style="display:none">↓ .mac</button></div></div>
+            <div class="prep-result-item" style="flex-direction:column;align-items:flex-start;"><div class="pri-label">📈 Статистика</div><div id="resStats" class="stats-content"></div></div>
+          </div>
+          <div id="wireframeViewer" style="margin-top: 24px; display: none;">
+            <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;margin-bottom:12px;">🎨 3D-просмотр каркаса</div>
+            <div id="viewerContainer" style="background: #0a121c; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); position: relative; height: 280px;">
+              <canvas id="wireframeCanvas" style="width: 100%; height: 100%; display: block;"></canvas>
+              <div id="viewerHint" style="position: absolute; bottom: 8px; left: 8px; font-size: 9px; color: rgba(255,255,255,0.3); font-family: monospace; background: rgba(0,0,0,0.5); padding: 2px 6px; border-radius: 4px;">🖱 Вращение: ПКМ · Масштаб: колесо</div>
+              <div id="viewerStatus" style="position: absolute; top: 8px; right: 8px; font-size: 9px; color: var(--gold); background: rgba(0,0,0,0.6); padding: 2px 8px; border-radius: 4px;">⏳ Ожидание данных</div>
+            </div>
+          </div>
+          <button id="testViewerBtn" style="margin-top: 12px; padding: 6px 12px; font-size: 10px; background: var(--dark-4); border: 1px solid var(--border); color: var(--text-muted); border-radius: 6px; cursor: pointer; display: none;">🔍 Показать каркас (тест)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <span class="f-copy">© 2025 GeoCore Academy</span>
+  <a href="index.html" class="f-back">← На главную</a>
+</footer>
+
+<script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+    }
+  }
+</script>
+
+<script type="module">
+  import * as THREE from 'three';
+  import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+  window.THREE = THREE;
+  window.OrbitControls = OrbitControls;
+  console.log('Three.js loaded:', typeof THREE);
+
+  // ДОСТУП
+  const ACCESS_CODE = "GEOCORE2025";
+  const accessBlock = document.getElementById('accessBlock');
+  const toolContainer = document.getElementById('toolContainer');
+  const accessInput = document.getElementById('accessKey');
+  const unlockBtn = document.getElementById('unlockBtn');
+  const accessError = document.getElementById('accessError');
+
+  function checkAccess() {
+    const stored = localStorage.getItem('lab_access');
+    if (stored === 'true') {
+      if (accessBlock) accessBlock.style.display = 'none';
+      if (toolContainer) toolContainer.classList.add('visible');
+    }
+  }
+
+  if (unlockBtn) {
+    unlockBtn.addEventListener('click', () => {
+      const key = accessInput.value.trim();
+      if (key === ACCESS_CODE) {
+        localStorage.setItem('lab_access', 'true');
+        accessBlock.style.display = 'none';
+        toolContainer.classList.add('visible');
+        accessError.textContent = '';
+      } else {
+        accessError.textContent = '❌ Неверный ключ доступа';
+      }
+    });
+  }
+  checkAccess();
+
+  // 3D ВИЗУАЛИЗАЦИЯ
+  let viewerInitialized = false;
+  let viewerScene, viewerCamera, viewerRenderer, viewerControls;
+  let currentWireframeGroup = null;
+
+  function initViewer3D() {
+    const container = document.getElementById('viewerContainer');
+    const canvas = document.getElementById('wireframeCanvas');
+    if (!container || !canvas) {
+      console.log('Container or canvas not found');
+      return;
+    }
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+    
+    viewerScene = new THREE.Scene();
+    viewerScene.background = new THREE.Color(0x0a121c);
+    viewerCamera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+    viewerCamera.position.set(100, 80, 120);
+    viewerRenderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    viewerRenderer.setSize(width, height);
+    viewerControls = new OrbitControls(viewerCamera, canvas);
+    viewerControls.enableDamping = true;
+    
+    const ambientLight = new THREE.AmbientLight(0x404060);
+    viewerScene.add(ambientLight);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+    dirLight.position.set(1, 2, 1);
+    viewerScene.add(dirLight);
+    const gridHelper = new THREE.GridHelper(300, 20, 0x88aaff, 0x335588);
+    gridHelper.position.y = -30;
+    viewerScene.add(gridHelper);
+    
+    viewerInitialized = true;
+    console.log('3D Viewer initialized');
+    
+    function animate() {
+      if (!viewerInitialized) return;
+      requestAnimationFrame(animate);
+      if (viewerControls) viewerControls.update();
+      if (viewerRenderer && viewerScene && viewerCamera) {
+        viewerRenderer.render(viewerScene, viewerCamera);
+      }
+    }
+    animate();
+  }
+
+  window.displayWireframe = function(objContent) {
+    console.log('displayWireframe called');
+    if (!objContent || objContent.includes('Ошибка') || !objContent.includes('v ')) {
+      const statusDiv = document.getElementById('viewerStatus');
+      if (statusDiv) statusDiv.innerHTML = '⚠ Нет данных';
+      return;
+    }
+    if (!viewerInitialized) initViewer3D();
+    document.getElementById('wireframeViewer').style.display = 'block';
+    
+    const lines = objContent.split('\n');
+    const vertices = [], faces = [];
+    lines.forEach(line => {
+      if (line.startsWith('v ')) {
+        const parts = line.trim().split(/\s+/);
+        if (parts.length >= 4) vertices.push(new THREE.Vector3(parseFloat(parts[1]), parseFloat(parts[2]), parseFloat(parts[3])));
+      } else if (line.startsWith('f ')) {
+        const parts = line.trim().split(/\s+/);
+        const indices = [];
+        for (let i = 1; i < parts.length; i++) {
+          const idx = parseInt(parts[i].split('/')[0]) - 1;
+          if (!isNaN(idx)) indices.push(idx);
+        }
+        if (indices.length >= 3) faces.push(indices);
+      }
+    });
+    if (vertices.length === 0 || faces.length === 0) return;
+    
+    if (currentWireframeGroup && viewerScene) viewerScene.remove(currentWireframeGroup);
+    const group = new THREE.Group();
+    const positions = [];
+    faces.forEach(face => {
+      if (face.length === 3) positions.push(vertices[face[0]].x, vertices[face[0]].y, vertices[face[0]].z, vertices[face[1]].x, vertices[face[1]].y, vertices[face[1]].z, vertices[face[2]].x, vertices[face[2]].y, vertices[face[2]].z);
+    });
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), 3));
+    geometry.computeVertexNormals();
+    const material = new THREE.MeshPhongMaterial({ color: 0xc9a84c, side: THREE.DoubleSide, transparent: true, opacity: 0.35 });
+    const mesh = new THREE.Mesh(geometry, material);
+    group.add(mesh);
+    const wireframeMat = new THREE.MeshBasicMaterial({ color: 0xffaa66, wireframe: true, transparent: true, opacity: 0.7 });
+    const wireframeMesh = new THREE.Mesh(geometry, wireframeMat);
+    group.add(wireframeMesh);
+    const box = new THREE.Box3().setFromObject(group);
+    const center = box.getCenter(new THREE.Vector3());
+    const size = box.getSize(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+    const scale = 100 / maxDim;
+    group.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
+    group.scale.set(scale, scale, scale);
+    viewerScene.add(group);
+    currentWireframeGroup = group;
+    viewerCamera.position.set(maxDim * 1.2, maxDim * 0.8, maxDim * 1.5);
+    viewerCamera.lookAt(0, 0, 0);
+    if (viewerControls) viewerControls.target.set(0, 0, 0);
+    document.getElementById('viewerStatus').innerHTML = `✓ Каркас: ${vertices.length} вершин, ${faces.length} граней`;
+  };
+
+  setTimeout(() => { if (typeof THREE !== 'undefined') initViewer3D(); else console.log('Three.js not loaded'); }, 500);
+</script>
+
+
+<script>
+// ============================================
+// 3D-ПРОСМОТР КАРКАСА (ПОСТОЯННЫЙ КОД)
+// ============================================
+
+// Функция для отображения каркаса
+window.showWireframe3D = function(objContent) {
+  if (!objContent) return false;
+  
+  const lines = objContent.split("
+");
+  const vertices = [];
+  lines.forEach(line => {
+    if (line.startsWith("v ")) {
+      const parts = line.trim().split(/\s+/);
+      if (parts.length >= 4) {
+        vertices.push(new THREE.Vector3(
+          parseFloat(parts[1]),
+          parseFloat(parts[2]),
+          parseFloat(parts[3])
+        ));
+      }
+    }
+  });
+  
+  if (vertices.length < 3) {
+    console.log("Недостаточно вершин:", vertices.length);
+    return false;
+  }
+  
+  // Находим центр и размер
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity, minZ = Infinity, maxZ = -Infinity;
+  vertices.forEach(v => {
+    minX = Math.min(minX, v.x); maxX = Math.max(maxX, v.x);
+    minY = Math.min(minY, v.y); maxY = Math.max(maxY, v.y);
+    minZ = Math.min(minZ, v.z); maxZ = Math.max(maxZ, v.z);
+  });
+  const centerX = (minX + maxX) / 2;
+  const centerY = (minY + maxY) / 2;
+  const centerZ = (minZ + maxZ) / 2;
+  const maxSize = Math.max(maxX - minX, maxY - minY, maxZ - minZ);
+  
+  // Создаём грани
+  const faces = [];
+  for (let i = 0; i < vertices.length - 2; i++) faces.push([i, i+1, i+2]);
+  if (vertices.length >= 3) {
+    faces.push([vertices.length-2, vertices.length-1, 0]);
+    faces.push([vertices.length-1, 0, 1]);
+  }
+  
+  // Строим геометрию
+  const positions = [];
+  faces.forEach(face => {
+    positions.push(vertices[face[0]].x, vertices[face[0]].y, vertices[face[0]].z);
+    positions.push(vertices[face[1]].x, vertices[face[1]].y, vertices[face[1]].z);
+    positions.push(vertices[face[2]].x, vertices[face[2]].y, vertices[face[2]].z);
+  });
+  
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(positions), 3));
+  geometry.computeVertexNormals();
+  
+  // Удаляем старую модель
+  if (window.currentGroup && window.viewerScene) {
+    window.viewerScene.remove(window.currentGroup);
+  }
+  
+  const group = new THREE.Group();
+  const material = new THREE.MeshPhongMaterial({ color: 0xc9a84c, side: THREE.DoubleSide, transparent: true, opacity: 0.6 });
+  const mesh = new THREE.Mesh(geometry, material);
+  group.add(mesh);
+  
+  const wireframeMat = new THREE.MeshBasicMaterial({ color: 0xffaa66, wireframe: true });
+  const wireframeMesh = new THREE.Mesh(geometry, wireframeMat);
+  group.add(wireframeMesh);
+  
+  const scale = 80 / maxSize;
+  group.position.set(-centerX * scale, -centerY * scale, -centerZ * scale);
+  group.scale.set(scale, scale, scale);
+  
+  window.viewerScene.add(group);
+  window.currentGroup = group;
+  
+  // Настраиваем камеру
+  window.viewerCamera.position.set(maxSize * 1.2, maxSize * 0.8, maxSize * 1.5);
+  window.viewerCamera.lookAt(0, 0, 0);
+  if (window.viewerControls) window.viewerControls.target.set(0, 0, 0);
+  
+  document.getElementById("viewerStatus").innerHTML = "✓ Каркас: " + vertices.length + " вершин, " + faces.length + " граней";
+  document.getElementById("viewerStatus").style.color = "#7ee787";
+  document.getElementById("wireframeViewer").style.display = "block";
+  
+  return true;
+};
+
+// Инициализация 3D сцены (если ещё не инициализирована)
+if (!window.viewerScene) {
+  const container = document.getElementById("viewerContainer");
+  const canvas = document.getElementById("wireframeCanvas");
+  if (container && canvas) {
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+    
+    window.viewerScene = new THREE.Scene();
+    window.viewerScene.background = new THREE.Color(0x0a121c);
+    
+    window.viewerCamera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+    window.viewerCamera.position.set(150, 100, 150);
+    
+    window.viewerRenderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    window.viewerRenderer.setSize(width, height);
+    
+    window.viewerControls = new THREE.OrbitControls(window.viewerCamera, canvas);
+    window.viewerControls.enableDamping = true;
+    window.viewerControls.dampingFactor = 0.05;
+    
+    // Освещение
+    const ambient = new THREE.AmbientLight(0x404060);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+    dirLight.position.set(1, 2, 1);
+    const backLight = new THREE.DirectionalLight(0x88aaff, 0.5);
+    backLight.position.set(-1, 1, -1);
+    window.viewerScene.add(ambient, dirLight, backLight);
+    
+    const grid = new THREE.GridHelper(300, 20, 0x88aaff, 0x335588);
+    grid.position.y = -50;
+    window.viewerScene.add(grid);
+    
+    window.viewerInitialized = true;
+    
+    function animate() {
+      if (!window.viewerInitialized) return;
+      requestAnimationFrame(animate);
+      window.viewerControls.update();
+      window.viewerRenderer.render(window.viewerScene, window.viewerCamera);
+    }
+    animate();
+    
+    console.log("✅ 3D сцена инициализирована");
+  }
+}
+
+// Если есть результат после обработки, отображаем каркас
+if (window.lastApiResult?.wireframe?.content) {
+  setTimeout(function() { window.showWireframe3D(window.lastApiResult.wireframe.content); }, 100);
+}
+
+// Перехватываем результат обработки
+const originalRun = document.getElementById("prepRunBtn");
+if (originalRun) {
+  const oldClick = originalRun.onclick;
+  originalRun.onclick = async function() {
+    const fileInput = document.getElementById("prepCsvIn");
+    if (!fileInput || !fileInput.files.length) return;
+    
+    const file = fileInput.files[0];
+    const compLen = +document.getElementById("prepCompLen")?.value || 2;
+    const cutoff = +document.getElementById("prepCutoff")?.value || 1.0;
+    
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("composite_length", compLen.toString());
+    formData.append("cutoff", cutoff.toString());
+    formData.append("wireframe_method", "convex_hull");
+    
+    originalRun.className = "prep-run running";
+    originalRun.disabled = true;
+    originalRun.querySelector("#prepRunText").textContent = "⚙ Обработка...";
+    
+    try {
+      const response = await fetch("http://localhost:8000/api/process", { method: "POST", body: formData });
+      const result = await response.json();
+      
+      if (result.wireframe && result.wireframe.content) {
+        window.lastApiResult = result;
+        window.showWireframe3D(result.wireframe.content);
+        document.getElementById("resWireframe").textContent = "✓ Каркас построен";
+        document.getElementById("dlWireframe").style.display = "block";
+      }
+      if (result.validation) {
+        const stats = result.validation.stats;
+        document.getElementById("resValidate").textContent = "✓ " + stats.n_intervals + " интервалов, " + stats.n_holes + " скважин";
+        document.getElementById("resStats").textContent = "Скважин: " + stats.n_holes + "\nИнтервалов: " + stats.n_intervals + "\nСреднее: " + stats.mean.toFixed(3) + " " + result.validation.value_field;
+      }
+      if (result.composite) {
+        document.getElementById("resComposite").textContent = "✓ " + result.composite.n_intervals + " композитов";
+        document.getElementById("dlComposite").style.display = "block";
+      }
+      if (result.mac_script) {
+        document.getElementById("resScript").textContent = "✓ Макрос сгенерирован";
+        document.getElementById("dlScript").style.display = "block";
+      }
+    } catch(e) {
+      console.error("Ошибка:", e);
+    } finally {
+      originalRun.className = "prep-run ready";
+      originalRun.disabled = false;
+      originalRun.querySelector("#prepRunText").textContent = "✓ Готово · Запустить снова";
+    }
+  };
+}
+</script>
+</body>
+</html>
