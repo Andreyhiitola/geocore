@@ -402,9 +402,12 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:5
 <section class="courses-sec sec" id="courses">
   <div class="inner">
     <div class="ch rv">
-      <div><div class="sec-lbl">Программы обучения</div><h2 class="sec-t">Курсы для<br>специалистов отрасли</h2></div>
-      <a href="#" class="btn-s">Все курсы →</a>
-    </div>
+  <div>
+    <div class="sec-lbl">Программы обучения</div>
+    <h2 class="sec-t">Курсы для<br>специалистов отрасли</h2>
+  </div>
+  <a href="courses.html" class="btn-s">Все курсы →</a>
+</div>
     <div class="cg stg">
       <div class="cc feat"><div class="cc-num">01 / 06</div><span class="cc-icon">⛏️</span><div class="cc-tag">Datamine · Базовый → Продвинутый</div><h3 class="cc-t">Datamine Studio RM: полный курс</h3><p class="cc-d">От импорта скважин до подсчёта запасов. Блочное моделирование, геостатистика, отчёты.</p><div class="cc-meta"><div class="cc-m">🕐 <strong>48 уроков</strong></div><div class="cc-m">📁 <strong>Шаблоны</strong></div></div></div>
       <div class="cc"><div class="cc-num">02 / 06</div><span class="cc-icon">🌍</span><div class="cc-tag">Leapfrog · Средний</div><h3 class="cc-t">Leapfrog Geo: неявное моделирование</h3><p class="cc-d">Implicit modelling для рудных тел. Быстрое обновление при новых данных бурения.</p><div class="cc-meta"><div class="cc-m">🕐 <strong>32 урока</strong></div><div class="cc-m">🎯 <strong>Практика</strong></div></div></div>
@@ -564,30 +567,45 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:5
 <!-- ── BLOG ── -->
 <section class="blog-sec sec" id="blog">
   <div class="inner">
-    <div class="rv"><div class="sec-lbl">Блог · Методика</div><h2 class="sec-t">Статьи для специалистов</h2><p class="sec-d">Практические материалы по методике оценки, ПО и стандартам подсчёта запасов.</p></div>
-    <div class="blog-grid stg">
-      <article class="blog-card blog-card--feat" onclick="window.open('article_sections_vs_datamine.html','_blank')">
-        <div class="bc-label">Методика · Datamine</div>
-        <h3 class="bc-title">Классический метод разрезов VS блочное моделирование в Datamine</h3>
-        <p class="bc-desc">Одно и то же рудное тело — два метода. Показываем визуально, почему современные геологи переходят на блочное моделирование.</p>
-        <div class="bc-meta"><span class="bc-tag">Datamine</span><span class="bc-tag">Блочная модель</span><span class="bc-tag">JORC</span></div>
-        <div class="bc-footer"><span class="bc-read">Читать статью →</span><span class="bc-time">8 мин</span></div>
-      </article>
-      <article class="blog-card" onclick="window.open('Variogramma_article.html','_blank')">
-        <div class="bc-label">Геостатистика</div>
-        <h3 class="bc-title">Вариограмма: как правильно настроить перед кригингом</h3>
-        <p class="bc-desc">Шаг за шагом: направления, экспериментальная вариограмма, подбор модели. Типичные ошибки начинающих.</p>
-        <div class="bc-meta"><span class="bc-tag">Геостатистика</span><span class="bc-tag">Кригинг</span></div>
-        <div class="bc-footer"><span class="bc-read">Читать статью →</span><span class="bc-time">12 мин</span></div>
-      </article>
-      <article class="blog-card" onclick="window.open('JORC_vs_GKZ_articel.html','_blank')">
-        <div class="bc-label">Стандарты</div>
-        <h3 class="bc-title">JORC vs ГКЗ: в чём реальная разница для геолога</h3>
-        <p class="bc-desc">Категории запасов, требования к данным, Competent Person — сравниваем два стандарта на практических примерах.</p>
-        <div class="bc-meta"><span class="bc-tag">JORC</span><span class="bc-tag">ГКЗ</span></div>
-        <div class="bc-footer"><span class="bc-read">Читать статью →</span><span class="bc-time">10 мин</span></div>
-      </article>
-    </div>
+   <div class="rv">
+  <div class="sec-lbl">Блог · Методика</div>
+  <h2 class="sec-t">Статьи для специалистов</h2>
+  <p class="sec-d">Практические материалы по методике оценки, ПО и стандартам подсчёта запасов. Новые статьи от экспертов отрасли.</p>
+</div>
+   <div class="blog-grid stg">
+  <article class="blog-card blog-card--feat" onclick="window.open('articles/article_sections_vs_datamine.html','_blank')">
+    <div class="bc-label">Методика · Datamine</div>
+    <h3 class="bc-title">Классический метод разрезов VS блочное моделирование в Datamine</h3>
+    <p class="bc-desc">Одно и то же рудное тело — два метода. Показываем визуально, почему современные геологи переходят на блочное моделирование.</p>
+    <div class="bc-meta"><span class="bc-tag">Datamine</span><span class="bc-tag">Блочная модель</span><span class="bc-tag">JORC</span></div>
+    <div class="bc-footer"><span class="bc-read">Читать статью →</span><span class="bc-time">8 мин</span></div>
+  </article>
+  
+  <article class="blog-card" onclick="window.open('articles/Variogramma_article.html','_blank')">
+    <div class="bc-label">Геостатистика</div>
+    <h3 class="bc-title">Вариограмма: как правильно настроить перед кригингом</h3>
+    <p class="bc-desc">Шаг за шагом: направления, экспериментальная вариограмма, подбор модели. Типичные ошибки начинающих.</p>
+    <div class="bc-meta"><span class="bc-tag">Геостатистика</span><span class="bc-tag">Кригинг</span></div>
+    <div class="bc-footer"><span class="bc-read">Читать статью →</span><span class="bc-time">12 мин</span></div>
+  </article>
+  
+  <article class="blog-card" onclick="window.open('articles/JORC_vs_GKZ_articel.html','_blank')">
+    <div class="bc-label">Стандарты</div>
+    <h3 class="bc-title">JORC vs ГКЗ: в чём реальная разница для геолога</h3>
+    <p class="bc-desc">Категории запасов, требования к данным, Competent Person — сравниваем два стандарта на практических примерах.</p>
+    <div class="bc-meta"><span class="bc-tag">JORC</span><span class="bc-tag">ГКЗ</span></div>
+    <div class="bc-footer"><span class="bc-read">Читать статью →</span><span class="bc-time">10 мин</span></div>
+  </article>
+  
+  <!-- НОВАЯ СТАТЬЯ: Эпитермальное золото от Борцова -->
+  <article class="blog-card" onclick="window.open('articles/bortsov_epithermal_gold.html','_blank')">
+    <div class="bc-label">Кейс · Эпитермальное золото</div>
+    <h3 class="bc-title">Эпитермальное золоторудное месторождение: от поисков до блочной модели</h3>
+    <p class="bc-desc">Реальный разведочный проект: геология, данные бурения, построение модели в Leapfrog/Datamine, подсчёт ресурсов по JORC. Авторский кейс Константина Борцова.</p>
+    <div class="bc-meta"><span class="bc-tag">Эпитермальное</span><span class="bc-tag">Золото</span><span class="bc-tag">Leapfrog</span><span class="bc-tag">Datamine</span></div>
+    <div class="bc-footer"><span class="bc-read">Читать статью →</span><span class="bc-time">15 мин</span></div>
+  </article>
+</div>
   </div>
 </section>
 

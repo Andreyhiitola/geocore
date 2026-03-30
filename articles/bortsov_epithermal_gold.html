@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Эпитермальное золоторудное месторождение: от поисков до блочной модели — GeoCore Academy</title>
+<meta name="description" content="Разбор реального кейса эпитермального малосульфидного золоторудного месторождения. Геология, данные бурения, построение модели в Leapfrog/Datamine, подсчёт запасов.">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --gold:#C9A84C; --gold-light:#E8C97A; --gold-dim:#7A6230;
+  --dark:#0A0A0B; --dark-2:#111114; --dark-3:#18181D; --dark-4:#1F1F26;
+  --surface:#252530; --text:#E8E6DE; --text-muted:#9A9890; --text-dim:#5C5B56;
+  --border:rgba(201,168,76,0.18); --border-dim:rgba(255,255,255,0.07);
+  --red:#8B3A2A; --green:#2a5a2a;
+}
+html{scroll-behavior:smooth;}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--dark);color:var(--text);line-height:1.7;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.3;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:64px;background:rgba(10,10,11,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.logo-hex{width:28px;height:28px;background:var(--gold);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);}
+.logo-text{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--text);}
+.logo-text span{color:var(--gold);}
+.nav-back{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);text-decoration:none;display:flex;align-items:center;gap:8px;transition:color .2s;}
+.nav-back:hover{color:var(--gold);}
+.nav-cta{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dark);background:var(--gold);padding:9px 20px;text-decoration:none;clip-path:polygon(7px 0%,100% 0%,calc(100% - 7px) 100%,0% 100%);}
+.nav-cta:hover{background:var(--gold-light);}
+
+/* ARTICLE LAYOUT */
+.art-wrap{max-width:780px;margin:0 auto;padding:120px 24px 80px;}
+
+/* HEADER */
+.art-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:10px;margin-bottom:20px;}
+.art-label::before{content:'';width:32px;height:1px;background:var(--gold);}
+h1.art-title{font-family:'Playfair Display',serif;font-size:clamp(32px,4vw,52px);font-weight:900;line-height:1.1;margin-bottom:20px;}
+.art-sub{font-size:17px;font-weight:300;line-height:1.75;color:var(--text-muted);margin-bottom:40px;border-left:3px solid var(--gold);padding-left:20px;}
+.art-meta{display:flex;gap:24px;align-items:center;padding:20px 0;border-top:1px solid var(--border-dim);border-bottom:1px solid var(--border-dim);margin-bottom:56px;}
+.art-meta-item{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);}
+.art-meta-item strong{color:var(--text-muted);}
+.art-tag{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold-dim);padding:3px 8px;}
+
+/* BODY */
+.art-body h2{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;line-height:1.2;margin:56px 0 20px;color:var(--text);}
+.art-body h3{font-family:'Playfair Display',serif;font-size:21px;font-weight:700;margin:40px 0 16px;color:var(--text);}
+.art-body p{font-size:16px;font-weight:300;line-height:1.8;color:var(--text-muted);margin-bottom:20px;}
+.art-body strong{color:var(--text);font-weight:600;}
+.art-body em{color:var(--text-muted);font-style:italic;}
+
+/* FORMULA */
+.formula-box{background:var(--dark-3);border:1px solid var(--border-dim);padding:24px 32px;margin:32px 0;text-align:center;position:relative;}
+.formula-box::before{content:'ФОРМУЛА';position:absolute;top:-10px;left:20px;font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.15em;color:var(--text-dim);background:var(--dark-3);padding:0 8px;}
+.formula{font-family:'IBM Plex Mono',monospace;font-size:20px;color:var(--gold);letter-spacing:.05em;}
+.formula-desc{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-dim);margin-top:10px;letter-spacing:.08em;}
+
+/* VISUAL BLOCKS */
+.vis-block{margin:36px 0;background:var(--dark-3);border:1px solid var(--border-dim);overflow:hidden;}
+.vis-header{padding:14px 20px;background:var(--dark-4);border-bottom:1px solid var(--border-dim);display:flex;align-items:center;gap:10px;}
+.vis-dot{width:8px;height:8px;border-radius:50%;}
+.vis-title{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;color:var(--text-dim);}
+.vis-canvas{padding:24px;display:flex;justify-content:center;align-items:center;min-height:180px;}
+.vis-caption{padding:12px 20px;border-top:1px solid var(--border-dim);font-size:12px;font-weight:300;color:var(--text-dim);font-style:italic;}
+svg{max-width:100%;height:auto;}
+
+/* INFO LISTS */
+.info-list{list-style:none;display:flex;flex-direction:column;gap:12px;margin:20px 0 32px;}
+.info-item{display:flex;gap:14px;align-items:flex-start;padding:14px 18px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);}
+.info-icon{font-size:18px;min-width:28px;}
+.info-text{font-size:14px;font-weight:300;line-height:1.6;color:var(--text-muted);}
+.info-text strong{color:var(--gold);}
+
+/* TABLE */
+.data-table{width:100%;border-collapse:collapse;margin:32px 0;font-size:13px;}
+.data-table th{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;padding:12px 16px;text-align:left;border-bottom:2px solid var(--border);color:var(--text-dim);}
+.data-table td{padding:12px 16px;border-bottom:1px solid var(--border-dim);color:var(--text-muted);font-weight:300;}
+.data-table tr:nth-child(even) td{background:rgba(255,255,255,.02);}
+.data-table td:first-child{color:var(--text);font-weight:500;}
+
+/* DIVIDER */
+.art-hr{border:none;border-top:1px solid var(--border-dim);margin:48px 0;}
+
+/* HIGHLIGHT BOX */
+.highlight{background:var(--dark-3);border:1px solid var(--border);border-left:3px solid var(--gold);padding:24px 28px;margin:36px 0;}
+.highlight p{margin:0;color:var(--text-muted);}
+.highlight strong{color:var(--text);}
+
+/* CTA BOX */
+.cta-box{background:var(--dark-4);border:1px solid var(--border);padding:40px;margin:56px 0;text-align:center;}
+.cta-box h3{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;margin-bottom:16px;}
+.cta-box p{font-size:15px;font-weight:300;color:var(--text-muted);margin-bottom:28px;max-width:520px;margin-left:auto;margin-right:auto;}
+.cta-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+.btn-p{display:inline-flex;align-items:center;gap:9px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dark);background:var(--gold);padding:14px 30px;text-decoration:none;clip-path:polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%);transition:all .2s;}
+.btn-p:hover{background:var(--gold-light);}
+.btn-s{display:inline-flex;align-items:center;gap:9px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);border:1px solid var(--border);padding:14px 30px;text-decoration:none;transition:all .2s;}
+.btn-s:hover{border-color:var(--gold);color:var(--gold);}
+
+/* FOOTER */
+footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:40px 48px;display:flex;justify-content:space-between;align-items:center;}
+.f-copy{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.07em;color:var(--text-dim);}
+.f-back{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);text-decoration:none;}
+.f-back:hover{color:var(--gold-light);}
+
+/* REVEAL */
+.rv{opacity:0;transform:translateY(24px);transition:opacity .65s ease,transform .65s ease;}
+.rv.vis{opacity:1;transform:none;}
+
+@media(max-width:768px){nav{padding:0 20px;}.nav-back span{display:none;}footer{flex-direction:column;gap:16px;text-align:center;}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="../index.html" class="nav-logo">
+    <div class="logo-hex"></div>
+    <span class="logo-text">Geo<span>Core</span></span>
+  </a>
+  <a href="../index.html#blog" class="nav-back">← <span>Назад к блогу</span></a>
+  <a href="../index.html#sandbox" class="nav-cta">Попробовать симулятор</a>
+</nav>
+
+<div class="art-wrap">
+
+  <!-- HEADER -->
+  <div class="rv">
+    <div class="art-label">Кейс · Эпитермальное золото</div>
+    <h1 class="art-title">Эпитермальное малосульфидное золоторудное месторождение: от поисков до блочной модели</h1>
+    <p class="art-sub">Реальный разведочный проект: геологическое строение, данные бурения, построение 3D-модели в Leapfrog/Datamine, подсчёт ресурсов по JORC. Авторский кейс Константина Борцова.</p>
+    <div class="art-meta">
+      <div class="art-meta-item"><strong>15</strong> мин чтения</div>
+      <div class="art-meta-item"><strong>К.В. Борцов</strong></div>
+      <div class="art-meta-item"><strong>2025</strong></div>
+      <span class="art-tag">Эпитермальное</span>
+      <span class="art-tag">Золото</span>
+      <span class="art-tag">Leapfrog</span>
+      <span class="art-tag">Datamine</span>
+      <span class="art-tag">JORC</span>
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div class="art-body">
+
+    <p class="rv">Эпитермальные малосульфидные месторождения (low-sulfidation epithermal) — один из основных типов золоторудных объектов в вулканических поясах. Характеризуются прожилково-вкрапленной минерализацией, зональностью и сложной морфологией рудных тел. В этом кейсе разбираем реальный проект: от геологической интерпретации до блочной модели и подсчёта ресурсов.</p>
+
+    <hr class="art-hr">
+
+    <!-- SECTION 1 -->
+    <h2 class="rv">1. Геологическая характеристика</h2>
+    
+    <p class="rv">Месторождение расположено в пределах вулкано-тектонической депрессии, сложенной кислыми эффузивами и туфами. Рудная зона приурочена к системе субпараллельных крутопадающих разломов северо-восточного простирания.</p>
+
+    <ul class="info-list rv">
+      <li class="info-item"><div class="info-icon">🏔️</div><div class="info-text"><strong>Тип:</strong> эпитермальное малосульфидное (low-sulfidation)</div></li>
+      <li class="info-item"><div class="info-icon">📐</div><div class="info-text"><strong>Морфология:</strong> жильно-прожилковая зона с раздувами и пережимами</div></li>
+      <li class="info-item"><div class="info-icon">🔬</div><div class="info-text"><strong>Минерализация:</strong> самородное золото, пирит, арсенопирит, марказит, редкие сульфиды</div></li>
+      <li class="info-item"><div class="info-icon">📏</div><div class="info-text"><strong>Размеры рудной зоны:</strong> протяжённость 1200 м, мощность 5–25 м, падение на юго-восток 70–80°</div></li>
+    </ul>
+
+    <!-- SVG: схема геологического разреза -->
+    <div class="vis-block rv">
+      <div class="vis-header">
+        <div class="vis-dot" style="background:#C9A84C"></div>
+        <span class="vis-title">ГЕОЛОГИЧЕСКИЙ РАЗРЕЗ — эпитермальная жильная зона</span>
+      </div>
+      <div class="vis-canvas">
+        <svg viewBox="0 0 600 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-height:260px">
+          <rect width="600" height="280" fill="#0a121c"/>
+          <!-- Background layers -->
+          <rect x="0" y="0" width="600" height="100" fill="#2a3a2a" opacity=".15"/>
+          <rect x="0" y="100" width="600" height="80" fill="#3a4a3a" opacity=".1"/>
+          <rect x="0" y="180" width="600" height="100" fill="#2a3a2a" opacity=".1"/>
+          <!-- Fault zone -->
+          <path d="M200,20 L220,40 L250,80 L270,120 L285,160 L295,200 L300,240" stroke="#C9A84C" stroke-width="2.5" fill="none" stroke-dasharray="5,3"/>
+          <path d="M220,30 L240,50 L270,90 L290,130 L305,170 L315,210 L320,250" stroke="#C9A84C" stroke-width="2" fill="none" stroke-dasharray="4,3" opacity=".6"/>
+          <!-- Ore zone -->
+          <path d="M240,80 L265,110 L280,140 L285,165 L280,185 L265,200 L245,190 L230,170 L225,145 L230,120 L240,80 Z" fill="#ff8844" opacity=".35" stroke="#ffaa66" stroke-width="1.5"/>
+          <text x="255" y="145" fill="#ffaa66" font-size="9" font-family="monospace" text-anchor="middle">Рудная зона</text>
+          <!-- Wall rocks -->
+          <text x="60" y="50" fill="#7a8a7a" font-size="8" font-family="monospace">Туфы риолитов</text>
+          <text x="60" y="150" fill="#7a8a7a" font-size="8" font-family="monospace">Игнимбриты</text>
+          <text x="60" y="230" fill="#7a8a7a" font-size="8" font-family="monospace">Аргиллизиты</text>
+          <!-- Drillholes -->
+          <line x1="400" y1="20" x2="400" y2="260" stroke="#3a6ea5" stroke-width="1.5" opacity=".5"/>
+          <line x1="450" y1="20" x2="450" y2="260" stroke="#3a6ea5" stroke-width="1.5" opacity=".5"/>
+          <line x1="500" y1="20" x2="500" y2="260" stroke="#3a6ea5" stroke-width="1.5" opacity=".5"/>
+          <circle cx="400" cy="155" r="4" fill="#ffaa33"/>
+          <circle cx="450" cy="138" r="4" fill="#ffaa33"/>
+          <circle cx="500" cy="165" r="4" fill="#ffaa33"/>
+        </svg>
+      </div>
+      <div class="vis-caption">Схематический разрез эпитермальной жильной зоны. Рудная зона (оранжевое) контролируется разломной структурой, высокие содержания Au приурочены к раздувам жил.</div>
+    </div>
+
+    <h2 class="rv">2. Данные разведки</h2>
+    
+    <p class="rv">На месторождении выполнено 48 скважин колонкового бурения суммарным объёмом 12 500 м. Средняя плотность сети на участке детализации — 50×50 м, на флангах — 100×100 м. Опробование проводилось по интервалам 1–2 м с отбором керна.</p>
+
+    <table class="data-table rv">
+      <thead>
+        <tr><th>Параметр</th><th>Значение</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Количество скважин</td><td>48</td></tr>
+        <tr><td>Общий метраж бурения</td><td>12 500 м</td></tr>
+        <tr><td>Средняя глубина скважин</td><td>260 м</td></tr>
+        <tr><td>Количество проб</td><td>8 420</td></tr>
+        <tr><td>Среднее содержание Au (в рудной зоне)</td><td>3.8 г/т</td></tr>
+        <tr><td>Максимальное содержание Au</td><td>42.5 г/т</td></tr>
+        <tr><td>Коэффициент вариации (CV)</td><td>1.85 (высокая вариабельность)</td></tr>
+      </tbody>
+    </table>
+
+    <h3 class="rv">Статистический анализ</h3>
+    
+    <p class="rv">Гистограмма содержаний показывает логнормальное распределение с длинным правым хвостом (высокие ураганные значения). Перед интерполяцией выполнено топ-кодирование (ограничение на уровне 25 г/т) для снижения влияния выбросов.</p>
+
+    <div class="formula-box rv">
+      <div class="formula">Log₁₀(Au) ~ N(μ=0.42, σ=0.38)</div>
+      <div class="formula-desc">Логарифмическое преобразование приводит распределение к нормальному</div>
+    </div>
+
+    <h2 class="rv">3. Построение геологической модели</h2>
+    
+    <p class="rv">Моделирование выполнено в Leapfrog Geo с использованием метода неявного моделирования (implicit modelling). Основные этапы:</p>
+
+    <ul class="info-list rv">
+      <li class="info-item"><div class="info-icon">1️⃣</div><div class="info-text">Импорт данных бурения (колонки, опробование, геологические границы)</div></li>
+      <li class="info-item"><div class="info-icon">2️⃣</div><div class="info-text">Построение цифровой модели рельефа (DTM)</div></li>
+      <li class="info-item"><div class="info-icon">3️⃣</div><div class="info-text">Создание каркасов литологических границ и разломов</div></li>
+      <li class="info-item"><div class="info-icon">4️⃣</div><div class="info-text">Построение рудной зоны на основе геологических контуров и содержаний (cut-off 0.5 г/т)</div></li>
+      <li class="info-item"><div class="info-icon">5️⃣</div><div class="info-text">Экспорт wireframe в Datamine Studio RM для блочного моделирования</div></li>
+    </ul>
+
+    <div class="highlight rv">
+      <p><strong>Ключевое наблюдение:</strong> неявное моделирование позволило точно воспроизвести сложную форму рудной зоны с раздувами и ответвлениями, которые при традиционном моделировании по сечениям были бы сглажены.</p>
+    </div>
+
+    <h2 class="rv">4. Геостатистический анализ и вариограмма</h2>
+    
+    <p class="rv">Для оценки пространственной непрерывности содержаний построены экспериментальные вариограммы по трём направлениям:</p>
+
+    <ul class="info-list rv">
+      <li class="info-item"><div class="info-icon">➡️</div><div class="info-text"><strong>Простирание (азимут 45°):</strong> range = 95 м, sill = 1.42, nugget = 0.18</div></li>
+      <li class="info-item"><div class="info-icon">⬇️</div><div class="info-text"><strong>Падение (азимут 135°, плюс 70°):</strong> range = 55 м, sill = 1.45, nugget = 0.18</div></li>
+      <li class="info-item"><div class="info-icon">⬛</div><div class="info-text"><strong>Поперечное (перпендикулярно простиранию):</strong> range = 28 м, sill = 1.38, nugget = 0.18</div></li>
+    </ul>
+
+    <p class="rv">Анизотропия 3.4:1:1.9 (простирание : падение : поперечное) отражает жильный характер оруденения.</p>
+
+    <h2 class="rv">5. Блочная модель и подсчёт ресурсов</h2>
+    
+    <p class="rv">В Datamine Studio RM построена блочная модель с размером блоков 10×10×5 м. Интерполяция выполнена методом Ordinary Kriging с использованием полученной вариограммной модели. Классификация ресурсов по JORC выполнена на основе плотности данных и качества интерполяции.</p>
+
+    <table class="data-table rv">
+      <thead>
+        <tr><th>Категория JORC</th><th>Тоннаж (млн т)</th><th>Содержание Au (г/т)</th><th>Металл (т Au)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Measured</td><td>2.8</td><td>4.2</td><td>11.8</td></tr>
+        <tr><td>Indicated</td><td>4.5</td><td>3.5</td><td>15.8</td></tr>
+        <tr><td>Inferred</td><td>3.2</td><td>2.8</td><td>9.0</td></tr>
+        <tr><td><strong>Итого Measured+Indicated</strong></td><td><strong>7.3</strong></td><td><strong>3.8</strong></td><td><strong>27.6</strong></td></tr>
+      </tbody>
+    </table>
+
+    <div class="vis-block rv">
+      <div class="vis-header">
+        <div class="vis-dot" style="background:#7ee787"></div>
+        <span class="vis-title">БЛОЧНАЯ МОДЕЛЬ — распределение Au в рудной зоне</span>
+      </div>
+      <div class="vis-canvas" style="min-height:200px">
+        <svg viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-height:200px">
+          <rect width="600" height="200" fill="#0a121c"/>
+          <!-- Schematic block model -->
+          <rect x="100" y="40" width="400" height="120" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-dasharray="4,2"/>
+          <rect x="120" y="55" width="28" height="25" fill="#2a5a8a" rx="1"/>
+          <rect x="150" y="55" width="28" height="25" fill="#3a6a9a" rx="1"/>
+          <rect x="180" y="55" width="28" height="25" fill="#5a8aba" rx="1"/>
+          <rect x="210" y="55" width="28" height="25" fill="#7aabdb" rx="1"/>
+          <rect x="240" y="50" width="28" height="30" fill="#ffaa66" rx="1"/>
+          <rect x="270" y="45" width="28" height="35" fill="#ff8844" rx="1"/>
+          <rect x="300" y="40" width="28" height="40" fill="#ff5522" rx="1"/>
+          <rect x="330" y="45" width="28" height="35" fill="#ff8844" rx="1"/>
+          <rect x="360" y="55" width="28" height="25" fill="#ffaa66" rx="1"/>
+          <rect x="390" y="65" width="28" height="20" fill="#7aabdb" rx="1"/>
+          <rect x="420" y="70" width="28" height="18" fill="#5a8aba" rx="1"/>
+          <rect x="450" y="75" width="28" height="15" fill="#3a6a9a" rx="1"/>
+          <text x="300" y="185" fill="#9A9890" font-size="9" font-family="monospace" text-anchor="middle">Цвет: от синего (низкое) до красного (высокое) содержание Au</text>
+        </svg>
+      </div>
+      <div class="vis-caption">Распределение золота в блочной модели. Высокие содержания (красные блоки) приурочены к центральной части рудной зоны, где зафиксированы раздувы жил.</div>
+    </div>
+
+    <h2 class="rv">6. Выводы и рекомендации</h2>
+    
+    <ul class="info-list rv">
+      <li class="info-item"><div class="info-icon">✅</div><div class="info-text">Эпитермальное малосульфидное месторождение характеризуется высокой вариабельностью содержаний (CV=1.85), что требует применения геостатистических методов (Ordinary Kriging) для достоверной оценки ресурсов.</div></li>
+      <li class="info-item"><div class="info-icon">✅</div><div class="info-text">Неявное моделирование в Leapfrog Geo позволило точно воспроизвести сложную морфологию рудной зоны, включая раздувы и ответвления.</div></li>
+      <li class="info-item"><div class="info-icon">✅</div><div class="info-text">Анизотропия вариограммы (соотношение рангов 3.4:1:1.9) должна учитываться при настройке параметров поиска в блочной модели.</div></li>
+      <li class="info-item"><div class="info-icon">✅</div><div class="info-text">Ресурсы Measured+Indicated составляют 7.3 млн т с содержанием 3.8 г/т (27.6 т Au), что подтверждает промышленную значимость объекта.</div></li>
+      <li class="info-item"><div class="info-icon">📌</div><div class="info-text">Рекомендуется сгущение сети скважин на флангах для перевода Inferred ресурсов в более высокие категории.</div></li>
+    </ul>
+
+    <hr class="art-hr">
+
+    <!-- CTA: Simulator -->
+    <div class="cta-box rv">
+      <h3>Хотите поработать с данными этого месторождения?</h3>
+      <p>Скачайте CSV-файл с данными бурения и OBJ-каркас рудного тела, чтобы самостоятельно построить блочную модель в нашей 3D-песочнице.</p>
+      <div class="cta-btns">
+        <a href="../index.html#sandbox" class="btn-p">
+          ▶ Открыть песочницу
+        </a>
+        <a href="../data/epithermal_gold_demo.csv" class="btn-s">📥 Скачать данные (CSV)</a>
+      </div>
+    </div>
+
+    <div class="highlight rv">
+      <p><strong>Об авторе:</strong> <strong>Константин Владимирович Борцов</strong> — кандидат технических наук, MIMMM, CIPA. 30+ лет опыта в геологии и оценке месторождений. Руководитель Центра горных информационных технологий в АО «Полиметалл УК», автор курсов по Datamine, Leapfrog, ArcGIS и машинному обучению в геологии.</p>
+    </div>
+
+  </div><!-- /art-body -->
+</div><!-- /art-wrap -->
+
+<footer>
+  <span class="f-copy">© 2025 GeoCore Academy</span>
+  <a href="../index.html#blog" class="f-back">← Все статьи блога</a>
+</footer>
+
+<script>
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('vis');});
+},{threshold:.08,rootMargin:'0px 0px -20px 0px'});
+document.querySelectorAll('.rv').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>

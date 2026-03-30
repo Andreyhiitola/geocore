@@ -1,3 +1,8 @@
+/**
+ * GeoCore Academy — main.js
+ * Точка входа. Инициализация и обработчики событий.
+ */
+
 import { init3D } from './core/threeInit.js';
 import { loadTemplate } from './data/templates.js';
 import { runModel } from './core/model.js';
@@ -8,11 +13,11 @@ import { setStatus, getParam, setRunReady } from './utils/helpers.js';
 import { copyToClipboard } from './utils/clipboard.js';
 import { parseCSV } from './data/csvParser.js';
 import { parseOBJ } from './data/objParser.js';
-import { visualizeHoles, visualizeOreFromVertices, drawEllipsoidOreBody, drawCoalSeams, clearOreGrp } from './core/visualization.js';
-import { getCurrentHoles, setCurrentHoles, TEMPLATES } from './data/templates.js';
+import { visualizeHoles, visualizeOreFromVertices } from './core/visualization.js';
+import { getCurrentHoles, setCurrentHoles } from './data/templates.js';
 import { updateUI, updateScriptOnly } from './ui/stats.js';
 
-// Глобальные функции для onclick в HTML
+// ─── Глобальные функции для onclick в HTML ───────────────────
 window.loadProject = function(i) {
   const p = loadProjects()[i];
   if (!p?.holesData) return;
@@ -30,351 +35,318 @@ window.deleteProject = function(i) {
   renderProjects();
 };
 
-export function wireEvents() {
+// ─── Главная функция обработчиков ────────────────────────────
+function wireEvents() {
   console.log('[EVENTS] Настройка обработчиков событий');
-  
-  // Шаблоны
+
+  // ── Шаблоны ────────────────────────────────────────────────
   document.querySelectorAll('.template-card').forEach(card => {
-    card.addEventListener('click', () => loadTemplate(card.dataset.template));
+    card.addEventListener('click', () => {
+      loadTemplate(card.dataset.template);
+    });
   });
 
-  // Загрузка CSV
-  const csvIn = document.getElementById('csvIn');
-  if (csvIn) {
-    csvIn.addEventListener('change', e => {
-      const f = e.target.files[0];
-      if (!f) return;
-      const r = new FileReader();
-      r.onload = ev => {
-        const holes = parseCSV(ev.target.result);
-        if (!holes.length) { 
-          setStatus('csvStatus', '❌ Ошибка формата', '#E87070'); 
-          return; 
-        }
-        setCurrentHoles(holes);
-        visualizeHoles(holes);
-        updateUI(holes, [], 'idw', getParam('cutoff'), document.getElementById('stdSel')?.value || 'JORC');
-        setRunReady(true);
-        setStatus('csvStatus', `✓ Загружено: ${holes.length} скважин`, '#7ee787');
-      };
-      r.readAsText(f);
-    });
-  }
-
-  // Загрузка OBJ
-  const objIn = document.getElementById('objIn');
-  if (objIn) {
-    objIn.addEventListener('change', e => {
-      const f = e.target.files[0];
-      if (!f) return;
-      const r = new FileReader();
-      r.onload = ev => {
-        const { vertices, faces } = parseOBJ(ev.target.result);
-        if (vertices.length && faces.length) {
-          visualizeOreFromVertices(vertices, faces, getCurrentHoles());
-          setStatus('objStatus', `✓ OBJ: ${vertices.length} вершин, ${faces.length} граней`, '#7ee787');
-        } else {
-          setStatus('objStatus', '❌ OBJ: нет данных', '#E87070');
-        }
-      };
-      r.readAsText(f);
-    });
-  }
-
-  // Кнопка запуска модели
-  const runBtn = document.getElementById('runBtn');
-  if (runBtn) {
-    console.log('[EVENTS] runBtn найден, добавляем обработчик');
-    runBtn.addEventListener('click', () => {
-      console.log('[EVENTS] Кнопка нажата!');
-      runModel();
-    });
-  } else {
-    console.error('[EVENTS] runBtn НЕ НАЙДЕН!');
-  }
-
-  // Копирование скрипта
-  const copyBtn = document.getElementById('copyBtn');
-  if (copyBtn) {
-    copyBtn.addEventListener('click', () => {
-      const script = document.getElementById('scriptOut')?.textContent || '';
-      copyToClipboard(script);
-      copyBtn.textContent = '✓ Скопировано!';
-      setTimeout(() => copyBtn.textContent = '📋 Копировать скрипт', 2000);
-    });
-  }
-
-  // Экспорт отчёта
-  const exportBtn = document.getElementById('exportBtn');
-  if (exportBtn) {
-    exportBtn.addEventListener('click', () => {
-      const currentBlocks = window.currentBlocks || [];
-      if (!currentBlocks.length) {
-        alert('Сначала постройте блочную модель');
+  // ── Загрузка CSV ───────────────────────────────────────────
+  document.getElementById('csvIn')?.addEventListener('change', e => {
+    const f = e.target.files[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = ev => {
+      const holes = parseCSV(ev.target.result);
+      if (!holes.length) {
+        setStatus('csvStatus', '❌ Ошибка формата', '#E87070');
         return;
       }
-      let csv = 'X,Y,Z,Grade,Category\n';
-      currentBlocks.forEach(b => { csv += `${b.x},${b.y},${b.z},${b.grade.toFixed(3)},${b.category}\n`; });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
-      a.download = 'blocks.csv';
-      a.click();
-      const stats = document.getElementById('statsOut')?.textContent || '';
-      const b = document.createElement('a');
-      b.href = URL.createObjectURL(new Blob([`Отчёт GeoCore\nДата: ${new Date().toLocaleString('ru')}\n\n${stats}`], { type: 'text/plain' }));
-      b.download = 'report.txt';
-      b.click();
+      setCurrentHoles(holes);
+      visualizeHoles(holes);
+      updateUI(holes, [], 'idw', getParam('cutoff'), document.getElementById('stdSel')?.value || 'JORC');
+      setRunReady(true);
+      setStatus('csvStatus', `✓ Загружено: ${holes.length} скважин`, '#7ee787');
+    };
+    r.readAsText(f);
+  });
+
+  // ── Загрузка OBJ ───────────────────────────────────────────
+  document.getElementById('objIn')?.addEventListener('change', e => {
+    const f = e.target.files[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = ev => {
+      const { vertices, faces } = parseOBJ(ev.target.result);
+      if (vertices.length && faces.length) {
+        visualizeOreFromVertices(vertices, faces, getCurrentHoles());
+        setStatus('objStatus', `✓ OBJ: ${vertices.length} вершин, ${faces.length} граней`, '#7ee787');
+      } else {
+        setStatus('objStatus', '❌ OBJ: нет данных', '#E87070');
+      }
+    };
+    r.readAsText(f);
+  });
+
+  // ── Кнопка запуска модели ──────────────────────────────────
+  const runBtn = document.getElementById('runBtn');
+  if (runBtn) {
+    runBtn.addEventListener('click', () => {
+      console.log('[EVENTS] Запуск модели');
+      runModel();
     });
+    console.log('[EVENTS] runBtn подключён');
+  } else {
+    console.error('[EVENTS] runBtn НЕ НАЙДЕН');
   }
 
-  // Сброс к золоту
-  const resetBtn = document.getElementById('resetDemoBtn');
-  if (resetBtn) resetBtn.addEventListener('click', () => loadTemplate('gold'));
+  // ── Копирование скрипта ────────────────────────────────────
+  document.getElementById('copyBtn')?.addEventListener('click', function() {
+    const script = document.getElementById('scriptOut')?.textContent || '';
+    copyToClipboard(script);
+    this.textContent = '✓ Скопировано!';
+    setTimeout(() => this.textContent = '📋 Копировать скрипт', 2000);
+  });
 
-  // Сохранение проекта
-  const saveBtn = document.getElementById('saveProjectBtn');
-  if (saveBtn) {
-    saveBtn.addEventListener('click', () => {
-      const holes = getCurrentHoles();
-      if (!holes.length) { alert('Нет данных для сохранения'); return; }
-      const name = prompt('Название проекта:', `Проект ${new Date().toLocaleDateString('ru')}`);
-      if (!name) return;
-      let ti = 0, tg = 0;
-      holes.forEach(h => { ti += h.intervals.length; h.intervals.forEach(([,, v]) => tg += v); });
-      const avg = ti ? (tg / ti).toFixed(2) : '0';
-      const proj = loadProjects();
-      proj.unshift({ name, date: new Date().toLocaleDateString('ru'), holes: holes.length, avgVal: avg, standard: document.getElementById('stdSel')?.value || 'JORC', holesData: holes });
-      saveProjects(proj);
-      renderProjects();
-      alert(`Проект «${name}» сохранён!`);
+  // ── Экспорт отчёта (CSV + текст) ──────────────────────────
+  document.getElementById('exportBtn')?.addEventListener('click', () => {
+    const blocks = window.currentBlocks || [];
+    if (!blocks.length) { alert('Сначала постройте блочную модель'); return; }
+
+    // CSV блоков
+    let csv = 'X,Y,Z,Grade,Category\n';
+    blocks.forEach(b => { csv += `${b.x},${b.y},${b.z},${b.grade.toFixed(3)},${b.category}\n`; });
+    _download(csv, 'blocks.csv', 'text/csv');
+
+    // Текстовый отчёт
+    const stats = document.getElementById('statsOut')?.textContent || '';
+    _download(
+      `Отчёт GeoCore Academy\nДата: ${new Date().toLocaleString('ru')}\n\n${stats}`,
+      'report.txt', 'text/plain'
+    );
+  });
+
+  // ── Экспорт .blockmodel для Datamine ──────────────────────
+  document.getElementById('exportBlockmodelBtn')?.addEventListener('click', () => {
+    const blocks = window.currentBlocks || [];
+    if (!blocks.length) { alert('Сначала постройте блочную модель'); return; }
+    let content = '! GeoCore Academy — Datamine Block Model\n! Format: X Y Z GRADE CATEGORY\n';
+    blocks.forEach(b => {
+      content += `${b.x} ${b.y} ${b.z} ${b.grade.toFixed(4)} ${b.category}\n`;
     });
-  }
+    _download(content, 'geocore_model.blockmodel', 'text/plain');
+    console.log('[EXPORT] .blockmodel скачан');
+  });
 
-  // Очистка проектов
-  const clearAll = document.getElementById('clearAll');
-  if (clearAll) {
-    clearAll.addEventListener('click', () => {
-      if (confirm('Удалить все проекты?')) { saveProjects([]); renderProjects(); }
+  // ── Экспорт .wrl каркаса ───────────────────────────────────
+  document.getElementById('exportWireframeBtn')?.addEventListener('click', () => {
+    const vertices = window.currentWireframeVertices;
+    const facesData = window.currentWireframeFaces;
+
+    if (!vertices?.length) { alert('Каркас не загружен'); return; }
+
+    let wrl = '#VRML V2.0 utf8\n# GeoCore Academy Wireframe\nShape {\n  geometry IndexedFaceSet {\n    coord Coordinate {\n      point [\n';
+    vertices.forEach(v => { wrl += `        ${v[0]} ${v[1]} ${v[2]},\n`; });
+    wrl += '      ]\n    }\n    coordIndex [\n';
+    (facesData || []).forEach(f => { wrl += `      ${f.v[0]} ${f.v[1]} ${f.v[2]} -1,\n`; });
+    wrl += '    ]\n  }\n}\n';
+    _download(wrl, 'wireframe.wrl', 'model/vrml');
+    console.log('[EXPORT] .wrl скачан');
+  });
+
+  // ── Сброс к золоту ─────────────────────────────────────────
+  document.getElementById('resetDemoBtn')?.addEventListener('click', () => loadTemplate('gold'));
+
+  // ── Сохранение проекта ────────────────────────────────────
+  document.getElementById('saveProjectBtn')?.addEventListener('click', () => {
+    const holes = getCurrentHoles();
+    if (!holes.length) { alert('Нет данных для сохранения'); return; }
+    const name = prompt('Название проекта:', `Проект ${new Date().toLocaleDateString('ru')}`);
+    if (!name) return;
+    let ti = 0, tg = 0;
+    holes.forEach(h => { ti += h.intervals.length; h.intervals.forEach(([,, v]) => tg += v); });
+    const proj = loadProjects();
+    proj.unshift({
+      name,
+      date: new Date().toLocaleDateString('ru'),
+      holes: holes.length,
+      avgVal: ti ? (tg / ti).toFixed(2) : '0',
+      standard: document.getElementById('stdSel')?.value || 'JORC',
+      holesData: holes,
     });
-  }
+    saveProjects(proj);
+    renderProjects();
+    alert(`Проект «${name}» сохранён!`);
+  });
 
-  // Вариограмма
-  const varioBtn = document.getElementById('calcVariogramBtn');
-  if (varioBtn) {
-    varioBtn.addEventListener('click', () => {
-      const holes = getCurrentHoles();
-      if (!holes.length) { alert('Загрузите данные'); return; }
-      const vg = calculateVariogram(holes);
-      if (!vg) { alert('Недостаточно точек (минимум 10)'); return; }
-      const container = document.getElementById('variogramCanvas');
-      if (container) container.style.display = 'block';
-      drawVariogram(vg);
-      const statsDiv = document.getElementById('variogramStats');
-      if (statsDiv) statsDiv.textContent = 'Экспериментальная вариограмма построена.';
-    });
-  }
+  // ── Очистка проектов ───────────────────────────────────────
+  document.getElementById('clearAll')?.addEventListener('click', () => {
+    if (confirm('Удалить все проекты?')) { saveProjects([]); renderProjects(); }
+  });
 
-  // ── Toggle visibility buttons ──────────────────────────────
+  // ── Вариограмма (инлайн-канвас) ────────────────────────────
+  document.getElementById('calcVariogramBtn')?.addEventListener('click', () => {
+    const holes = getCurrentHoles();
+    if (!holes.length) { alert('Загрузите данные'); return; }
+    const vg = calculateVariogram(holes);
+    if (!vg) { alert('Недостаточно точек (минимум 10)'); return; }
+
+    const container = document.getElementById('variogramCanvas');
+    if (container) container.style.display = 'block';
+
+    // Пробуем большой канвас (модальное окно), если нет — малый
+    const targetId = document.getElementById('variogramPlotLarge')
+      ? 'variogramPlotLarge'
+      : 'variogramPlot';
+
+    const fittedParams = drawVariogram(vg, targetId);
+
+    // Статистика под графиком
+    const statsId = targetId === 'variogramPlotLarge'
+      ? 'variogramStatsLarge'
+      : 'variogramStats';
+    const statsDiv = document.getElementById(statsId);
+    if (statsDiv && fittedParams) {
+      let html = '';
+      const colors = { strike: '#E87070', dip: '#7ee787', perp: '#C9A84C' };
+      const labels = { strike: 'Простирание', dip: 'Падение', perp: 'Поперечное' };
+      for (const [dir, p] of Object.entries(fittedParams)) {
+        if (!p) continue;
+        html += `<span style="color:${colors[dir]}">${labels[dir]}</span>: ` +
+                `Nugget=${p.nugget.toFixed(3)} Sill=${p.sill.toFixed(3)} Range=${p.range.toFixed(1)}м R²=${p.r2.toFixed(3)}<br>`;
+      }
+      statsDiv.innerHTML = html || 'Параметры не определены';
+    }
+
+    // Открыть модальное окно если есть
+    const modal = document.getElementById('variogramModal');
+    if (modal) modal.style.display = 'flex';
+  });
+
+  // ── Модальное окно вариограммы ─────────────────────────────
+  document.getElementById('closeVariogramModal')?.addEventListener('click', () => {
+    document.getElementById('variogramModal')?.style.setProperty('display', 'none');
+  });
+  document.getElementById('variogramModal')?.addEventListener('click', function(e) {
+    if (e.target === this) this.style.display = 'none';
+  });
+
+  // ── Управление видимостью 3D ───────────────────────────────
   let showOreShell = true;
-  let showHolesVis = true;
+  let showHoles    = true;
 
-  const toggleOreShellBtn = document.getElementById("toggleOreShell");
+  document.getElementById('toggleOreShell')?.addEventListener('click', function() {
+    showOreShell = !showOreShell;
+    this.classList.toggle('active', showOreShell);
+    if (window.oreGrp) window.oreGrp.visible = showOreShell;
+    console.log(`[VIS] Каркас ${showOreShell ? 'показан' : 'скрыт'}`);
+  });
 
-  if (toggleOreShellBtn) {
+  document.getElementById('toggleHoles')?.addEventListener('click', function() {
+    showHoles = !showHoles;
+    this.classList.toggle('active', showHoles);
+    if (window.holesGrp) window.holesGrp.visible = showHoles;
+    console.log(`[VIS] Скважины ${showHoles ? 'показаны' : 'скрыты'}`);
+  });
 
-    toggleOreShellBtn.addEventListener("click", function() {
-
-      showOreShell = !showOreShell;
-
-      this.classList.toggle("active", showOreShell);
-
-      const oreGrp = window.oreGrp;
-
-      if (oreGrp) oreGrp.visible = showOreShell;
-
-      console.log(`[VIS] Каркас рудного тела ${showOreShell ? "показан" : "скрыт"}`);
-
-    });
-
-    console.log("[EVENTS] Кнопка toggleOreShell (каркас) найдена");
-
-  } else {
-
-    console.warn("[EVENTS] Кнопка toggleOreShell не найдена");
-
-  }
-
-
-
-  const toggleHolesBtn = document.getElementById("toggleHoles");
-  if (toggleHolesBtn) {
-    toggleHolesBtn.addEventListener('click', function() {
-      showHolesVis = !showHolesVis;
-      this.classList.toggle('active', showHolesVis);
-      const holesGrp = window.holesGrp;
-      if (holesGrp) holesGrp.visible = showHolesVis;
-      console.log(`[VIS] Скважины ${showHolesVis ? 'показаны' : 'скрыты'}`);
-    });
-    console.log('[EVENTS] Кнопка toggleHoles найдена');
-  } else {
-    console.warn('[EVENTS] Кнопка toggleHoles не найдена');
-  }
-
-  // Автоматическое обновление алгоритма при изменении параметров
-  const paramFields = ['blockSize', 'methodSel', 'cutoff', 'stdSel'];
-  paramFields.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.addEventListener('change', () => {
-        const holes = getCurrentHoles();
-        if (holes.length > 0) {
-          const method = document.getElementById('methodSel')?.value || 'idw';
-          const cutoff = getParam('cutoff') || 1.0;
-          const standard = document.getElementById('stdSel')?.value || 'JORC';
-          updateScriptOnly(holes, method, cutoff, standard);
-          
-          const btn = document.getElementById('runBtn');
-          if (btn && btn.classList.contains('done')) {
-            btn.classList.remove('done');
-            btn.classList.add('ready');
-            btn.innerHTML = '<span>▶ Запустить построение блочной модели</span>';
-          }
-        }
-      });
+  // ── Сброс камеры ───────────────────────────────────────────
+  document.getElementById('resetCamera')?.addEventListener('click', () => {
+    if (window.camera && window.controls) {
+      window.camera.position.set(50, 40, 55);
+      window.camera.lookAt(0, -8, 0);
+      window.controls.target.set(0, -8, 0);
+      window.controls.update();
     }
   });
 
-  // Чат
-  const chatSend = document.getElementById('chatSend');
-  const chatInput = document.getElementById('chatInput');
-  const chatMsgs = document.getElementById('chatMsgs');
-  function addMsg(role, text) {
-    const d = document.createElement('div'); d.className = `msg ${role}`;
-    d.innerHTML = `<div class="msg-b">${text}</div><div class="msg-t">${new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' })}</div>`;
-    if (chatMsgs) { chatMsgs.appendChild(d); chatMsgs.scrollTop = chatMsgs.scrollHeight; }
-  }
-  if (chatSend && chatInput) {
-    chatSend.addEventListener('click', () => {
-      const q = chatInput.value.trim();
-      if (!q) return;
-      chatInput.value = '';
-      addMsg('user', q);
-      setTimeout(() => addMsg('bot', botReply(q)), 500);
+  // ── Автообновление скрипта при смене параметров ────────────
+  ['blockSize', 'methodSel', 'cutoff', 'stdSel'].forEach(id => {
+    document.getElementById(id)?.addEventListener('change', () => {
+      const holes = getCurrentHoles();
+      if (!holes.length) return;
+      const method   = document.getElementById('methodSel')?.value || 'idw';
+      const cutoff   = getParam('cutoff') || 1.0;
+      const standard = document.getElementById('stdSel')?.value || 'JORC';
+      updateScriptOnly(holes, method, cutoff, standard);
+      // Сбрасываем статус кнопки если модель уже построена
+      const btn = document.getElementById('runBtn');
+      if (btn?.classList.contains('done')) {
+        btn.className = 'run-btn ready';
+        btn.innerHTML = '<span id="runBtnText">▶ Запустить построение блочной модели</span>';
+      }
     });
-    chatInput.addEventListener('keypress', e => { if (e.key === 'Enter') chatSend.click(); });
+  });
+
+  // ── Чат ────────────────────────────────────────────────────
+  const chatSend  = document.getElementById('chatSend');
+  const chatInput = document.getElementById('chatInput');
+  const chatMsgs  = document.getElementById('chatMsgs');
+
+  function addChatMsg(role, text) {
+    if (!chatMsgs) return;
+    const d = document.createElement('div');
+    d.className = `msg ${role}`;
+    d.innerHTML = `<div class="msg-b">${text}</div>` +
+      `<div class="msg-t">${new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' })}</div>`;
+    chatMsgs.appendChild(d);
+    chatMsgs.scrollTop = chatMsgs.scrollHeight;
   }
 
-  // Тема
+  chatSend?.addEventListener('click', () => {
+    const q = chatInput?.value.trim();
+    if (!q) return;
+    chatInput.value = '';
+    addChatMsg('user', q);
+    setTimeout(() => addChatMsg('bot', botReply(q)), 500);
+  });
+  chatInput?.addEventListener('keypress', e => { if (e.key === 'Enter') chatSend?.click(); });
+
+  // ── Тема ───────────────────────────────────────────────────
   const themeBtn = document.getElementById('themeBtn');
   let dark = !localStorage.getItem('geocoreLight');
+
   function applyTheme() {
     document.body.classList.toggle('light', !dark);
     if (themeBtn) themeBtn.textContent = dark ? '🌙' : '☀️';
   }
   applyTheme();
-  if (themeBtn) {
-    themeBtn.addEventListener('click', () => {
-      dark = !dark;
-      localStorage.setItem('geocoreLight', dark ? '' : '1');
-      applyTheme();
+  themeBtn?.addEventListener('click', () => {
+    dark = !dark;
+    localStorage.setItem('geocoreLight', dark ? '' : '1');
+    applyTheme();
+  });
+
+  // ── Scroll reveal ──────────────────────────────────────────
+  const obs = new IntersectionObserver(
+    entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('vis'); }),
+    { threshold: 0.08 }
+  );
+  document.querySelectorAll('.rv, .stg').forEach(el => obs.observe(el));
+
+  // ── Плавная навигация ──────────────────────────────────────
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const id = a.getAttribute('href');
+      if (id && id !== '#') {
+        e.preventDefault();
+        document.querySelector(id)?.scrollIntoView({ behavior: 'smooth' });
+      }
     });
-  }
+  });
 
-  // Скролл-ревел
-  const obs = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('vis'); }), { threshold: 0.08 });
-  document.querySelectorAll('.rv,.stg').forEach(el => obs.observe(el));
-
-  // Плавная навигация
-  document.querySelectorAll('a[href^="#"]').forEach(a => a.addEventListener('click', e => {
-    const id = a.getAttribute('href');
-    if (id && id !== '#') { e.preventDefault(); document.querySelector(id)?.scrollIntoView({ behavior: 'smooth' }); }
-  }));
-
-  // Автозагрузка золота
+  // ── Автозагрузка золота при старте ─────────────────────────
   loadTemplate('gold');
   renderProjects();
+
+  console.log('[EVENTS] Все обработчики подключены');
 }
 
-// Запуск после загрузки DOM
+// ─── Вспомогательная функция скачивания ──────────────────────
+function _download(content, filename, type) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([content], { type }));
+  a.download = filename;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+
+// ─── Запуск ───────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   init3D();
   wireEvents();
 });
-
-  // Вариограмма (добавляем в конец wireEvents)
-  const varioBtn = document.getElementById('calcVariogramBtn');
-  if (varioBtn) {
-    varioBtn.addEventListener('click', () => {
-      const holes = getCurrentHoles();
-      if (!holes.length) { alert('Загрузите данные'); return; }
-      const vg = calculateVariogram(holes);
-      if (!vg) { alert('Недостаточно точек (минимум 10)'); return; }
-      const modal = document.getElementById('variogramModal');
-      if (modal) modal.style.display = 'flex';
-      drawVariogram(vg, 'variogramPlotLarge');
-      const statsDiv = document.getElementById('variogramStatsLarge');
-      if (statsDiv) {
-        const strikeRange = vg.strike.length ? vg.strike[vg.strike.length-1]?.dist.toFixed(1) : '?';
-        const dipRange = vg.dip.length ? vg.dip[vg.dip.length-1]?.dist.toFixed(1) : '?';
-        statsDiv.innerHTML = `📊 Простирание: ранг ~${strikeRange} м | Падение: ранг ~${dipRange} м`;
-      }
-    });
-  }
-  
-  const closeModal = document.getElementById('closeVariogramModal');
-  if (closeModal) {
-    closeModal.addEventListener('click', () => {
-      const modal = document.getElementById('variogramModal');
-      if (modal) modal.style.display = 'none';
-    });
-  }
-  
-  const modalBg = document.getElementById('variogramModal');
-  if (modalBg) {
-    modalBg.addEventListener('click', (e) => {
-      if (e.target === modalBg) modalBg.style.display = 'none';
-    });
-  }
-
-// Функция для автообновления вариограммы (если модальное окно открыто)
-function autoUpdateVariogram() {
-  const modal = document.getElementById('variogramModal');
-  if (modal && modal.style.display === 'flex') {
-    const holes = getCurrentHoles();
-    if (holes.length) {
-      const vg = calculateVariogram(holes);
-      if (vg) {
-        const fittedParams = drawVariogram(vg, 'variogramPlotLarge');
-        if (fittedParams) {
-          let paramsHtml = '';
-          for (const [dir, params] of Object.entries(fittedParams)) {
-            if (params) {
-              const color = dir === 'strike' ? '#E87070' : dir === 'dip' ? '#7ee787' : '#C9A84C';
-              const label = dir === 'strike' ? 'Простирание' : dir === 'dip' ? 'Падение' : 'Поперечное';
-              paramsHtml += `<div style="margin-top: 8px;"><span style="color:${color}">${label}</span><br>`;
-              paramsHtml += `  Nugget: ${params.nugget.toFixed(3)} | Sill: ${params.sill.toFixed(3)} | Range: ${params.range.toFixed(1)} м | R²: ${params.r2.toFixed(3)}</div>`;
-            }
-          }
-          const statsDiv = document.getElementById('variogramStatsLarge');
-          if (statsDiv) statsDiv.innerHTML = paramsHtml + '<br><small>⚡ Автообновление: данные изменены</small>';
-        }
-      }
-    }
-  }
-}
-
-// Подписываемся на события смены данных
-const originalLoadTemplate = loadTemplate;
-window.loadTemplate = async function(type) {
-  await originalLoadTemplate(type);
-  autoUpdateVariogram();
-};
-
-// Также обновляем при загрузке CSV
-const csvIn = document.getElementById('csvIn');
-if (csvIn) {
-  const originalHandler = csvIn.onchange;
-  csvIn.addEventListener('change', () => {
-    setTimeout(autoUpdateVariogram, 500);
-  });
-}
