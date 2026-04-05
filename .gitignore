@@ -64,3 +64,17 @@ out/
 *.user
 *.userosscache
 *.sln.docstates
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Docker volumes (runtime data)
+mariadb_data/
+moodledata_data/
+
+# Temporary files
+*.tar
+*.tar.gz
+*.bak

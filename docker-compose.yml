@@ -1,0 +1,29 @@
+services:
+  mariadb:
+    image: mariadb:10.11
+    container_name: geocore_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: andysag_dbroot
+      MYSQL_DATABASE: moodle
+      MYSQL_USER: moodle
+      MYSQL_PASSWORD: andysag_db_password
+    volumes:
+      - mariadb_data:/var/lib/mysql
+
+  moodle:
+    build: ./moodle
+    container_name: geocore_moodle
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      - mariadb
+    environment:
+      MOODLE_DATABASE_HOST: mariadb
+      MOODLE_DATABASE_NAME: moodle
+      MOODLE_DATABASE_USER: moodle
+      MOODLE_DATABASE_PASSWORD: andysag_db_password
+
+volumes:
+  mariadb_data:
