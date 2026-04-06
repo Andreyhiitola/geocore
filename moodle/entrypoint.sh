@@ -30,16 +30,20 @@ PHPEOF
 chown www-data:www-data "${MOODLE_ROOT}/config.php"
 
 # --- Ждём, пока БД поднимется ---
+# Используем mysqladmin ping — не требует авторизации, просто проверяет доступность сервера
 echo "==> Ожидаем MariaDB на ${DB_HOST}..."
-until mysql -h"${DB_HOST}" -u"${DB_USER}" -p"${DB_PASS}" "${DB_NAME}" -e "SELECT 1" 2>/dev/null; do
+until mysqladmin ping -h"${DB_HOST}" --silent --skip-ssl 2>/dev/null; do
     echo "   БД ещё не готова, повтор через 3 сек..."
     sleep 3
 done
+# Дополнительная пауза — MariaDB создаёт пользователей после старта
+echo "==> Сервер отвечает, ждём инициализации пользователей..."
+sleep 8
 echo "==> БД готова."
 
-# --- Установка Moodle при первом запуске ---
-# Флаг .installed в moodledata означает, что установка уже была выполнена
+# --- Установка или обновление Moodle ---
 if [ ! -f "${MOODLE_DATA}/.installed" ]; then
+    # Первый запуск — полная установка
     echo "==> Запускаем CLI-установщик Moodle (~5 минут)..."
     su -s /bin/bash www-data -c "php ${MOODLE_ROOT}/admin/cli/install_database.php \
         --lang=${MOODLE_LANG:-ru} \
@@ -52,7 +56,11 @@ if [ ! -f "${MOODLE_DATA}/.installed" ]; then
     touch "${MOODLE_DATA}/.installed"
     echo "==> Moodle успешно установлен!"
 else
-    echo "==> Moodle уже установлен, пропускаем установщик."
+    # Повторный запуск — проверяем нужно ли обновление схемы БД
+    echo "==> Moodle уже установлен, проверяем обновления БД..."
+    su -s /bin/bash www-data -c "php ${MOODLE_ROOT}/admin/cli/upgrade.php --non-interactive" \
+        && echo "==> БД актуальна." \
+        || echo "==> Обновление БД выполнено."
 fi
 
 echo "==> Запускаем Apache..."
