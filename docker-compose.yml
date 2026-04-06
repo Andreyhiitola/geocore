@@ -1,29 +1,76 @@
+# Production — использует готовые образы с Docker Hub
+# Секреты читаются из .env (не коммитится в git, см. .env.example)
+
 services:
   mariadb:
     image: mariadb:10.11
     container_name: geocore_db
     restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: andysag_dbroot
-      MYSQL_DATABASE: moodle
-      MYSQL_USER: moodle
-      MYSQL_PASSWORD: andysag_db_password
     volumes:
       - mariadb_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MOODLE_DB_NAME}
+      MYSQL_USER: ${MOODLE_DB_USER}
+      MYSQL_PASSWORD: ${MOODLE_DB_PASSWORD}
+    networks:
+      - geocore_net
 
   moodle:
-    build: ./moodle
+    image: ${DOCKERHUB_USER}/geocore-moodle:${MOODLE_VERSION}
     container_name: geocore_moodle
     restart: unless-stopped
-    ports:
-      - "8080:80"
     depends_on:
       - mariadb
+    ports:
+      - "127.0.0.1:8080:80"
+    volumes:
+      - moodle_data:/var/moodledata
     environment:
-      MOODLE_DATABASE_HOST: mariadb
-      MOODLE_DATABASE_NAME: moodle
-      MOODLE_DATABASE_USER: moodle
-      MOODLE_DATABASE_PASSWORD: andysag_db_password
+      MOODLE_DB_HOST: mariadb
+      MOODLE_DB_NAME: ${MOODLE_DB_NAME}
+      MOODLE_DB_USER: ${MOODLE_DB_USER}
+      MOODLE_DB_PASSWORD: ${MOODLE_DB_PASSWORD}
+      MOODLE_WWWROOT: ${MOODLE_WWWROOT}
+      MOODLE_SITE_NAME: ${MOODLE_SITE_NAME}
+      MOODLE_SITE_SHORTNAME: ${MOODLE_SITE_SHORTNAME}
+      MOODLE_LANG: ${MOODLE_LANG:-ru}
+      MOODLE_ADMIN_USER: ${MOODLE_ADMIN_USER}
+      MOODLE_ADMIN_PASS: ${MOODLE_ADMIN_PASS}
+      MOODLE_ADMIN_EMAIL: ${MOODLE_ADMIN_EMAIL}
+    networks:
+      - geocore_net
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  backend:
+    image: ${DOCKERHUB_USER}/geocore-backend:latest
+    container_name: geocore_api
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8000:8000"
+    networks:
+      - geocore_net
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  watchtower:
+    image: containrrr/watchtower
+    container_name: geocore_watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      WATCHTOWER_CLEANUP: "true"
+      WATCHTOWER_INTERVAL: "3600"
+    command: --label-enable
+    networks:
+      - geocore_net
+
+networks:
+  geocore_net:
+    driver: bridge
 
 volumes:
   mariadb_data:
+  moodle_data:

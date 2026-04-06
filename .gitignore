@@ -30,29 +30,35 @@ Thumbs.db
 node_modules/
 package-lock.json
 
-# Python cache (if using local server)
+# Python cache
 __pycache__/
 *.py[cod]
 *$py.class
 
-# Local server files
-.serve/
-.vercel/
-.netlify/
-
-# Environment variables
+# Environment variables — НЕ КОММИТИТЬ СЕКРЕТЫ
 .env
 .env.local
+.env.prod
+.env.test
 .env.*.local
+
+# Moodle config.php генерируется entrypoint.sh из env vars
+moodle/config.php
+
+# Docker runtime data (volumes на диске)
+mariadb_data/
+moodle_data/
+moodledata_data/
+moodle_data/
 
 # Backup files
 *.bak
 *.backup
+*.bak2
 *.old
-
-# Archive files (not needed in repo)
-*.zip
+*.tar
 *.tar.gz
+*.zip
 *.rar
 
 # Local build artifacts
@@ -60,21 +66,6 @@ dist/
 build/
 out/
 
-# User-specific files
-*.user
-*.userosscache
-*.sln.docstates
-
-# Environment variables
-.env
-.env.local
-.env.*.local
-
-# Docker volumes (runtime data)
-mariadb_data/
-moodledata_data/
-
-# Temporary files
-*.tar
-*.tar.gz
-*.bak
+# Локальные утилиты (не нужны в репо)
+generate-compose.sh
+docker-compose.template.yml
