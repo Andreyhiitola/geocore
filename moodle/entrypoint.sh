@@ -59,6 +59,14 @@ if [ ! -f "${MOODLE_DATA}/.installed" ]; then
     # Активируем кастомную тему GeoCore
     echo "==> Активируем тему geocore..."
     su -s /bin/bash www-data -c "php ${MOODLE_ROOT}/admin/cli/cfg.php --name=theme --set=geocore"
+
+    # Если wwwroot начинается с http:// (не https) — отключаем secure cookies
+    # На продакшне с HTTPS этот параметр остаётся включённым по умолчанию
+    if [[ "${WWWROOT}" == http://* ]]; then
+        echo "==> HTTP режим: отключаем secure cookies..."
+        su -s /bin/bash www-data -c "php ${MOODLE_ROOT}/admin/cli/cfg.php --name=cookiesecure --set=0"
+    fi
+
     su -s /bin/bash www-data -c "php ${MOODLE_ROOT}/admin/cli/purge_caches.php"
     echo "==> Тема geocore активирована."
 else
