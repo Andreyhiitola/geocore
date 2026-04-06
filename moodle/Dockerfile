@@ -33,6 +33,11 @@ RUN MAJOR=$(echo "${MOODLE_VERSION}" | cut -d. -f1) && \
     echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
 COPY php.ini /usr/local/etc/php/conf.d/moodle.ini
+
+# Копируем кастомную тему GeoCore Academy в директорию Moodle
+COPY theme/geocore /var/www/moodle/theme/geocore
+RUN chown -R www-data:www-data /var/www/moodle/theme/geocore
+
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 

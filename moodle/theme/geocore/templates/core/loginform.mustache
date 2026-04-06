@@ -1,0 +1,262 @@
+{{!
+    @template core/loginform
+
+    Страница входа GeoCore Academy.
+    Переопределяет стандартный шаблон Boost.
+
+    Context variables:
+    * loginurl        - URL формы входа
+    * logintoken      - CSRF токен
+    * username        - предзаполненный логин
+    * error           - сообщение об ошибке
+    * info            - информационное сообщение
+    * autofocusform   - автофокус на поле ввода
+    * forgotpasswordurl - ссылка восстановления пароля
+    * cookiesenabled  - включены ли куки
+}}
+
+{{#cookiesenabled}}
+<div class="geocore-login-wrapper" style="
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    background: #0A0A0B;
+    font-family: 'IBM Plex Sans', sans-serif;
+    position: relative;
+">
+
+    {{! Логотип GeoCore Academy }}
+    <div style="
+        position: absolute;
+        top: 32px;
+        left: 48px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+    ">
+        <div style="
+            width: 28px;
+            height: 28px;
+            background: #C9A84C;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+        "></div>
+        <span style="
+            font-family: 'Playfair Display', serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: #E8E6DE;
+        ">Geo<span style="color:#C9A84C;">Core</span> Academy</span>
+    </div>
+
+    {{! Карточка формы }}
+    <div style="
+        background: #111114;
+        border: 1px solid rgba(201,168,76,0.18);
+        padding: 48px 44px;
+        width: 100%;
+        max-width: 440px;
+        position: relative;
+        box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+    ">
+        {{! Золотая полоска сверху }}
+        <div style="
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #C9A84C, transparent);
+        "></div>
+
+        {{! Логотип внутри карточки }}
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+            <div style="
+                width: 36px; height: 36px;
+                background: #C9A84C;
+                clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+                flex-shrink: 0;
+            "></div>
+            <div style="
+                font-family: 'Playfair Display', serif;
+                font-size: 20px;
+                font-weight: 700;
+                color: #E8E6DE;
+            ">Geo<span style="color:#C9A84C;">Core</span> Academy</div>
+        </div>
+
+        {{! Подзаголовок }}
+        <div style="
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 9.5px;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: #5C5B56;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        ">
+            <span style="width:28px; height:1px; background:#7A6230; display:inline-block;"></span>
+            ПЛАТФОРМА ОЦЕНКИ МЕСТОРОЖДЕНИЙ
+        </div>
+
+        {{! Заголовок }}
+        <h2 style="
+            font-family: 'Playfair Display', serif;
+            font-size: 26px;
+            font-weight: 700;
+            color: #E8E6DE;
+            margin-bottom: 28px;
+            line-height: 1.2;
+        ">{{#str}}login{{/str}}</h2>
+
+        {{! Ошибка }}
+        {{#error}}
+        <div style="
+            background: rgba(201,168,76,0.08);
+            border: 1px solid rgba(201,168,76,0.3);
+            border-left: 3px solid #C9A84C;
+            color: #E8C97A;
+            font-size: 13px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+        ">{{error}}</div>
+        {{/error}}
+
+        {{! Инфо }}
+        {{#info}}
+        <div style="
+            background: rgba(42,74,107,0.2);
+            border: 1px solid rgba(42,74,107,0.4);
+            border-left: 3px solid #2A4A6B;
+            color: #9A9890;
+            font-size: 13px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+        ">{{info}}</div>
+        {{/info}}
+
+        {{! Форма }}
+        <form action="{{loginurl}}" method="post" id="login" autocomplete="on">
+            <input type="hidden" name="logintoken" value="{{logintoken}}">
+            <input type="hidden" name="anchor" value="">
+
+            {{! Логин }}
+            <div style="margin-bottom: 20px;">
+                <label for="username" style="
+                    display: block;
+                    font-family: 'IBM Plex Mono', monospace;
+                    font-size: 10px;
+                    letter-spacing: 0.16em;
+                    text-transform: uppercase;
+                    color: #9A9890;
+                    margin-bottom: 8px;
+                ">{{#str}}username{{/str}}</label>
+                <input type="text"
+                       name="username"
+                       id="username"
+                       value="{{username}}"
+                       autocomplete="username"
+                       {{#autofocusform}}autofocus{{/autofocusform}}
+                       style="
+                           width: 100%;
+                           background: #18181D;
+                           border: 1px solid rgba(255,255,255,0.08);
+                           color: #E8E6DE;
+                           font-family: 'IBM Plex Sans', sans-serif;
+                           font-size: 14px;
+                           padding: 12px 16px;
+                           outline: none;
+                           transition: border-color 0.2s;
+                           box-sizing: border-box;
+                       "
+                       onfocus="this.style.borderColor='#C9A84C'; this.style.boxShadow='0 0 0 3px rgba(201,168,76,0.12)'"
+                       onblur="this.style.borderColor='rgba(255,255,255,0.08)'; this.style.boxShadow='none'">
+            </div>
+
+            {{! Пароль }}
+            <div style="margin-bottom: 28px;">
+                <label for="password" style="
+                    display: block;
+                    font-family: 'IBM Plex Mono', monospace;
+                    font-size: 10px;
+                    letter-spacing: 0.16em;
+                    text-transform: uppercase;
+                    color: #9A9890;
+                    margin-bottom: 8px;
+                ">{{#str}}password{{/str}}</label>
+                <input type="password"
+                       name="password"
+                       id="password"
+                       autocomplete="current-password"
+                       style="
+                           width: 100%;
+                           background: #18181D;
+                           border: 1px solid rgba(255,255,255,0.08);
+                           color: #E8E6DE;
+                           font-family: 'IBM Plex Sans', sans-serif;
+                           font-size: 14px;
+                           padding: 12px 16px;
+                           outline: none;
+                           transition: border-color 0.2s;
+                           box-sizing: border-box;
+                       "
+                       onfocus="this.style.borderColor='#C9A84C'; this.style.boxShadow='0 0 0 3px rgba(201,168,76,0.12)'"
+                       onblur="this.style.borderColor='rgba(255,255,255,0.08)'; this.style.boxShadow='none'">
+            </div>
+
+            {{! Кнопка входа }}
+            <button type="submit" id="loginbtn" style="
+                width: 100%;
+                background: #C9A84C;
+                border: none;
+                color: #0A0A0B;
+                font-family: 'IBM Plex Mono', monospace;
+                font-size: 11px;
+                font-weight: 500;
+                letter-spacing: 0.14em;
+                text-transform: uppercase;
+                padding: 14px 32px;
+                clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+                cursor: pointer;
+                transition: background 0.2s;
+            "
+            onmouseover="this.style.background='#E8C97A'"
+            onmouseout="this.style.background='#C9A84C'">
+                {{#str}}login{{/str}}
+            </button>
+        </form>
+
+        {{! Ссылка забыл пароль }}
+        {{#forgotpasswordurl}}
+        <div style="margin-top: 20px; text-align: center;">
+            <a href="{{forgotpasswordurl}}" style="
+                font-family: 'IBM Plex Mono', monospace;
+                font-size: 10px;
+                letter-spacing: 0.1em;
+                color: #5C5B56;
+                text-decoration: none;
+                transition: color 0.2s;
+            "
+            onmouseover="this.style.color='#C9A84C'"
+            onmouseout="this.style.color='#5C5B56'">
+                {{#str}}forgotten{{/str}}
+            </a>
+        </div>
+        {{/forgotpasswordurl}}
+
+    </div>
+</div>
+{{/cookiesenabled}}
+
+{{^cookiesenabled}}
+<div style="min-height:100vh; display:flex; align-items:center; justify-content:center; background:#0A0A0B;">
+    <div style="
+        background:#111114; border:1px solid rgba(201,168,76,0.18);
+        padding:32px; color:#E8C97A; font-family:'IBM Plex Sans',sans-serif;
+    ">
+        {{#str}}cookiesnotenabled{{/str}}
+    </div>
+</div>
+{{/cookiesenabled}}
