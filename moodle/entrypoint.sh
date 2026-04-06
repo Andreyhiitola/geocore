@@ -55,6 +55,12 @@ if [ ! -f "${MOODLE_DATA}/.installed" ]; then
         --agree-license"
     touch "${MOODLE_DATA}/.installed"
     echo "==> Moodle успешно установлен!"
+
+    # Активируем кастомную тему GeoCore
+    echo "==> Активируем тему geocore..."
+    su -s /bin/bash www-data -c "php ${MOODLE_ROOT}/admin/cli/cfg.php --name=theme --set=geocore"
+    su -s /bin/bash www-data -c "php ${MOODLE_ROOT}/admin/cli/purge_caches.php"
+    echo "==> Тема geocore активирована."
 else
     # Повторный запуск — проверяем нужно ли обновление схемы БД
     echo "==> Moodle уже установлен, проверяем обновления БД..."
