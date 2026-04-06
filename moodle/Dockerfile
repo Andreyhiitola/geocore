@@ -52,4 +52,8 @@ RUN chmod +x /entrypoint.sh
 
 EXPOSE 80
 
+# start-period=600s — даём время на установку Moodle при первом запуске (~5 мин)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=600s --retries=3 \
+    CMD curl -f http://localhost/ || exit 1
+
 ENTRYPOINT ["/entrypoint.sh"]
