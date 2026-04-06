@@ -9,8 +9,9 @@ DB_USER="${MOODLE_DB_USER:-moodle}"
 DB_PASS="${MOODLE_DB_PASSWORD}"
 WWWROOT="${MOODLE_WWWROOT:-http://localhost}"
 
-# --- Generate config.php from environment variables ---
-echo "==> Generating config.php (wwwroot=${WWWROOT})..."
+# --- Генерируем config.php из переменных окружения ---
+# config.php не хранится в git — создаётся при каждом старте контейнера
+echo "==> Генерируем config.php (wwwroot=${WWWROOT})..."
 cat > "${MOODLE_ROOT}/config.php" << PHPEOF
 <?php
 global \$CFG;
@@ -28,17 +29,18 @@ require_once(__DIR__ . '/lib/setup.php');
 PHPEOF
 chown www-data:www-data "${MOODLE_ROOT}/config.php"
 
-# --- Wait for database ---
-echo "==> Waiting for MariaDB at ${DB_HOST}..."
+# --- Ждём, пока БД поднимется ---
+echo "==> Ожидаем MariaDB на ${DB_HOST}..."
 until mysql -h"${DB_HOST}" -u"${DB_USER}" -p"${DB_PASS}" "${DB_NAME}" -e "SELECT 1" 2>/dev/null; do
-    echo "   database not ready, retrying in 3s..."
+    echo "   БД ещё не готова, повтор через 3 сек..."
     sleep 3
 done
-echo "==> Database is ready."
+echo "==> БД готова."
 
-# --- First-time install ---
+# --- Установка Moodle при первом запуске ---
+# Флаг .installed в moodledata означает, что установка уже была выполнена
 if [ ! -f "${MOODLE_DATA}/.installed" ]; then
-    echo "==> Running Moodle CLI installer (this takes ~5 minutes)..."
+    echo "==> Запускаем CLI-установщик Moodle (~5 минут)..."
     su -s /bin/bash www-data -c "php ${MOODLE_ROOT}/admin/cli/install_database.php \
         --lang=${MOODLE_LANG:-ru} \
         --adminuser=${MOODLE_ADMIN_USER:-admin} \
@@ -48,10 +50,10 @@ if [ ! -f "${MOODLE_DATA}/.installed" ]; then
         --shortname='${MOODLE_SITE_SHORTNAME:-geocore}' \
         --agree-license"
     touch "${MOODLE_DATA}/.installed"
-    echo "==> Moodle installed successfully!"
+    echo "==> Moodle успешно установлен!"
 else
-    echo "==> Moodle already installed, skipping installer."
+    echo "==> Moodle уже установлен, пропускаем установщик."
 fi
 
-echo "==> Starting Apache..."
+echo "==> Запускаем Apache..."
 exec apache2-foreground

@@ -2,7 +2,7 @@ FROM php:8.3-apache
 
 ARG MOODLE_VERSION=5.1.2
 
-# System dependencies + PHP extensions
+# Системные зависимости и PHP-расширения
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git curl zip unzip \
     libicu-dev libzip-dev libpng-dev libxml2-dev \
@@ -10,15 +10,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && docker-php-ext-install intl mysqli zip gd xml soap opcache \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Включаем модуль mod_rewrite для .htaccess
 RUN a2enmod rewrite
 
-# Download Moodle (specific version tag)
+# Клонируем конкретный тег Moodle (shallow clone — только последний коммит)
 RUN git clone --depth 1 --branch v${MOODLE_VERSION} \
     https://github.com/moodle/moodle.git /var/www/moodle \
     && mkdir -p /var/moodledata \
     && chown -R www-data:www-data /var/www/moodle /var/moodledata
 
-# Apache VirtualHost: Moodle 5.x uses /public subdir as DocumentRoot
+# Настройка Apache VirtualHost
+# Moodle 5.x использует /public как DocumentRoot, в 4.x — корень
 RUN MAJOR=$(echo "${MOODLE_VERSION}" | cut -d. -f1) && \
     if [ "${MAJOR}" -ge "5" ]; then \
         DOCROOT="/var/www/moodle/public"; \
