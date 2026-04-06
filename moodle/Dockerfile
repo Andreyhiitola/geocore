@@ -34,9 +34,18 @@ RUN MAJOR=$(echo "${MOODLE_VERSION}" | cut -d. -f1) && \
 
 COPY php.ini /usr/local/etc/php/conf.d/moodle.ini
 
-# Копируем кастомную тему GeoCore Academy в директорию Moodle
-COPY theme/geocore /var/www/moodle/theme/geocore
-RUN chown -R www-data:www-data /var/www/moodle/theme/geocore
+# Копируем кастомную тему GeoCore Academy
+# В Moodle 5.x темы живут в public/theme/, в 4.x — в theme/
+COPY theme/geocore /tmp/geocore_theme
+RUN MAJOR=$(echo "${MOODLE_VERSION}" | cut -d. -f1) && \
+    if [ "${MAJOR}" -ge "5" ]; then \
+        THEME_DIR="/var/www/moodle/public/theme/geocore"; \
+    else \
+        THEME_DIR="/var/www/moodle/theme/geocore"; \
+    fi && \
+    cp -r /tmp/geocore_theme "${THEME_DIR}" && \
+    chown -R www-data:www-data "${THEME_DIR}" && \
+    rm -rf /tmp/geocore_theme
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh

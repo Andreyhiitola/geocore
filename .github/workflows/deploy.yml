@@ -28,6 +28,7 @@ jobs:
           filters: |
             moodle:
               - 'moodle/**'
+              - '.github/workflows/deploy.yml'  # смена MOODLE_VERSION тоже триггерит
             backend:
               - 'backend/**'
 
