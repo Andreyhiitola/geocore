@@ -1,21 +1,22 @@
 FROM php:8.3-apache
 
-ARG MOODLE_VERSION=5.1.2
+ARG MOODLE_VERSION=5.1.3
 
 # Системные зависимости и PHP-расширения
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git curl zip unzip \
+    curl zip unzip \
     libicu-dev libzip-dev libpng-dev libxml2-dev \
     default-mysql-client \
     && docker-php-ext-install intl mysqli zip gd xml soap opcache \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Включаем модуль mod_rewrite для .htaccess
+# Включаем mod_rewrite для .htaccess Moodle
 RUN a2enmod rewrite
 
-# Клонируем конкретный тег Moodle (shallow clone — только последний коммит)
-RUN git clone --depth 1 --branch v${MOODLE_VERSION} \
-    https://github.com/moodle/moodle.git /var/www/moodle \
+# Скачиваем Moodle как тарбол с GitHub (надёжнее чем git clone)
+RUN curl -fsSL https://github.com/moodle/moodle/archive/refs/tags/v${MOODLE_VERSION}.tar.gz \
+    | tar xz -C /var/www \
+    && mv /var/www/moodle-${MOODLE_VERSION} /var/www/moodle \
     && mkdir -p /var/moodledata \
     && chown -R www-data:www-data /var/www/moodle /var/moodledata
 
