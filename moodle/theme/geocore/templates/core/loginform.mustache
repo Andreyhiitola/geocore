@@ -12,10 +12,8 @@
     * info            - информационное сообщение
     * autofocusform   - автофокус на поле ввода
     * forgotpasswordurl - ссылка восстановления пароля
-    * cookiesenabled  - включены ли куки
 }}
 
-{{#cookiesenabled}}
 <div class="geocore-login-wrapper" style="
     min-height: 100vh;
     display: flex;
@@ -248,15 +246,3 @@
 
     </div>
 </div>
-{{/cookiesenabled}}
-
-{{^cookiesenabled}}
-<div style="min-height:100vh; display:flex; align-items:center; justify-content:center; background:#0A0A0B;">
-    <div style="
-        background:#111114; border:1px solid rgba(201,168,76,0.18);
-        padding:32px; color:#E8C97A; font-family:'IBM Plex Sans',sans-serif;
-    ">
-        {{#str}}cookiesnotenabled{{/str}}
-    </div>
-</div>
-{{/cookiesenabled}}
