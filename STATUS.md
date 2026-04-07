@@ -29,9 +29,9 @@ nginx (на VPS, хост)
 | MariaDB контейнер | ✅ работает |
 | Moodle 5.1.3 контейнер | ✅ работает, тема geocore активна |
 | courses.geocore-academy.ru | ✅ открывается |
-| GitHub Actions CI/CD | ⏳ нет Secrets — автодеплой не настроен |
-| FastAPI контейнер | ❌ не запущен |
-| api.geocore-academy.ru | ❌ 502 |
+| GitHub Actions CI/CD | ✅ работает — автодеплой по git push |
+| FastAPI контейнер | ✅ работает |
+| api.geocore-academy.ru | ✅ отвечает |
 | Фронтенд (index/courses/lab) | ⏳ в репозитории, не подключён |
 
 ---
