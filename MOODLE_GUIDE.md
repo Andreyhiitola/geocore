@@ -115,6 +115,57 @@ GitHub Actions автоматически соберёт новый образ �
 
 ---
 
+## Тегирование образов на Docker Hub
+
+Репозиторий: `andreysagurov/geocore-moodle`
+
+### Схема тегов
+
+| Тег | Пример | Смысл |
+|-----|--------|-------|
+| `{версия_moodle}` | `5.1.3` | Базовая версия Moodle |
+| `{версия_moodle}-r{N}` | `5.1.3-r1` | Moodle + N-я ревизия наших правок |
+| `latest` | `latest` | Всегда последний актуальный образ |
+
+### Текущее состояние
+
+```
+5.1.3 = 5.1.3-r1 = latest
+```
+
+Все три тега указывают на один образ. Это нормально — `latest` всегда совпадает с последней ревизией.
+
+### Когда создавать новую ревизию
+
+При любых изменениях в `moodle/` (entrypoint, тема, php.ini) без обновления версии Moodle:
+
+```bash
+# На VPS после git pull
+docker build -t andreysagurov/geocore-moodle:5.1.3 \
+             -t andreysagurov/geocore-moodle:5.1.3-r2 \
+             -t andreysagurov/geocore-moodle:latest \
+             /opt/geocore/moodle/
+
+docker push andreysagurov/geocore-moodle:5.1.3
+docker push andreysagurov/geocore-moodle:5.1.3-r2
+docker push andreysagurov/geocore-moodle:latest
+```
+
+### Откат к предыдущей ревизии
+
+Если после обновления что-то сломалось — откатиться к предыдущей ревизии:
+
+```bash
+# В docker-compose.yml временно поменять тег
+image: andreysagurov/geocore-moodle:5.1.3-r1
+
+# Перезапустить
+docker compose pull moodle
+docker compose up -d moodle
+```
+
+---
+
 ## Быстрые команды
 
 ```bash
