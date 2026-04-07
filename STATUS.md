@@ -2,7 +2,7 @@
 
 > Последнее обновление: 6 апреля 2026  
 > Репозиторий: https://github.com/Andreyhiitola/geocore  
-> VPS: 176.123.169.77 (root)  
+> VPS: 176.123.169.77 (   )  
 > Домен: geocore-academy.ru
 
 ---
@@ -47,7 +47,7 @@
 | `DOCKERHUB_USERNAME` | логин Docker Hub |
 | `DOCKERHUB_TOKEN` | токен из Docker Hub → Account Settings → Personal Access Tokens |
 | `VPS_HOST` | `176.123.169.77` |
-| `VPS_USER` | `root` |
+| `VPS_USER` | `  ` |
 | `VPS_SSH_KEY` | содержимое `~/.ssh/id_rsa` или `~/.ssh/id_ed25519` |
 
 ### DNS (приоритет 2)
