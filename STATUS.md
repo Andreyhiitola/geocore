@@ -32,7 +32,7 @@ nginx (на VPS, хост)
 | GitHub Actions CI/CD | ✅ работает — автодеплой по git push |
 | FastAPI контейнер | ✅ работает |
 | api.geocore-academy.ru | ✅ отвечает |
-| Фронтенд (index/courses/lab) | ⏳ в репозитории, не подключён |
+| Фронтенд (index/courses/lab) | ✅ работает — geocore-academy.ru |
 
 ---
 
