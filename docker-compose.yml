@@ -17,7 +17,7 @@ services:
       - geocore_net
 
   moodle:
-    image: ${DOCKERHUB_USER}/geocore-moodle:${MOODLE_VERSION}
+    image: andreysagurov/geocore-moodle:${MOODLE_VERSION}
     container_name: geocore_moodle
     restart: unless-stopped
     depends_on:
@@ -44,7 +44,7 @@ services:
       - "com.centurylinklabs.watchtower.enable=true"
 
   backend:
-    image: ${DOCKERHUB_USER}/geocore-backend:latest
+    image: andreysagurov/geocore-backend:latest
     container_name: geocore_api
     restart: unless-stopped
     ports:
