@@ -2,6 +2,29 @@
 
 ---
 
+## 2026-04-07 (сессия 2)
+
+### Что сделали
+- Настроили Moodle Web Services: включили REST, создали сервис GeoCore API, выдали права пользователю API Service
+- Получили токен `MOODLE_TOKEN` и прописали в `.env` на VPS
+- Добавили эндпоинт `GET /api/courses` в FastAPI — тянет курсы из Moodle через `core_course_get_courses`
+- Добавили `httpx` в `requirements.txt`
+- Пробросили `MOODLE_URL` и `MOODLE_TOKEN` в backend через `docker-compose.yml`
+- Обновили `siteRenderer.js` — загружает курсы из API с fallback на `site.json`
+- Карточки курсов на главной стали кликабельными ссылками
+- Создали 6 курсов в Moodle — они появились на главной странице
+
+### Решённые проблемы
+- Опечатка `/webservices/rest/` → `/webservice/rest/` в `backend/main.py`
+- CI/CD не обновил контейнер — исправили через `docker exec sed` + `docker restart`
+
+### Отложено
+- Убрать дублирование карточек: сейчас показываются 6 из `site.json` + 6 из Moodle — нужно оставить только Moodle
+- Саморегистрация студентов в Moodle
+- www.geocore-academy.ru
+
+---
+
 ## 2026-04-07
 
 ### Что сделали

@@ -58,28 +58,15 @@ nginx (на VPS, хост)
 
 ## Что осталось сделать
 
-### 1. GitHub Secrets (нужны для CI/CD автодеплоя)
-Добавить в Settings → Secrets and variables → Actions:
+### 1. Фронтенд — дублирование карточек курсов
+На главной странице показываются 6 карточек из `site.json` + 6 из Moodle (итого 12).
+Нужно убрать статические карточки из `index.html` — оставить только динамические из API.
 
-| Secret | Что это |
-|--------|---------|
-| `DOCKERHUB_USERNAME` | логин Docker Hub |
-| `DOCKERHUB_TOKEN` | токен из Docker Hub → Account Settings → Personal Access Tokens |
-| `VPS_HOST` | IP-адрес VPS |
-| `VPS_USER` | пользователь SSH |
-| `VPS_SSH_KEY` | приватный SSH-ключ (`~/.ssh/id_rsa` или `id_ed25519`) |
+### 2. Саморегистрация студентов в Moodle
+Настроить самостоятельную запись на курсы.
 
-### 2. FastAPI бэкенд
-- Описать API эндпоинты в `backend/main.py`
-- Прописать зависимости в `requirements.txt`
-- Добавить `geocore_api` сервис в `docker-compose.yml` (сейчас его там нет — поэтому 502)
-- Проверить локально через `docker-compose.test.yml`
-- После настройки Secrets — задеплоить через git push
-
-### 3. Фронтенд
-- Определиться со структурой: статика в nginx или SPA в отдельном контейнере
-- Подключить к домену (или поддомену)
-- Интегрировать с Moodle (SSO / ссылки на курсы)
+### 3. www.geocore-academy.ru
+Нет DNS записи — не приоритет.
 
 ---
 
