@@ -20,6 +20,8 @@
       "title": "Datamine Studio RM: полный курс",
       "desc": "От импорта скважин до подсчёта запасов. Блочное моделирование, геостатистика, отчёты.",
       "meta": [{ "icon": "🕐", "text": "48 уроков" }, { "icon": "📁", "text": "Шаблоны" }],
+      "price": "29 900",
+      "currency": "₽",
       "featured": true,
       "href": "https://courses.geocore-academy.ru"
     },
@@ -30,6 +32,8 @@
       "title": "Leapfrog Geo: неявное моделирование",
       "desc": "Implicit modelling для рудных тел. Быстрое обновление при новых данных бурения.",
       "meta": [{ "icon": "🕐", "text": "32 урока" }, { "icon": "🎯", "text": "Практика" }],
+      "price": "24 900",
+      "currency": "₽",
       "featured": false,
       "href": "https://courses.geocore-academy.ru"
     },
@@ -40,6 +44,8 @@
       "title": "Подсчёт запасов: международные стандарты",
       "desc": "JORC, ГКЗ, NI 43-101, NAEN. Категории, CPR, отчётность для инвесторов.",
       "meta": [{ "icon": "🕐", "text": "24 урока" }, { "icon": "📄", "text": "Шаблоны CPR" }],
+      "price": "19 900",
+      "currency": "₽",
       "featured": false,
       "href": "https://courses.geocore-academy.ru"
     },
@@ -50,6 +56,8 @@
       "title": "Геостатистика и кригинг: от основ",
       "desc": "Вариография, ординарный кригинг, условная симуляция. Python + горное ПО.",
       "meta": [{ "icon": "🕐", "text": "28 уроков" }, { "icon": "🐍", "text": "Python" }],
+      "price": "22 900",
+      "currency": "₽",
       "featured": false,
       "href": "https://courses.geocore-academy.ru"
     },
@@ -60,6 +68,8 @@
       "title": "Читаем геологические отчёты",
       "desc": "Как оценивать JORC-отчёты, понимать категории запасов, выявлять риски.",
       "meta": [{ "icon": "🕐", "text": "12 уроков" }, { "icon": "📈", "text": "Кейсы" }],
+      "price": "9 900",
+      "currency": "₽",
       "featured": false,
       "href": "https://courses.geocore-academy.ru"
     },
@@ -70,6 +80,8 @@
       "title": "Surpac: маркшейдерия и горное планирование",
       "desc": "3D-моделирование рудных тел, маркшейдерские расчёты, планирование.",
       "meta": [{ "icon": "🕐", "text": "36 уроков" }, { "icon": "🔧", "text": "Практика" }],
+      "price": "24 900",
+      "currency": "₽",
       "featured": false,
       "href": "https://courses.geocore-academy.ru"
     }
@@ -101,10 +113,12 @@
       {
         "title": "Контакты",
         "links": [
-          { "label": "Telegram",      "href": "#" },
-          { "label": "LinkedIn",      "href": "#" },
-          { "label": "Email",         "href": "#" },
-          { "label": "Корпоративным", "href": "#" }
+          { "label": "📱 +7 (___) ___-__-__",      "href": "tel:+70000000000" },
+          { "label": "💬 WhatsApp",                 "href": "https://wa.me/70000000000" },
+          { "label": "✈️ Telegram",                 "href": "https://t.me/geocore_academy" },
+          { "label": "📧 info@geocore-academy.ru",  "href": "mailto:info@geocore-academy.ru" },
+          { "label": "💼 LinkedIn",                 "href": "https://linkedin.com/company/geocore-academy" },
+          { "label": "🏢 Корпоративным",            "href": "mailto:corp@geocore-academy.ru" }
         ]
       }
     ]
