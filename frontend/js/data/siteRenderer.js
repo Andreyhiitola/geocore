@@ -24,18 +24,35 @@ export function renderNav(data) {
 export function renderCourses(data) {
   const grid = document.querySelector('.cg');
   if (!grid) return;
-  grid.innerHTML = data.courses.map(c => `
-    <a href="${c.href}" class="cc${c.featured ? ' feat' : ''}" style="text-decoration:none;color:inherit;">
-      <div class="cc-num">${c.num}</div>
-      <span class="cc-icon">${c.icon}</span>
-      <div class="cc-tag">${c.tag}</div>
+  grid.innerHTML = data.courses.map((c, i) => `
+    <a href="${c.href}" class="cc${c.featured ? ' feat' : ''}" style="text-decoration:none;color:inherit;" target="_blank" rel="noopener">
+      <div class="cc-num">${c.num || `0${i+1} / ??`}</div>
+      <span class="cc-icon">${c.icon || '📚'}</span>
+      <div class="cc-tag">${c.tag || ''}</div>
       <h3 class="cc-t">${c.title}</h3>
-      <p class="cc-d">${c.desc}</p>
+      <p class="cc-d">${c.desc || c.summary || ''}</p>
       <div class="cc-meta">
-        ${c.meta.map(m => `<div class="cc-m">${m.icon} <strong>${m.text}</strong></div>`).join('')}
+        ${(c.meta || []).map(m => `<div class="cc-m">${m.icon} <strong>${m.text}</strong></div>`).join('')}
       </div>
     </a>
   `).join('');
+}
+
+async function fetchCoursesFromAPI() {
+  const resp = await fetch('https://api.geocore-academy.ru/api/courses');
+  if (!resp.ok) throw new Error(`API ${resp.status}`);
+  const { courses } = await resp.json();
+  // Маппим Moodle формат в наш формат
+  return courses.map((c, i) => ({
+    num:      `${String(i+1).padStart(2,'0')} / ??`,
+    icon:     '📚',
+    tag:      '',
+    title:    c.title,
+    desc:     c.summary.replace(/<[^>]+>/g, '').slice(0, 120),
+    meta:     [],
+    href:     c.href,
+    featured: i === 0,
+  }));
 }
 
 export function renderFooter(data) {
@@ -70,8 +87,17 @@ export async function initSite() {
   try {
     const data = await loadSiteData();
     renderNav(data);
-    renderCourses(data);
     renderFooter(data);
+
+    // Пробуем загрузить курсы из Moodle через API, fallback — site.json
+    try {
+      const moodleCourses = await fetchCoursesFromAPI();
+      renderCourses({ courses: moodleCourses });
+      console.log('[siteRenderer] Курсы загружены из Moodle API');
+    } catch (e) {
+      console.warn('[siteRenderer] Moodle API недоступен, fallback на site.json:', e.message);
+      renderCourses(data);
+    }
   } catch (e) {
     console.warn('[siteRenderer] Не удалось загрузить site.json:', e);
   }

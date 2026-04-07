@@ -60,6 +60,9 @@ services:
     restart: unless-stopped
     ports:
       - "127.0.0.1:8000:8000"
+    environment:
+      MOODLE_URL: ${MOODLE_WWWROOT:-https://courses.geocore-academy.ru}
+      MOODLE_TOKEN: ${MOODLE_TOKEN}
     networks:
       - geocore_net
     labels:

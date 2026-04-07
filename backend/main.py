@@ -4,6 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, PlainTextResponse
 import pandas as pd
 import io
+import os
+import httpx
 from typing import Optional
 
 # Импортируем наши модули
@@ -52,6 +54,44 @@ async def root():
             "/api/mac"
         ]
     }
+
+
+MOODLE_URL   = os.getenv("MOODLE_URL",   "https://courses.geocore-academy.ru")
+MOODLE_TOKEN = os.getenv("MOODLE_TOKEN", "")
+
+
+@app.get("/api/courses")
+async def get_courses():
+    """Список курсов из Moodle"""
+    if not MOODLE_TOKEN:
+        raise HTTPException(503, "MOODLE_TOKEN не задан")
+
+    params = {
+        "wstoken":           MOODLE_TOKEN,
+        "wsfunction":        "core_course_get_courses",
+        "moodlewsrestformat": "json",
+    }
+    async with httpx.AsyncClient(timeout=10) as client:
+        resp = await client.get(f"{MOODLE_URL}/webservices/rest/server.php", params=params)
+        resp.raise_for_status()
+        raw = resp.json()
+
+    if isinstance(raw, dict) and raw.get("exception"):
+        raise HTTPException(502, f"Moodle error: {raw.get('message')}")
+
+    # Фильтруем системный курс (id=1) и форматируем
+    courses = [
+        {
+            "id":       c["id"],
+            "title":    c["fullname"],
+            "summary":  c.get("summary", ""),
+            "href":     f"{MOODLE_URL}/course/view.php?id={c['id']}",
+            "img":      c.get("courseimage", ""),
+        }
+        for c in raw
+        if c["id"] != 1
+    ]
+    return {"courses": courses}
 
 
 @app.get("/api/health")
