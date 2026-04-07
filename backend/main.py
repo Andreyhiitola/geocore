@@ -72,7 +72,7 @@ async def get_courses():
         "moodlewsrestformat": "json",
     }
     async with httpx.AsyncClient(timeout=10) as client:
-        resp = await client.get(f"{MOODLE_URL}/webservices/rest/server.php", params=params)
+        resp = await client.get(f"{MOODLE_URL}/webservice/rest/server.php", params=params)
         resp.raise_for_status()
         raw = resp.json()
 
