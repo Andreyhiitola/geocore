@@ -43,6 +43,17 @@ services:
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
 
+  frontend:
+    image: andreysagurov/geocore-frontend:latest
+    container_name: geocore_frontend
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:80"
+    networks:
+      - geocore_net
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
   backend:
     image: andreysagurov/geocore-backend:latest
     container_name: geocore_api

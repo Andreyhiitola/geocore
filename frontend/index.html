@@ -1,0 +1,1279 @@
+<!DOCTYPE html><html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GeoCore Academy — Оценка месторождений</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── RESET & VARS ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --gold:#C9A84C; --gold-light:#E8C97A; --gold-dim:#7A6230;
+  --dark:#0A0A0B; --dark-2:#111114; --dark-3:#18181D; --dark-4:#1F1F26;
+  --surface:#252530; --text:#E8E6DE; --text-muted:#9A9890; --text-dim:#5C5B56;
+  --border:rgba(201,168,76,0.18); --border-dim:rgba(255,255,255,0.07);
+  --accent:#2A4A6B;
+}
+body.light{
+  --dark:#F5F3EE; --dark-2:#EDE9E0; --dark-3:#E4DED2; --dark-4:#D9D2C5;
+  --surface:#FFFFFF; --text:#1A1916; --text-muted:#5A5650; --text-dim:#9A9080;
+  --border:rgba(139,105,27,0.2); --border-dim:rgba(0,0,0,0.06);
+}
+html{scroll-behavior:smooth;}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--dark);color:var(--text);overflow-x:hidden;transition:background .3s,color .3s;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.35;}
+body.light::before{display:none;}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:68px;background:rgba(10,10,11,.88);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);transition:background .3s;}
+body.light nav{background:rgba(245,243,238,.92);}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.logo-hex{width:32px;height:32px;background:var(--gold);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);}
+.logo-text{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--text);}
+.logo-text span{color:var(--gold);}
+.nav-links{display:flex;gap:36px;list-style:none;}
+.nav-links a{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);text-decoration:none;transition:color .2s;}
+.nav-links a:hover{color:var(--gold);}
+.nav-right{display:flex;align-items:center;gap:12px;}
+.theme-btn{background:none;border:1px solid var(--border);color:var(--text-muted);width:34px;height:34px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.theme-btn:hover{border-color:var(--gold);color:var(--gold);}
+.nav-cta{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dark);background:var(--gold);padding:9px 22px;text-decoration:none;clip-path:polygon(7px 0%,100% 0%,calc(100% - 7px) 100%,0% 100%);transition:background .2s;}
+.nav-cta:hover{background:var(--gold-light);}
+
+/* ── HERO ── */
+.hero{min-height:100vh;display:grid;grid-template-columns:1fr;position:relative;overflow:hidden;padding-top:68px;}
+.hero-left{padding:60px 72px 80px 100px;z-index:1;display:flex;flex-direction:column;justify-content:center;max-width:720px;}
+.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:26px;display:flex;align-items:center;gap:10px;}
+.eyebrow::before{content:'';width:36px;height:1px;background:var(--gold);}
+h1.h-title{font-family:'Playfair Display',serif;font-size:clamp(44px,4.8vw,68px);font-weight:900;line-height:1.06;margin-bottom:28px;}
+h1.h-title em{font-style:italic;color:var(--gold);}
+.h-sub{font-size:15px;font-weight:300;line-height:1.75;color:var(--text-muted);max-width:460px;margin-bottom:44px;}
+.btn-row{display:flex;gap:14px;flex-wrap:wrap;}
+.btn-p{display:inline-flex;align-items:center;gap:9px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dark);background:var(--gold);padding:14px 30px;text-decoration:none;clip-path:polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%);transition:all .2s;}
+.btn-p:hover{background:var(--gold-light);transform:translateY(-2px);}
+.btn-s{display:inline-flex;align-items:center;gap:9px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);border:1px solid var(--border);padding:14px 30px;text-decoration:none;transition:all .2s;}
+.btn-s:hover{border-color:var(--gold);color:var(--gold);}
+.h-stats{display:flex;gap:44px;margin-top:56px;padding-top:36px;border-top:1px solid var(--border-dim);flex-wrap:wrap;}
+.stat-n{font-family:'Playfair Display',serif;font-size:34px;font-weight:700;color:var(--gold);}
+.stat-l{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--text-dim);margin-top:4px;}
+
+/* ── MARQUEE ── */
+.marquee-band{padding:24px 0;background:var(--dark-2);border-top:1px solid var(--border-dim);border-bottom:1px solid var(--border-dim);overflow:hidden;}
+.m-track{display:flex;gap:56px;animation:mq 22s linear infinite;white-space:nowrap;width:max-content;}
+@keyframes mq{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+.m-item{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-dim);display:flex;align-items:center;gap:7px;}
+.m-item::before{content:'◆';color:var(--gold-dim);font-size:7px;}
+
+/* ── SECTION COMMONS ── */
+.sec{position:relative;}
+.inner{max-width:1240px;margin:0 auto;padding:0 100px;}
+.sec-lbl{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+.sec-lbl::after{content:'';flex:1;max-width:50px;height:1px;background:var(--gold-dim);}
+h2.sec-t{font-family:'Playfair Display',serif;font-size:clamp(34px,3.2vw,50px);font-weight:700;line-height:1.1;margin-bottom:18px;}
+.sec-d{font-size:15px;font-weight:300;line-height:1.75;color:var(--text-muted);max-width:540px;}
+
+/* ── COURSES ── */
+.courses-sec{padding:110px 0;background:var(--dark);}
+.ch{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:56px;}
+.cg{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;}
+.cc{background:var(--dark-3);padding:36px 32px;position:relative;overflow:hidden;transition:all .3s;border:1px solid transparent;cursor:pointer;}
+.cc::before{content:'';position:absolute;top:0;left:0;width:3px;height:0;background:var(--gold);transition:height .4s ease;}
+.cc:hover{background:var(--dark-4);border-color:var(--border);transform:translateY(-4px);}
+.cc:hover::before{height:100%;}
+.cc.feat{background:var(--dark-4);border-color:var(--border);}
+.cc.feat::after{content:'POPULAR';position:absolute;top:18px;right:18px;font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.14em;color:var(--dark);background:var(--gold);padding:3px 9px;clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);}
+.cc-num{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--text-dim);margin-bottom:18px;}
+.cc-icon{font-size:30px;margin-bottom:16px;display:block;}
+.cc-tag{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold-dim);padding:3px 7px;margin-bottom:14px;}
+h3.cc-t{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;line-height:1.25;margin-bottom:10px;}
+.cc-d{font-size:13px;font-weight:300;line-height:1.6;color:var(--text-muted);margin-bottom:24px;}
+.cc-meta{display:flex;gap:18px;padding-top:20px;border-top:1px solid var(--border-dim);}
+.cc-m{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.07em;color:var(--text-dim);display:flex;align-items:center;gap:5px;}
+
+/* ── WHO ── */
+.who-sec{padding:110px 0;background:var(--dark-2);border-top:1px solid var(--border-dim);}
+.who-g{display:grid;grid-template-columns:1fr 1fr;gap:100px;align-items:center;margin-top:72px;}
+.who-item{display:flex;gap:18px;padding:26px 0;border-bottom:1px solid var(--border-dim);transition:all .2s;}
+.who-item:hover .wi-num{color:var(--gold);}
+.wi-num{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;color:var(--text-dim);min-width:30px;padding-top:2px;transition:color .2s;}
+.wi-t{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;margin-bottom:5px;}
+.wi-d{font-size:13px;font-weight:300;line-height:1.6;color:var(--text-muted);}
+.who-viz{display:flex;align-items:center;justify-content:center;height:380px;}
+.who-diag{position:relative;width:260px;height:260px;}
+.d-ring{position:absolute;border-radius:50%;border:1px solid var(--border);animation:rp 4s ease-in-out infinite;}
+.d-ring:nth-child(1){inset:0;}.d-ring:nth-child(2){inset:26px;animation-delay:.5s;}.d-ring:nth-child(3){inset:52px;animation-delay:1s;}.d-ring:nth-child(4){inset:78px;animation-delay:1.5s;}
+@keyframes rp{0%,100%{opacity:.4;transform:scale(1);}50%{opacity:1;transform:scale(1.02);}}
+.d-center{position:absolute;inset:96px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;}
+
+/* ── TEMPLATES ── */
+.template-card:hover::before{height:100%;}
+
+/* ── SANDBOX ── */
+.sb-sec{padding:110px 0;background:var(--dark);}
+.sb-grid{display:grid;grid-template-columns:400px 1fr;gap:28px;margin-top:72px;align-items:start;}
+.sb-panel{background:var(--dark-3);border:1px solid var(--border-dim);}
+.sb-ph{padding:16px 20px;border-bottom:1px solid var(--border-dim);background:var(--dark-4);}
+.sb-ph-t{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;}
+.sb-ph-d{font-size:12px;color:var(--text-muted);margin-top:2px;}
+.sb-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sb-feat {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.sb-feat > div:last-child {
+  flex: 1;
+  min-width: 0;
+}
+.sb-fi{font-size:22px;min-width:36px;}
+.sb-ft{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;margin-bottom:5px;}
+.sb-fd{font-size:12px;font-weight:300;line-height:1.55;color:var(--text-muted);}
+.file-in{background:var(--dark-4);border:1px solid var(--border-dim);color:var(--text);padding:7px 10px;width:100%;font-size:11px;margin-top:6px;cursor:pointer;}
+.file-in::-webkit-file-upload-button{background:var(--gold);border:none;color:var(--dark);padding:4px 10px;font-family:'IBM Plex Mono',monospace;font-size:10px;cursor:pointer;}
+.status-line{font-size:10px;margin-top:5px;}
+.params-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
+.param-label{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--text-dim);margin-bottom:3px;}
+.param-input{width:100%;background:var(--dark-4);border:1px solid var(--border-dim);color:var(--text);padding:6px 8px;font-family:'IBM Plex Mono',monospace;font-size:12px;outline:none;}
+.param-input:focus{border-color:var(--gold);}
+.stats-out{font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.7;color:var(--text-muted);background:var(--dark-4);padding:10px 12px;border:1px solid var(--border-dim);min-height:70px;white-space:pre-wrap;}
+.script-out {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  line-height: 1.65;
+  color: #7ee787;
+  background: #0D1117;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  max-height: 180px;
+  overflow: auto;
+  white-space: pre-wrap;
+}
+.copy-btn,.export-btn{display:block;width:100%;background:transparent;border:1px solid var(--border);color:var(--text-muted);padding:8px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;cursor:pointer;margin-top:8px;transition:all .2s;}
+.copy-btn:hover,.export-btn:hover{border-color:var(--gold);color:var(--gold);}
+.run-btn{width:100%;background:var(--dark-4);border:2px solid var(--border-dim);color:var(--text-dim);padding:15px;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;cursor:not-allowed;transition:all .3s;position:relative;overflow:hidden;}
+.run-btn.ready{background:var(--gold);border-color:var(--gold);color:var(--dark);cursor:pointer;clip-path:polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%);}
+.run-btn.ready:hover{background:var(--gold-light);transform:translateY(-2px);}
+.run-btn.running{background:#1a2a3a;border-color:#2a5a8a;color:#79C0FF;cursor:wait;}
+.run-btn.done{background:#0d1f0d;border-color:#2a5a2a;color:#7ee787;cursor:pointer;}
+.run-progress{position:absolute;bottom:0;left:0;height:3px;background:var(--gold-light);width:0%;transition:width .08s linear;}
+.canvas-wrap{background:#0a121c;border:1px solid rgba(255,255,255,.06);position:relative;}
+#c3d{width:100%;height:520px;display:block;}
+.canvas-hint{position:absolute;bottom:10px;left:0;right:0;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:rgba(255,255,255,.2);pointer-events:none;}
+.legend{display:flex;gap:20px;padding:10px 14px;border-top:1px solid rgba(255,255,255,.05);flex-wrap:wrap;}
+.leg-item{display:flex;align-items:center;gap:6px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:rgba(255,255,255,.35);}
+.leg-dot{width:10px;height:10px;border-radius:50%;}
+.vari-btn{background:var(--dark-4);border:1px solid var(--border);color:var(--gold);padding:8px 14px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;cursor:pointer;width:100%;margin-top:8px;transition:all .2s;}
+.vari-btn:hover{border-color:var(--gold);background:rgba(201,168,76,.08);}
+#variogramCanvas{display:none;margin-top:12px;background:#0D1117;padding:12px;}
+#variogramStats{font-family:'IBM Plex Mono',monospace;font-size:10px;margin-top:8px;color:#7ee787;}
+
+/* ── PROJECTS ── */
+.proj-sec{padding:80px 0;background:var(--dark-2);border-top:1px solid var(--border-dim);}
+.proj-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:32px;}
+.proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;}
+.proj-card{background:var(--dark-3);border:1px solid var(--border-dim);padding:20px 24px;position:relative;transition:all .25s;cursor:pointer;}
+.proj-card:hover{border-color:var(--border);transform:translateY(-2px);}
+.proj-name{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;margin-bottom:6px;}
+.proj-meta{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-dim);letter-spacing:.08em;}
+.proj-tag{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold-dim);padding:2px 7px;margin-top:10px;}
+.proj-del{position:absolute;top:12px;right:12px;background:none;border:1px solid var(--border-dim);color:var(--text-dim);width:26px;height:26px;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.proj-del:hover{border-color:#8B3A2A;color:#8B3A2A;}
+.no-proj{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-dim);text-align:center;padding:40px;border:1px dashed var(--border-dim);}
+.save-btn{background:var(--gold);border:none;color:var(--dark);padding:9px 20px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;clip-path:polygon(7px 0%,100% 0%,calc(100% - 7px) 100%,0% 100%);transition:background .2s;}
+.save-btn:hover{background:var(--gold-light);}
+
+/* ── CHAT ── */
+.chat-sec{padding:110px 0;background:var(--dark);}
+.chat-layout{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start;margin-top:72px;}
+.consult-steps{display:flex;flex-direction:column;}
+.cs{display:flex;gap:20px;padding:28px 0;border-bottom:1px solid var(--border-dim);position:relative;}
+.cs-connector{position:absolute;left:17px;top:64px;bottom:-1px;width:1px;background:linear-gradient(180deg,var(--gold-dim),transparent);}
+.cs-num{width:36px;height:36px;min-width:36px;border:1px solid var(--gold-dim);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--gold);clip-path:polygon(5px 0%,100% 0%,calc(100% - 5px) 100%,0% 100%);}
+.cs-t{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;margin-bottom:7px;}
+.cs-d{font-size:13px;font-weight:300;line-height:1.6;color:var(--text-muted);}
+.chat-box{background:var(--dark-3);border:1px solid var(--border);display:flex;flex-direction:column;height:560px;}
+.chat-hd{display:flex;align-items:center;gap:10px;padding:14px 18px;background:var(--dark-4);border-bottom:1px solid var(--border-dim);flex-shrink:0;}
+.ch-av{width:34px;height:34px;background:var(--gold);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.ch-name{font-size:13px;font-weight:600;}
+.ch-status{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#28CA42;display:flex;align-items:center;gap:5px;}
+.ch-status::before{content:'';width:5px;height:5px;border-radius:50%;background:#28CA42;animation:pl 2s ease-in-out infinite;}
+@keyframes pl{0%,100%{opacity:1;}50%{opacity:.35;}}
+.chat-msgs{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:14px;scroll-behavior:smooth;}
+.chat-msgs::-webkit-scrollbar{width:4px;}.chat-msgs::-webkit-scrollbar-thumb{background:var(--border);}
+.msg{display:flex;gap:8px;max-width:88%;}
+.msg.user{align-self:flex-end;flex-direction:row-reverse;}
+.msg-b{padding:10px 14px;font-size:13px;font-weight:300;line-height:1.52;border-radius:2px;}
+.msg.bot .msg-b{background:var(--surface);color:var(--text);border:1px solid var(--border-dim);}
+.msg.user .msg-b{background:var(--gold);color:var(--dark);font-weight:400;}
+.msg-t{font-family:'IBM Plex Mono',monospace;font-size:8.5px;color:var(--text-dim);align-self:flex-end;flex-shrink:0;}
+.chat-inp{display:flex;border-top:1px solid var(--border-dim);flex-shrink:0;background:var(--dark-4);}
+.chat-inp input{flex:1;background:transparent;border:none;padding:12px 16px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:var(--text);outline:none;}
+.chat-inp input::placeholder{color:var(--text-dim);}
+.chat-send{background:var(--gold);border:none;padding:0 18px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.08em;color:var(--dark);cursor:pointer;transition:background .2s;flex-shrink:0;}
+.chat-send:hover{background:var(--gold-light);}
+.api-notice{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.06em;color:var(--text-dim);padding:6px 18px;border-top:1px solid var(--border-dim);text-align:center;background:var(--dark-4);}
+
+/* ── PRICING ── */
+/* ── ЛАБОРАТОРИЯ ── */
+.lab-sec{padding:110px 0;background:var(--dark);border-top:1px solid var(--border-dim);}
+.lab-intro{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;margin-bottom:80px;}
+.lab-desc{font-size:15px;font-weight:300;line-height:1.8;color:var(--text-muted);}
+.lab-steps{display:flex;flex-direction:column;gap:0;}
+.lab-step{display:flex;gap:16px;padding:18px 0;border-bottom:1px solid var(--border-dim);}
+.lab-step-num{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--gold);min-width:28px;padding-top:2px;}
+.lab-step-text{font-size:13px;font-weight:300;line-height:1.6;color:var(--text-muted);}
+.lab-step-text strong{color:var(--text);}
+
+/* Архив месторождений */
+.archive-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-bottom:72px;}
+.archive-card{background:var(--dark-3);padding:28px 24px;border:1px solid transparent;transition:all .3s;cursor:pointer;position:relative;overflow:hidden;}
+.archive-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:0;transition:height .4s;}
+.archive-card:hover{background:var(--dark-4);border-color:var(--border);transform:translateY(-3px);}
+.archive-card:hover::before{height:100%;}
+.archive-card.au::before{background:#C9A84C;}
+.archive-card.cu::before{background:#c06030;}
+.archive-card.coal::before{background:#666;}
+.archive-card.poly::before{background:#7070cc;}
+.archive-card.fe::before{background:#cc4444;}
+.archive-card.diamond::before{background:#88ccff;}
+.ac-icon{font-size:28px;margin-bottom:12px;display:block;}
+.ac-type{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px;}
+.ac-name{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;line-height:1.3;margin-bottom:8px;}
+.ac-desc{font-size:12px;font-weight:300;line-height:1.55;color:var(--text-muted);margin-bottom:16px;}
+.ac-files{display:flex;gap:8px;flex-wrap:wrap;padding-top:14px;border-top:1px solid var(--border-dim);}
+.ac-file{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold-dim);padding:3px 8px;cursor:pointer;transition:all .2s;}
+.ac-file:hover{background:var(--gold);color:var(--dark);}
+.ac-badge{position:absolute;top:14px;right:14px;font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:.12em;color:var(--dark);background:var(--gold);padding:2px 7px;clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);}
+
+/* Инструмент подготовки данных */
+.prep-tool{background:var(--dark-3);border:1px solid var(--border);}
+.prep-header{padding:20px 28px;border-bottom:1px solid var(--border-dim);background:var(--dark-4);display:flex;align-items:center;justify-content:space-between;}
+.prep-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;}
+.prep-badge{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold-dim);padding:3px 10px;}
+.prep-body{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+.prep-left{padding:28px;border-right:1px solid var(--border-dim);}
+.prep-right{padding:28px;}
+.prep-upload{border:1px dashed var(--border);padding:24px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:20px;}
+.prep-upload:hover{border-color:var(--gold);background:rgba(201,168,76,.04);}
+.prep-upload-icon{font-size:28px;margin-bottom:8px;}
+.prep-upload-text{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;color:var(--text-dim);}
+.prep-upload-sub{font-size:11px;font-weight:300;color:var(--text-dim);margin-top:4px;}
+.prep-ops{display:flex;flex-direction:column;gap:10px;}
+.prep-op{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--dark-4);border:1px solid var(--border-dim);cursor:pointer;transition:all .2s;}
+.prep-op:hover{border-color:var(--border);background:var(--dark-3);}
+.prep-op input[type=checkbox]{accent-color:var(--gold);width:14px;height:14px;cursor:pointer;}
+.prep-op-label{font-size:13px;font-weight:300;color:var(--text-muted);flex:1;}
+.prep-op-label strong{color:var(--text);}
+.prep-op-tag{font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.1em;color:var(--text-dim);border:1px solid var(--border-dim);padding:2px 6px;}
+.prep-run{width:100%;background:var(--dark-4);border:2px solid var(--border-dim);color:var(--text-dim);padding:14px;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;cursor:not-allowed;transition:all .3s;margin-top:16px;position:relative;overflow:hidden;}
+.prep-run.ready{background:var(--gold);border-color:var(--gold);color:var(--dark);cursor:pointer;clip-path:polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%);}
+.prep-run.ready:hover{background:var(--gold-light);}
+.prep-result{display:none;flex-direction:column;gap:12px;}
+.prep-result.visible{display:flex;}
+.prep-result-item{background:var(--dark-4);border:1px solid var(--border-dim);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;}
+.pri-label{font-size:12px;font-weight:300;color:var(--text-muted);}
+.pri-status{font-family:'IBM Plex Mono',monospace;font-size:10px;color:#7ee787;display:flex;align-items:center;gap:6px;}
+.pri-status.warn{color:var(--gold);}
+.pri-status.err{color:#E87070;}
+.pri-download{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.08em;color:var(--gold);background:transparent;border:1px solid var(--gold-dim);padding:4px 10px;cursor:pointer;transition:all .2s;}
+.pri-download:hover{background:var(--gold);color:var(--dark);}
+
+@media(max-width:1080px){
+  .archive-grid{grid-template-columns:repeat(2,1fr);}
+  .lab-intro,.prep-body{grid-template-columns:1fr;}
+  .prep-left{border-right:none;border-bottom:1px solid var(--border-dim);}
+}
+
+.price-sec{padding:110px 0;background:var(--dark-2);border-top:1px solid var(--border-dim);}
+.pg{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:56px;}
+.pc{background:var(--dark-3);padding:44px 32px;border:1px solid transparent;transition:all .3s;position:relative;}
+.pc:hover{border-color:var(--border);transform:translateY(-4px);}
+.pc.feat{background:var(--dark-4);border:1px solid var(--border);}
+.pc.feat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.pt{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-dim);margin-bottom:18px;}
+.pp{font-family:'Playfair Display',serif;font-size:48px;font-weight:900;color:var(--text);line-height:1;}
+.pp span{font-size:18px;color:var(--text-dim);}
+.pperiod{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--text-dim);margin-bottom:28px;}
+.pf{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:36px;}
+.pf li{font-size:13px;font-weight:300;color:var(--text-muted);display:flex;gap:9px;}
+.pf li::before{content:'◆';color:var(--gold-dim);font-size:7.5px;margin-top:5px;flex-shrink:0;}
+.pf li.hl{color:var(--text);}.pf li.hl::before{color:var(--gold);}
+.pb{display:block;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;padding:13px 20px;text-decoration:none;transition:all .2s;}
+.pb.out{color:var(--text-muted);border:1px solid var(--border);}.pb.out:hover{border-color:var(--gold);color:var(--gold);}
+.pb.fil{background:var(--gold);color:var(--dark);clip-path:polygon(9px 0%,100% 0%,calc(100% - 9px) 100%,0% 100%);}.pb.fil:hover{background:var(--gold-light);}
+
+/* ── BLOG ── */
+.blog-sec{padding:110px 0;background:var(--dark-2);border-top:1px solid var(--border-dim);}
+.blog-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:2px;margin-top:56px;}
+.blog-card{background:var(--dark-3);padding:36px 32px;border:1px solid transparent;transition:all .3s;cursor:pointer;display:flex;flex-direction:column;gap:14px;}
+.blog-card:hover{background:var(--dark-4);border-color:var(--border);transform:translateY(-4px);}
+.blog-card--feat{background:var(--dark-4);border-color:var(--border);position:relative;}
+.blog-card--feat::before{content:'НОВОЕ';position:absolute;top:20px;right:20px;font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.14em;color:var(--dark);background:var(--gold);padding:3px 9px;clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);}
+.bc-label{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);}
+h3.bc-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;line-height:1.28;color:var(--text);}
+.blog-card--feat h3.bc-title{font-size:24px;}
+.bc-desc{font-size:13px;font-weight:300;line-height:1.65;color:var(--text-muted);flex:1;}
+.bc-meta{display:flex;gap:8px;flex-wrap:wrap;}
+.bc-tag{font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold-dim);padding:2px 7px;}
+.bc-footer{display:flex;justify-content:space-between;align-items:center;padding-top:16px;border-top:1px solid var(--border-dim);margin-top:auto;}
+.bc-read{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;color:var(--gold);}
+.bc-time{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-dim);}
+
+/* ── CTA ── */
+.cta-sec{padding:90px 0;background:var(--dark);text-align:center;border-top:1px solid var(--border-dim);}
+.cta-in{max-width:640px;margin:0 auto;padding:0 32px;}
+.cta-ey{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:20px;}
+h2.cta-t{font-family:'Playfair Display',serif;font-size:44px;font-weight:900;line-height:1.1;margin-bottom:18px;}
+.cta-s{font-size:15px;font-weight:300;line-height:1.75;color:var(--text-muted);margin-bottom:44px;}
+
+/* ── FOOTER ── */
+footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:56px 0 36px;}
+.fi{max-width:1240px;margin:0 auto;padding:0 100px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:56px;margin-bottom:44px;}
+.fb-d{font-size:13px;font-weight:300;line-height:1.75;color:var(--text-muted);margin-top:14px;max-width:240px;}
+.fc-t{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-dim);margin-bottom:18px;}
+.fl{list-style:none;display:flex;flex-direction:column;gap:9px;}
+.fl a{font-size:13px;font-weight:300;color:var(--text-muted);text-decoration:none;transition:color .2s;}
+.fl a:hover{color:var(--gold);}
+.fb{max-width:1240px;margin:0 auto;padding:22px 100px 0;border-top:1px solid var(--border-dim);display:flex;justify-content:space-between;align-items:center;}
+.fc{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.07em;color:var(--text-dim);}
+.fl-langs{display:flex;gap:14px;}
+.fl-lang{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;color:var(--text-dim);cursor:pointer;}
+.fl-lang.act{color:var(--gold);}
+
+/* ── REVEAL ── */
+.rv{opacity:0;transform:translateY(28px);transition:opacity .65s ease,transform .65s ease;}
+.rv.vis{opacity:1;transform:none;}
+.stg>*{opacity:0;transform:translateY(18px);transition:opacity .5s ease,transform .5s ease;}
+.stg.vis>*:nth-child(1){opacity:1;transform:none;transition-delay:.08s;}
+.stg.vis>*:nth-child(2){opacity:1;transform:none;transition-delay:.16s;}
+.stg.vis>*:nth-child(3){opacity:1;transform:none;transition-delay:.24s;}
+.stg.vis>*:nth-child(4){opacity:1;transform:none;transition-delay:.32s;}
+.stg.vis>*:nth-child(5){opacity:1;transform:none;transition-delay:.40s;}
+.stg.vis>*:nth-child(6){opacity:1;transform:none;transition-delay:.48s;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1080px){
+  nav{padding:0 24px;}.nav-links{display:none;}
+  .inner,.fi,.fb{padding-left:24px;padding-right:24px;}
+  .hero-left{padding:80px 24px 60px;}
+  .cg,.pg,.blog-grid{grid-template-columns:1fr;}
+  .who-g,.sb-grid,.chat-layout{grid-template-columns:1fr;gap:40px;}
+  .fi{grid-template-columns:1fr 1fr;}
+  .h-stats{flex-wrap:wrap;gap:28px;}
+  /* ФИНАЛЬНОЕ ИСПРАВЛЕНИЕ БЛОКА СКРИПТА */
+.sb-panel {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.sb-body {
+  width: 100% !important;
+  min-width: 0 !important;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.sb-feat {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.script-out {
+  width: 100% !important;
+  max-width: 100% !important;
+  display: block !important;
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
+  box-sizing: border-box !important;
+}
+  #variogramModal {
+
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+
+    background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center;
+
+  }
+
+  #variogramModal > div { animation: fadeIn 0.3s ease; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+</style>
+</head>
+<body>
+
+<!-- ── NAVIGATION ── -->
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="logo-hex"></div>
+    <span class="logo-text">Geo<span>Core</span></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#courses">Курсы</a></li>
+    <li><a href="#sandbox">Песочница</a></li>
+    <li><a href="lab.html">Лаборатория</a></li>
+    <li><a href="#projects">Проекты</a></li>
+    <li><a href="#consult">Консультации</a></li>
+    <li><a href="#blog">Блог</a></li>
+    <li><a href="#pricing">Цены</a></li>
+    <li><a href="#">EN</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="theme-btn" id="themeBtn" title="Сменить тему">🌙</button>
+    <a href="#pricing" class="nav-cta">Начать обучение</a>
+  </div>
+</nav>
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="eyebrow">Mining Education Platform</div>
+    <h1 class="h-title">Оценка<br>месторождений.<br><em>На профессиональном уровне.</em></h1>
+    <p class="h-sub">Обучение работе с Datamine, Surpac, Leapfrog и другим горным ПО. Методика подсчёта запасов по JORC, ГКЗ, NAEN. Консультации по реальным проектам.</p>
+    <div class="btn-row">
+      <a href="lab.html" class="btn-p">🔬 Лаборатория данных</a>
+      <a href="#courses" class="btn-s">Смотреть курсы</a>
+    </div>
+    <div class="h-stats">
+      <div><div class="stat-n">12+</div><div class="stat-l">Программ ПО</div></div>
+      <div><div class="stat-n">JORC</div><div class="stat-l">ГКЗ · NAEN</div></div>
+      <div><div class="stat-n">3</div><div class="stat-l">Типа месторождений</div></div>
+      <div><div class="stat-n">RU/EN</div><div class="stat-l">Два рынка</div></div>
+    </div>
+  </div>
+</section>
+<!-- ── MARQUEE ── -->
+<div class="marquee-band">
+  <div class="m-track">
+    <span class="m-item">Datamine Studio RM</span><span class="m-item">Surpac</span><span class="m-item">Leapfrog Geo</span><span class="m-item">Micromine Origin</span><span class="m-item">Vulcan Maptek</span><span class="m-item">MineSight</span><span class="m-item">GEMS</span><span class="m-item">Deswik Suite</span><span class="m-item">JORC Code</span><span class="m-item">NI 43-101</span><span class="m-item">ГКЗ России</span><span class="m-item">CRIRSCO</span>
+    <span class="m-item">Datamine Studio RM</span><span class="m-item">Surpac</span><span class="m-item">Leapfrog Geo</span><span class="m-item">Micromine Origin</span><span class="m-item">Vulcan Maptek</span><span class="m-item">MineSight</span><span class="m-item">GEMS</span><span class="m-item">Deswik Suite</span><span class="m-item">JORC Code</span><span class="m-item">NI 43-101</span><span class="m-item">ГКЗ России</span><span class="m-item">CRIRSCO</span>
+  </div>
+</div>
+
+<!-- ── COURSES ── -->
+<section class="courses-sec sec" id="courses">
+  <div class="inner">
+    <div class="ch rv">
+  <div>
+    <div class="sec-lbl">Программы обучения</div>
+    <h2 class="sec-t">Курсы для<br>специалистов отрасли</h2>
+  </div>
+  <a href="courses.html" class="btn-s">Все курсы →</a>
+</div>
+    <div class="cg stg">
+      <div class="cc feat"><div class="cc-num">01 / 06</div><span class="cc-icon">⛏️</span><div class="cc-tag">Datamine · Базовый → Продвинутый</div><h3 class="cc-t">Datamine Studio RM: полный курс</h3><p class="cc-d">От импорта скважин до подсчёта запасов. Блочное моделирование, геостатистика, отчёты.</p><div class="cc-meta"><div class="cc-m">🕐 <strong>48 уроков</strong></div><div class="cc-m">📁 <strong>Шаблоны</strong></div></div></div>
+      <div class="cc"><div class="cc-num">02 / 06</div><span class="cc-icon">🌍</span><div class="cc-tag">Leapfrog · Средний</div><h3 class="cc-t">Leapfrog Geo: неявное моделирование</h3><p class="cc-d">Implicit modelling для рудных тел. Быстрое обновление при новых данных бурения.</p><div class="cc-meta"><div class="cc-m">🕐 <strong>32 урока</strong></div><div class="cc-m">🎯 <strong>Практика</strong></div></div></div>
+      <div class="cc"><div class="cc-num">03 / 06</div><span class="cc-icon">📐</span><div class="cc-tag">Методика · JORC / ГКЗ</div><h3 class="cc-t">Подсчёт запасов: международные стандарты</h3><p class="cc-d">JORC, ГКЗ, NI 43-101, NAEN. Категории, CPR, отчётность для инвесторов.</p><div class="cc-meta"><div class="cc-m">🕐 <strong>24 урока</strong></div><div class="cc-m">📄 <strong>Шаблоны CPR</strong></div></div></div>
+      <div class="cc"><div class="cc-num">04 / 06</div><span class="cc-icon">📊</span><div class="cc-tag">Геостатистика</div><h3 class="cc-t">Геостатистика и кригинг: от основ</h3><p class="cc-d">Вариография, ординарный кригинг, условная симуляция. Python + горное ПО.</p><div class="cc-meta"><div class="cc-m">🕐 <strong>28 уроков</strong></div><div class="cc-m">🐍 <strong>Python</strong></div></div></div>
+      <div class="cc"><div class="cc-num">05 / 06</div><span class="cc-icon">💼</span><div class="cc-tag">Для инвесторов</div><h3 class="cc-t">Читаем геологические отчёты</h3><p class="cc-d">Как оценивать JORC-отчёты, понимать категории запасов, выявлять риски.</p><div class="cc-meta"><div class="cc-m">🕐 <strong>12 уроков</strong></div><div class="cc-m">📈 <strong>Кейсы</strong></div></div></div>
+      <div class="cc"><div class="cc-num">06 / 06</div><span class="cc-icon">🗺️</span><div class="cc-tag">Surpac · Средний</div><h3 class="cc-t">Surpac: маркшейдерия и горное планирование</h3><p class="cc-d">3D-моделирование рудных тел, маркшейдерские расчёты, планирование.</p><div class="cc-meta"><div class="cc-m">🕐 <strong>36 уроков</strong></div><div class="cc-m">🔧 <strong>Практика</strong></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── WHO ── -->
+<section class="who-sec sec" id="who">
+  <div class="inner">
+    <div class="rv"><div class="sec-lbl">Аудитория</div><h2 class="sec-t">Для кого эта платформа</h2></div>
+    <div class="who-g">
+      <ul class="stg" style="list-style:none">
+        <li class="who-item"><div class="wi-num">01</div><div><div class="wi-t">Геологи и маркшейдеры</div><div class="wi-d">Практики, которым нужен конкретный навык в ПО или методике подсчёта запасов.</div></div></li>
+        <li class="who-item"><div class="wi-num">02</div><div><div class="wi-t">Горные инженеры</div><div class="wi-d">Специалисты по планированию горных работ, подсчёту запасов, ТЭО.</div></div></li>
+        <li class="who-item"><div class="wi-num">03</div><div><div class="wi-t">Инвесторы в добычу</div><div class="wi-d">Люди, принимающие решения о финансировании. Нужен язык геологических отчётов.</div></div></li>
+        <li class="who-item"><div class="wi-num">04</div><div><div class="wi-t">Студенты профильных вузов</div><div class="wi-d">МГРИ, СПбГИ, КазНТУ. Доступ к ПО и методике без дорогостоящих лицензий.</div></div></li>
+      </ul>
+      <div class="who-viz rv"><div class="who-diag"><div class="d-ring"></div><div class="d-ring"></div><div class="d-ring"></div><div class="d-ring"></div><div class="d-center">⛏️</div></div></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ── SANDBOX ── -->
+<!-- ── SANDBOX ── -->
+<section class="sb-sec sec" id="sandbox">
+  <div class="inner">
+    <div class="rv">
+      <div class="sec-lbl">3D-Песочница</div>
+      <h2 class="sec-t">Анализируйте данные<br>в реальном времени</h2>
+      <p class="sec-d">Выберите шаблон ниже или загрузите свои файлы. Получите 3D-модель, оценку запасов и готовый скрипт Datamine.</p>
+    </div>
+
+    <!-- АРХИВ МЕСТОРОЖДЕНИЙ (7 типов) -->
+    <div class="rv" style="margin-top: 48px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+        <h3 style="font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700;">🗂️ Архив месторождений</h3>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text-dim);">7 типов · CSV + OBJ</span>
+      </div>
+      <div class="templates-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 48px;">
+        <!-- Золото эпитермальное -->
+        <div class="template-card" data-template="gold" style="cursor: pointer;">
+          <div class="template-name"><span>🥇</span> Золото эпитермальное</div>
+          <p class="template-desc">Малосульфидное Au. Жильно-прожилковая минерализация, сложная морфология.</p>
+          <div class="template-stats">12 скважин · до 14 г/т Au · JORC</div>
+          <div class="template-badge">gold_demo.csv + obj</div>
+        </div>
+        <!-- Золото порфировое -->
+        <div class="template-card" data-template="gold" style="cursor: pointer;">
+          <div class="template-name"><span>🔶</span> Золото порфировое</div>
+          <p class="template-desc">Штокверковая минерализация, равномерное распределение.</p>
+          <div class="template-stats">15 скважин · 0.5–8 г/т Au · JORC</div>
+          <div class="template-badge">porphyry_gold.csv + obj</div>
+        </div>
+        <!-- Медь порфировая -->
+        <div class="template-card" data-template="copper" style="cursor: pointer;">
+          <div class="template-name"><span>🔴</span> Медь порфировая</div>
+          <p class="template-desc">Вкрапленная Cu-Mo минерализация, крупный объём.</p>
+          <div class="template-stats">10 скважин · 0.2–2.5% Cu · JORC</div>
+          <div class="template-badge">copper_demo.csv + obj</div>
+        </div>
+        <!-- Уголь пластовый -->
+        <div class="template-card" data-template="coal" style="cursor: pointer;">
+          <div class="template-name"><span>⚫</span> Уголь пластовый</div>
+          <p class="template-desc">Два рабочих пласта мощностью 2–6 м.</p>
+          <div class="template-stats">13 скважин · мощность 3–5 м · ГКЗ</div>
+          <div class="template-badge">coal_demo.csv</div>
+        </div>
+        <!-- Полиметаллы Pb-Zn-Ag -->
+        <div class="template-card" data-template="copper" style="cursor: pointer;">
+          <div class="template-name"><span>🔵</span> Полиметаллы Pb-Zn-Ag</div>
+          <p class="template-desc">Стратиформная минерализация. Pb до 8%, Zn до 12%.</p>
+          <div class="template-stats">18 скважин · JORC</div>
+          <div class="template-badge">polymetallic_demo.csv + obj</div>
+        </div>
+        <!-- Железо (МКЖ) -->
+        <div class="template-card" data-template="gold" style="cursor: pointer;">
+          <div class="template-name"><span>🔩</span> Железо (МКЖ)</div>
+          <p class="template-desc">Магнетитовые кварциты, Fe 28–45%.</p>
+          <div class="template-stats">22 скважины · JORC / ГКЗ</div>
+          <div class="template-badge">iron_demo.csv + obj</div>
+        </div>
+        <!-- VMS Cu-Zn -->
+        <div class="template-card" data-template="copper" style="cursor: pointer;">
+          <div class="template-name"><span>🟣</span> VMS Cu-Zn</div>
+          <p class="template-desc">Колчеданно-полиметаллическое, высокая вариабельность.</p>
+          <div class="template-stats">20 скважин · Cu до 3%, Zn до 8%</div>
+          <div class="template-badge">vms_demo.csv + obj</div>
+        </div>
+        <!-- Алмазы (кимберлит) -->
+        <div class="template-card" style="cursor: pointer; opacity: 0.7;">
+          <div class="template-name"><span>💎</span> Алмазы (кимберлит)</div>
+          <p class="template-desc">Трубкообразное тело, содержание карат/т.</p>
+          <div class="template-stats">в разработке · JORC</div>
+          <div class="template-badge">Скоро</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ОСНОВНОЙ БЛОК ПЕСОЧНИЦЫ (2 колонки) -->
+    <div class="sb-grid" style="display: grid; grid-template-columns: 400px 1fr; gap: 28px; align-items: start;">
+      
+      <!-- ЛЕВАЯ КОЛОНКА: панель управления -->
+      <div class="sb-panel">
+        <div class="sb-ph">
+          <div class="sb-ph-t">📂 Данные проекта</div>
+          <div class="sb-ph-d">CSV скважины · OBJ каркас · или выберите шаблон выше</div>
+        </div>
+        <div class="sb-body">
+          <div class="sb-feat"><div class="sb-fi">📋</div><div style="flex:1"><div class="sb-ft">1. CSV (скважины)</div><div class="sb-fd">Формат: HoleID, From, To, Au_gpt</div><input type="file" id="csvIn" accept=".csv,.txt" class="file-in"><div id="csvStatus" class="status-line" style="color:var(--text-dim)">Демо-данные загружены автоматически</div></div></div>
+          <div class="sb-feat"><div class="sb-fi">🔷</div><div style="flex:1"><div class="sb-ft">2. OBJ (каркас рудного тела)</div><div class="sb-fd">Wavefront OBJ — вершины и грани</div><input type="file" id="objIn" accept=".obj,.txt" class="file-in"><div id="objStatus" class="status-line" style="color:var(--text-dim)"></div></div></div>
+          <div class="sb-feat"><div class="sb-fi">⚙️</div><div style="flex:1"><div class="sb-ft">3. Параметры блочной модели</div><div class="params-grid"><div><div class="param-label">Размер блока (м)</div><input type="number" id="blockSize" class="param-input" value="5" min="1" max="20"></div><div><div class="param-label">Метод интерполяции</div><select id="methodSel" class="param-input"><option value="idw">IDW (расстояние)</option><option value="kriging">Кригинг (упрощ.)</option><option value="nn">Nearest Neighbour</option></select></div><div><div class="param-label">Cutoff (г/т или %)</div><input type="number" id="cutoff" class="param-input" value="2.0" step="0.5"></div><div><div class="param-label">Стандарт</div><select id="stdSel" class="param-input"><option value="JORC">JORC</option><option value="ГКЗ">ГКЗ</option><option value="NI 43-101">NI 43-101</option></select></div></div></div></div>
+          <div class="sb-feat"><div class="sb-fi">📈</div><div style="flex:1"><div class="sb-ft">Экспериментальная вариограмма</div><div class="sb-fd">Анализ пространственной корреляции по трём направлениям.</div><button id="calcVariogramBtn" class="vari-btn">📊 Построить вариограмму</button><div id="variogramCanvas"><canvas id="variogramPlot" width="500" height="260" style="width:100%;background:#0a121c;"></canvas><div id="variogramStats"></div></div></div></div>
+          <button class="run-btn" id="runBtn" disabled><span id="runBtnText">▶ Загрузите CSV для запуска</span></button>
+          <div class="sb-feat"><div class="sb-fi">📊</div><div style="flex:1"><div class="sb-ft">Статистика и оценка запасов</div><div class="stats-out" id="statsOut">Загрузите CSV или выберите шаблон…</div></div></div>
+          <div class="sb-feat">
+            <div class="sb-fi">👁️</div>
+            <div style="flex:1">
+              <div class="sb-ft">Визуализация</div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;">
+                <button id="toggleOreShell" class="btn-s" style="padding: 6px 12px; background: var(--dark-4);">🔮 Каркас рудного тела</button>
+                <button id="toggleHoles" class="btn-s" style="padding: 6px 12px; background: var(--dark-4);">🕳️ Скважины</button>
+               </div>
+              <div class="sb-fd" style="margin-top: 6px;">Включите/выключите отображение элементов</div>
+            </div>
+          </div>
+          <div class="sb-feat"><div class="sb-fi">📜</div><div style="flex:1"><div class="sb-ft">Шаблон скрипта Datamine</div><div class="script-out" id="scriptOut">Загрузите данные…</div><button class="copy-btn" id="copyBtn">📋 Копировать скрипт</button><button class="export-btn" id="exportBtn">📎 Экспорт отчёта (CSV + текст)</button></div></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="save-btn" id="resetDemoBtn" style="background:var(--dark-4);color:var(--gold);border:1px solid var(--border);flex:1">⟳ Сброс к золоту</button><button class="save-btn" id="saveProjectBtn" style="flex:2">💾 Сохранить проект</button></div>
+        </div>
+      </div>
+
+      <!-- ПРАВАЯ КОЛОНКА: 3D-визуализация -->
+      <div>
+        <div class="canvas-wrap"><canvas id="c3d"></canvas><div class="canvas-hint">🖱 Вращение · ПКМ панорама · Scroll масштаб</div></div>
+        <div class="legend">
+          <div class="leg-item"><div class="leg-dot" style="background:#3a6ea5"></div>Скважины</div>
+          <div class="leg-item"><div class="leg-dot" style="background:#ffaa33"></div>Высокое содержание (>5 г/т)</div>
+          <div class="leg-item"><div class="leg-dot" style="background: linear-gradient(90deg, #0040ff, #00aaff, #ffdd00, #ff8800, #ff2200); width: 40px;"></div>Блочная модель (цвет = содержание)</div>
+          <div class="leg-item"><div class="leg-dot" style="background:#c9a84c; opacity:0.8; width: 12px; height: 12px; border-radius: 1px;"></div>Каркас рудного тела (сетка)</div>
+        </div>
+        <div class="sb-feat" style="margin-top: 16px;">
+          <div class="sb-fi">📥</div>
+          <div style="flex:1">
+            <div class="sb-ft">Экспорт для Datamine Viewer</div>
+            <div class="sb-fd" style="margin-bottom: 8px;">Скачайте блочную модель и каркас, чтобы открыть их в бесплатном просмотрщике Datamine Studio Viewer.</div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button id="exportBlockmodelBtn" class="btn-s" style="padding: 6px 12px; background: var(--dark-4);">📦 Скачать .blockmodel</button>
+              <button id="exportWireframeBtn" class="btn-s" style="padding: 6px 12px; background: var(--dark-4);">🔷 Скачать каркас (.wrl)</button>
+              <a href="https://www.dataminesoftware.com/products/studio-viewer" target="_blank" class="btn-s" style="padding: 6px 12px; background: var(--dark-4); text-decoration: none;">🔗 Datamine Viewer (бесплатно)</a>
+            </div>
+            <div class="sb-fd" style="margin-top: 6px; font-size: 10px;">📌 Studio Viewer позволяет открывать блочные модели и каркасы без лицензии Datamine.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ── PROJECTS ── -->
+<section class="proj-sec sec" id="projects">
+  <div class="inner">
+    <div class="proj-header rv"><div><div class="sec-lbl">Мои проекты</div><h2 class="sec-t" style="font-size:clamp(28px,2.8vw,40px)">Сохранённые проекты</h2></div><button class="save-btn" id="clearAll">🗑 Очистить всё</button></div>
+    <div class="proj-grid" id="projGrid"><div class="no-proj">Нет сохранённых проектов.<br>Загрузите данные и нажмите «Сохранить проект».</div></div>
+  </div>
+</section>
+
+<!-- ── CHAT ── -->
+<section class="chat-sec sec" id="consult">
+  <div class="inner">
+    <div class="rv"><div class="sec-lbl">Экспертные консультации · AI-ассистент</div><h2 class="sec-t">Помощь по вашему<br>конкретному проекту</h2><p class="sec-d">Задавайте вопросы по Datamine, JORC, геостатистике или опишите свой проект для консультации.</p></div>
+    <div class="chat-layout">
+      <div class="consult-steps rv"><div class="cs"><div class="cs-connector"></div><div class="cs-num">01</div><div><div class="cs-t">Опишите проект</div><div class="cs-d">Тип месторождения, стадия, стандарт. Ассистент задаст уточняющие вопросы.</div></div></div><div class="cs"><div class="cs-connector"></div><div class="cs-num">02</div><div><div class="cs-t">Получите анализ</div><div class="cs-d">Рекомендации по методике, ПО, параметрам интерполяции.</div></div></div><div class="cs"><div class="cs-connector"></div><div class="cs-num">03</div><div><div class="cs-t">Запись к эксперту</div><div class="cs-d">Бот помогает сформировать бриф и предлагает удобное время.</div></div></div><div class="cs"><div class="cs-num">04</div><div><div class="cs-t">NDA и сессия</div><div class="cs-d">Для конфиденциальных проектов — соглашение о неразглашении.</div></div></div></div>
+      <div class="chat-box rv"><div class="chat-hd"><div class="ch-av">⛏</div><div><div class="ch-name">GeoCore Assistant</div><div class="ch-status">online · горное дело · оценка месторождений</div></div></div><div class="chat-msgs" id="chatMsgs"><div class="msg bot"><div class="msg-b">Здравствуйте! Задайте вопрос по Datamine, Surpac, Leapfrog, методике JORC/ГКЗ или геостатистике.</div><div class="msg-t">сейчас</div></div></div><div class="chat-inp"><input type="text" id="chatInput" placeholder="Вопрос по Datamine, JORC, геостатистике…"><button class="chat-send" id="chatSend">Отправить</button></div><div class="api-notice">Локальный ассистент · для AI-ответов подключите API-ключ</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PRICING ── -->
+<!-- ── ЛАБОРАТОРИЯ ── -->
+<section class="lab-sec sec" id="lab">
+  <div class="inner">
+
+    <!-- Заголовок + описание -->
+    <div class="rv">
+      <div class="sec-lbl">Лаборатория · Данные и инструменты</div>
+      <h2 class="sec-t">Подготовка данных<br>для Datamine Studio RM</h2>
+    </div>
+
+    <div class="lab-intro rv">
+      <div>
+        <p class="lab-desc">Загрузите свои данные опробования — система автоматически проверит формат, выполнит композитирование, декластеризацию и построит каркас рудного тела. На выходе — файлы готовые для импорта в Datamine и готовый макрос <code style="font-family:'IBM Plex Mono',monospace;color:var(--gold)">.mac</code>.</p>
+        <p class="lab-desc" style="margin-top:16px">Или скачайте демонстрационные данные из архива — 7 типов месторождений с реалистичными параметрами для практики.</p>
+      </div>
+      <div class="lab-steps">
+        <div class="lab-step"><div class="lab-step-num">01</div><div class="lab-step-text"><strong>Загрузить CSV</strong> — данные опробования скважин</div></div>
+        <div class="lab-step"><div class="lab-step-num">02</div><div class="lab-step-text"><strong>Валидация</strong> — проверка формата, пропусков, выбросов</div></div>
+        <div class="lab-step"><div class="lab-step-num">03</div><div class="lab-step-text"><strong>Обработка</strong> — композитирование, декластеризация</div></div>
+        <div class="lab-step"><div class="lab-step-num">04</div><div class="lab-step-text"><strong>Каркас OBJ</strong> — автопостроение по контурам скважин</div></div>
+        <div class="lab-step"><div class="lab-step-num">05</div><div class="lab-step-text"><strong>Скрипт .mac</strong> — готовый макрос для Datamine Studio RM</div></div>
+      </div>
+    </div>
+
+    <!-- Архив месторождений -->
+    <div class="rv">
+      <div class="sec-lbl">Архив · 7 типов месторождений</div>
+      <h3 style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin-bottom:32px;">Демонстрационные датасеты</h3>
+    </div>
+
+    <div class="archive-grid stg">
+
+      <div class="archive-card au" onclick="loadLabTemplate('epithermal_gold')">
+        <div class="ac-badge">CSV + OBJ</div>
+        <span class="ac-icon">🥇</span>
+        <div class="ac-type">Золото · Эпитермальное</div>
+        <div class="ac-name">Малосульфидное Au месторождение</div>
+        <div class="ac-desc">Жильно-прожилковая минерализация, зональность, сложная морфология. 15 скважин, до 22 г/т Au.</div>
+        <div class="ac-files">
+          <span class="ac-file" onclick="event.stopPropagation();dlLabFile('epithermal_gold_demo.csv')">CSV</span>
+          <span class="ac-file" onclick="event.stopPropagation();dlLabFile('ore_body_gold.obj')">OBJ</span>
+          <span class="ac-file" onclick="event.stopPropagation();window.open('articles/bortsov_epithermal_gold.html','_blank')">Кейс →</span>
+        </div>
+      </div>
+
+      <div class="archive-card au" onclick="loadLabTemplate('porphyry_gold')">
+        <span class="ac-icon">🔶</span>
+        <div class="ac-type">Золото · Порфировое</div>
+        <div class="ac-name">Золото-порфировое месторождение</div>
+        <div class="ac-desc">Штокверковая минерализация, равномерное распределение, большой объём. 20 скважин, 0.5–8 г/т Au.</div>
+        <div class="ac-files">
+          <span class="ac-file" onclick="event.stopPropagation();dlLabFile('porphyry_gold_demo.csv')">CSV</span>
+          <span class="ac-file" onclick="event.stopPropagation();dlLabFile('ore_body_gold.obj')">OBJ</span>
+        </div>
+      </div>
+
+      <div class="archive-card cu" onclick="loadLabTemplate('porphyry_copper')">
+        <span class="ac-icon">🔴</span>
+        <div class="ac-type">Медь · Порфировое</div>
+        <div class="ac-name">Медно-порфировое месторождение</div>
+        <div class="ac-desc">Вкрапленная Cu-Mo минерализация. 20 скважин, 0.2–2.5% Cu, Mo попутный.</div>
+        <div class="ac-files">
+          <span class="ac-file" onclick="event.stopPropagation();dlLabFile('copper_demo.csv')">CSV</span>
+          <span class="ac-file" onclick="event.stopPropagation();dlLabFile('ore_body_copper.obj')">OBJ</span>
+        </div>
+      </div>
+
+      <div class="archive-card coal" onclick="loadLabTemplate('coal')">
+        <span class="ac-icon">⚫</span>
+        <div class="ac-type">Уголь · Пластовый</div>
+        <div class="ac-name">Каменноугольный пласт</div>
+        <div class="ac-desc">Два рабочих пласта мощностью 2–6 м. 13 скважин, выдержанная мощность. Стандарт ГКЗ.</div>
+        <div class="ac-files">
+          <span class="ac-file" onclick="event.stopPropagation();dlLabFile('coal_demo.csv')">CSV</span>
+        </div>
+      </div>
+
+      <div class="archive-card poly" onclick="loadLabTemplate('polymetallic')">
+        <span class="ac-icon">🔵</span>
+        <div class="ac-type">Полиметаллы · Pb-Zn-Ag</div>
+        <div class="ac-name">Свинцово-цинковое месторождение</div>
+        <div class="ac-desc">Стратиформная минерализация. 18 скважин, Pb до 8%, Zn до 12%, попутное Ag.</div>
+        <div class="ac-files">
+          <span class="ac-file" onclick="event.stopPropagation();dlLabFile('polymetallic_demo.csv')">CSV</span>
+          <span class="ac-file" onclick="event.stopPropagation();dlLabFile('ore_body_poly.obj')">OBJ</span>
+          <span class="ac-file" style="color:var(--text-dim);border-color:var(--border-dim);cursor:default;">Скоро</span>
+        </div>
+      </div>
+
+      <div class="archive-card fe" onclick="loadLabTemplate('iron')">
+        <span class="ac-icon">🔩</span>
+        <div class="ac-type">Железо · МКЖ</div>
+        <div class="ac-name">Магнетитовые кварциты</div>
+        <div class="ac-desc">Пластообразное тело, содержание Fe 28–45%. 22 скважины. Стандарты JORC / ГКЗ.</div>
+        <div class="ac-files">
+          <span class="ac-file" onclick="event.stopPropagation();dlLabFile('iron_demo.csv')">CSV</span>
+          <span class="ac-file" style="color:var(--text-dim);border-color:var(--border-dim);cursor:default;">Скоро</span>
+        </div>
+      </div>
+
+      <div class="archive-card diamond">
+        <span class="ac-icon">💎</span>
+        <div class="ac-type">Алмазы · Кимберлит</div>
+        <div class="ac-name">Кимберлитовая трубка</div>
+        <div class="ac-desc">Трубкообразное тело, содержание карат/т. Специфика выборочного опробования. JORC.</div>
+        <div class="ac-files">
+          <span class="ac-file" style="color:var(--text-dim);border-color:var(--border-dim);cursor:default;">В разработке</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Инструмент подготовки -->
+    <div class="rv">
+      <div class="sec-lbl">Инструмент · Подготовка данных</div>
+      <h3 style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin-bottom:32px;">Обработка перед Datamine</h3>
+    </div>
+
+    <div class="prep-tool rv">
+      <div class="prep-header">
+        <div class="prep-title">⚗️ Подготовка данных к импорту в Datamine Studio RM</div>
+        <div class="prep-badge">Python · Open Source</div>
+      </div>
+      <div class="prep-body">
+
+        <!-- Левая панель: загрузка + операции -->
+        <div class="prep-left">
+          <div class="prep-upload" id="prepUploadZone" onclick="document.getElementById('prepCsvIn').click()">
+            <div class="prep-upload-icon">📂</div>
+            <div class="prep-upload-text">Загрузить CSV с данными опробования</div>
+            <div class="prep-upload-sub">HoleID, From, To, Au_gpt (или Cu_pct, Coal_m, Fe_pct)</div>
+            <input type="file" id="prepCsvIn" accept=".csv,.txt" style="display:none">
+          </div>
+          <div id="prepFileStatus" style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-dim);margin-bottom:16px;min-height:16px;"></div>
+
+          <div class="prep-ops">
+            <label class="prep-op">
+              <input type="checkbox" id="opValidate" checked>
+              <span class="prep-op-label"><strong>Валидация</strong> — формат, пропуски, выбросы (IQR)</span>
+              <span class="prep-op-tag">шаг 1</span>
+            </label>
+            <label class="prep-op">
+              <input type="checkbox" id="opComposite" checked>
+              <span class="prep-op-label"><strong>Композитирование</strong> — приведение к единой длине интервала</span>
+              <span class="prep-op-tag">шаг 2</span>
+            </label>
+            <label class="prep-op">
+              <input type="checkbox" id="opDecluster">
+              <span class="prep-op-label"><strong>Декластеризация</strong> — сотовый метод (ячейка = блок)</span>
+              <span class="prep-op-tag">шаг 3</span>
+            </label>
+            <label class="prep-op">
+              <input type="checkbox" id="opWireframe" checked>
+              <span class="prep-op-label"><strong>Каркас OBJ</strong> — convex hull по скважинам</span>
+              <span class="prep-op-tag">шаг 4</span>
+            </label>
+            <label class="prep-op">
+              <input type="checkbox" id="opScript" checked>
+              <span class="prep-op-label"><strong>Скрипт .mac</strong> — макрос для Datamine Studio RM</span>
+              <span class="prep-op-tag">шаг 5</span>
+            </label>
+          </div>
+
+          <div style="display:flex;gap:8px;margin-top:16px;align-items:center">
+            <div style="flex:1">
+              <div class="param-label">Длина композита (м)</div>
+              <input type="number" id="prepCompLen" class="param-input" value="2" min="0.5" max="10" step="0.5">
+            </div>
+            <div style="flex:1">
+              <div class="param-label">Cutoff (г/т или %)</div>
+              <input type="number" id="prepCutoff" class="param-input" value="1.0" min="0" step="0.5">
+            </div>
+          </div>
+
+          <button class="prep-run" id="prepRunBtn" disabled>
+            <span id="prepRunText">▶ Загрузите CSV для запуска</span>
+          </button>
+        </div>
+
+        <!-- Правая панель: результаты -->
+        <div class="prep-right">
+          <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:700;margin-bottom:20px;color:var(--text-muted);">Результаты обработки</div>
+
+          <div class="prep-result" id="prepResult">
+            <div class="prep-result-item">
+              <div class="pri-label">📊 Валидация CSV</div>
+              <div style="display:flex;align-items:center;gap:10px">
+                <span class="pri-status" id="resValidate">—</span>
+              </div>
+            </div>
+            <div class="prep-result-item">
+              <div class="pri-label">🔗 Композиты</div>
+              <div style="display:flex;align-items:center;gap:10px">
+                <span class="pri-status" id="resComposite">—</span>
+                <button class="pri-download" id="dlComposite" style="display:none" onclick="downloadPrepResult('composite')">↓ CSV</button>
+              </div>
+            </div>
+            <div class="prep-result-item">
+              <div class="pri-label">🔷 Каркас рудного тела</div>
+              <div style="display:flex;align-items:center;gap:10px">
+                <span class="pri-status" id="resWireframe">—</span>
+                <button class="pri-download" id="dlWireframe" style="display:none" onclick="downloadPrepResult('wireframe')">↓ OBJ</button>
+              </div>
+            </div>
+            <div class="prep-result-item">
+              <div class="pri-label">📜 Скрипт Datamine</div>
+              <div style="display:flex;align-items:center;gap:10px">
+                <span class="pri-status" id="resScript">—</span>
+                <button class="pri-download" id="dlScript" style="display:none" onclick="downloadPrepResult('script')">↓ .mac</button>
+              </div>
+            </div>
+            <div class="prep-result-item" id="resStatsRow" style="flex-direction:column;gap:8px;align-items:flex-start">
+              <div class="pri-label">📈 Статистика</div>
+              <div id="resStats" style="font-family:'IBM Plex Mono',monospace;font-size:10px;line-height:1.8;color:var(--text-muted);white-space:pre;"></div>
+            </div>
+          </div>
+
+          <div id="prepPlaceholder" style="display:flex;align-items:center;justify-content:center;height:200px;border:1px dashed var(--border-dim);font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-dim);letter-spacing:.08em;text-align:center;">
+            Загрузите CSV<br>или выберите датасет из архива
+          </div>
+
+          <div style="margin-top:20px;padding:16px;background:var(--dark-4);border:1px solid var(--border-dim);">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;">ℹ Примечание</div>
+            <div style="font-size:12px;font-weight:300;line-height:1.65;color:var(--text-muted);">Предварительная обработка на open-source алгоритмах (Python/NumPy). Для официального подсчёта запасов по JORC/ГКЗ — используйте результаты в Datamine Studio RM с верификацией Competent Person.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="price-sec sec" id="pricing">
+  <div class="inner">
+    <div class="rv" style="text-align:center"><div class="sec-lbl" style="justify-content:center">Стоимость</div><h2 class="sec-t">Выберите формат</h2><p class="sec-d" style="margin:0 auto">Курсы, подписка или персональная консультация.</p></div>
+    <div class="pg stg">
+      <div class="pc"><div class="pt">Отдельный курс</div><div class="pp"><span>от </span>9 900</div><div class="pperiod">рублей · разовая оплата</div><ul class="pf"><li class="hl">Полный доступ к курсу</li><li>Практические задания</li><li>Шаблоны файлов</li><li>Сертификат об окончании</li><li>Доступ в Telegram-чат</li></ul><a href="#" class="pb out">Выбрать курс</a></div>
+      <div class="pc feat"><div class="pt">Подписка Pro</div><div class="pp"><span>₽</span>3 900</div><div class="pperiod">в месяц · все курсы включены</div><ul class="pf"><li class="hl">Все курсы платформы</li><li class="hl">Песочница без ограничений</li><li class="hl">Новые курсы сразу</li><li>Все шаблоны и скрипты</li><li>Скидка 20% на консультации</li></ul><a href="#" class="pb fil">Оформить подписку</a></div>
+      <div class="pc"><div class="pt">Консультация</div><div class="pp"><span>от </span>8 000</div><div class="pperiod">рублей · 60 минут</div><ul class="pf"><li class="hl">Разбор вашего проекта</li><li class="hl">Ревью модели / отчёта</li><li>Запись сессии</li><li>NDA по запросу</li><li>Сопровождение проекта</li></ul><a href="#consult" class="pb out">Записаться</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── BLOG ── -->
+<section class="blog-sec sec" id="blog">
+  <div class="inner">
+   <div class="rv">
+  <div class="sec-lbl">Блог · Методика</div>
+  <h2 class="sec-t">Статьи для специалистов</h2>
+  <p class="sec-d">Практические материалы по методике оценки, ПО и стандартам подсчёта запасов. Новые статьи от экспертов отрасли.</p>
+</div>
+   <div class="blog-grid stg">
+  <article class="blog-card blog-card--feat" onclick="window.open('articles/article_sections_vs_datamine.html','_blank')">
+    <div class="bc-label">Методика · Datamine</div>
+    <h3 class="bc-title">Классический метод разрезов VS блочное моделирование в Datamine</h3>
+    <p class="bc-desc">Одно и то же рудное тело — два метода. Показываем визуально, почему современные геологи переходят на блочное моделирование.</p>
+    <div class="bc-meta"><span class="bc-tag">Datamine</span><span class="bc-tag">Блочная модель</span><span class="bc-tag">JORC</span></div>
+    <div class="bc-footer"><span class="bc-read">Читать статью →</span><span class="bc-time">8 мин</span></div>
+  </article>
+  
+  <article class="blog-card" onclick="window.open('articles/Variogramma_article.html','_blank')">
+    <div class="bc-label">Геостатистика</div>
+    <h3 class="bc-title">Вариограмма: как правильно настроить перед кригингом</h3>
+    <p class="bc-desc">Шаг за шагом: направления, экспериментальная вариограмма, подбор модели. Типичные ошибки начинающих.</p>
+    <div class="bc-meta"><span class="bc-tag">Геостатистика</span><span class="bc-tag">Кригинг</span></div>
+    <div class="bc-footer"><span class="bc-read">Читать статью →</span><span class="bc-time">12 мин</span></div>
+  </article>
+  
+  <article class="blog-card" onclick="window.open('articles/JORC_vs_GKZ_articel.html','_blank')">
+    <div class="bc-label">Стандарты</div>
+    <h3 class="bc-title">JORC vs ГКЗ: в чём реальная разница для геолога</h3>
+    <p class="bc-desc">Категории запасов, требования к данным, Competent Person — сравниваем два стандарта на практических примерах.</p>
+    <div class="bc-meta"><span class="bc-tag">JORC</span><span class="bc-tag">ГКЗ</span></div>
+    <div class="bc-footer"><span class="bc-read">Читать статью →</span><span class="bc-time">10 мин</span></div>
+  </article>
+  
+  <!-- НОВАЯ СТАТЬЯ: Эпитермальное золото от Борцова -->
+  <article class="blog-card" onclick="window.open('articles/bortsov_epithermal_gold.html','_blank')">
+    <div class="bc-label">Кейс · Эпитермальное золото</div>
+    <h3 class="bc-title">Эпитермальное золоторудное месторождение: от поисков до блочной модели</h3>
+    <p class="bc-desc">Реальный разведочный проект: геология, данные бурения, построение модели в Leapfrog/Datamine, подсчёт ресурсов по JORC. Авторский кейс Константина Борцова.</p>
+    <div class="bc-meta"><span class="bc-tag">Эпитермальное</span><span class="bc-tag">Золото</span><span class="bc-tag">Leapfrog</span><span class="bc-tag">Datamine</span></div>
+    <div class="bc-footer"><span class="bc-read">Читать статью →</span><span class="bc-time">15 мин</span></div>
+  </article>
+</div>
+  </div>
+</section>
+
+<!-- ── CTA ── -->
+<section class="cta-sec sec">
+  <div class="cta-in rv">
+    <div class="cta-ey">Начните сегодня</div>
+    <h2 class="cta-t">Первый урок — бесплатно</h2>
+    <p class="cta-s">Откройте вводный урок любого курса без регистрации. Убедитесь в качестве материала перед покупкой.</p>
+    <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap"><a href="#" class="btn-p">Смотреть бесплатный урок</a><a href="#lab" class="btn-s">Открыть архив</a></div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="fi">
+    <div>
+      <a href="#" class="nav-logo" style="text-decoration:none">
+        <div class="logo-hex"></div>
+        <span class="logo-text">Geo<span>Core</span></span>
+      </a>
+      <p class="fb-d">Профессиональное обучение оценке месторождений. Россия, СНГ и международный рынок.</p>
+    </div>
+    <div>
+      <div class="fc-t">Курсы</div>
+      <ul class="fl">
+        <li><a href="#">Datamine Studio</a></li>
+        <li><a href="#">Leapfrog Geo</a></li>
+        <li><a href="#">Surpac</a></li>
+        <li><a href="#">Методика JORC</a></li>
+        <li><a href="#">Геостатистика</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="fc-t">Платформа</div>
+      <ul class="fl">
+        <li><a href="#sandbox">Песочница</a></li>
+        <li><a href="#lab">Шаблоны</a></li>
+        <li><a href="#consult">Консультации</a></li>
+        <li><a href="#blog">Блог</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="fc-t">Контакты</div>
+      <ul class="fl">
+        <li><a href="#">Telegram</a></li>
+        <li><a href="#">LinkedIn</a></li>
+        <li><a href="#">Email</a></li>
+        <li><a href="#">Корпоративным</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="fb">
+    <div class="fc">© 2025 GeoCore Academy · Все права защищены</div>
+    <div class="fl-langs">
+      <span class="fl-lang act">RU</span>
+      <span class="fl-lang">EN</span>
+    </div>
+  </div>
+</footer>
+
+<script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.128.0/build/three.module.js"
+    }
+  }
+</script>
+<script type="module" src="js/main.js"></script>
+<!-- Модальное окно для вариограммы -->
+
+<div id="variogramModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center;">
+
+  <div style="background: var(--dark-3); border: 1px solid var(--border); border-radius: 12px; width: 90%; max-width: 900px; padding: 20px; position: relative;">
+
+    <button id="closeVariogramModal" style="position: absolute; top: 10px; right: 20px; background: none; border: none; color: var(--text-muted); font-size: 28px; cursor: pointer;">&times;</button>
+
+    <h3 style="font-family: Playfair Display, serif; margin-bottom: 16px;">📈 Экспериментальная вариограмма</h3>
+
+    <canvas id="variogramPlotLarge" width="800" height="500" style="width: 100%; height: auto; background: #0a121c; border-radius: 8px;"></canvas>
+
+    <div id="variogramStatsLarge" style="font-family: monospace; font-size: 12px; margin-top: 16px; color: #7ee787; text-align: center;"></div>
+
+  </div>
+
+</div>
+
+<!-- ── ЛАБОРАТОРИЯ JS ── -->
+<script type="module">
+import { loadTemplate } from './js/data/templates.js';
+import { parseCSV } from './js/data/csvParser.js';
+
+// ── Загрузка шаблона из архива в песочницу ─────────────────
+window.loadLabTemplate = function(type) {
+  // Маппинг на существующие шаблоны
+  const map = {
+    epithermal_gold:  'gold',
+    porphyry_gold:    'gold',
+    porphyry_copper:  'copper',
+    coal:             'coal',
+    polymetallic:     'copper', // временно
+    iron:             'gold',   // временно
+  };
+  const tmpl = map[type] || 'gold';
+  loadTemplate(tmpl);
+  document.getElementById('sandbox')?.scrollIntoView({ behavior: 'smooth' });
+};
+
+// ── Скачать файл из data/ ──────────────────────────────────
+window.dlLabFile = function(filename) {
+  const a = document.createElement('a');
+  a.href = `data/${filename}`;
+  a.download = filename;
+  a.click();
+};
+
+// ── Инструмент подготовки данных ──────────────────────────
+let prepHoles = [];
+let prepResults = {};
+
+// Drag & drop зона
+const zone = document.getElementById('prepUploadZone');
+if (zone) {
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = 'var(--gold)'; });
+  zone.addEventListener('dragleave', () => { zone.style.borderColor = ''; });
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.style.borderColor = '';
+    const f = e.dataTransfer.files[0];
+    if (f) handlePrepFile(f);
+  });
+}
+
+document.getElementById('prepCsvIn')?.addEventListener('change', e => {
+  const f = e.target.files[0];
+  if (f) handlePrepFile(f);
+});
+
+function handlePrepFile(file) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    prepHoles = parseCSV(ev.target.result);
+    if (!prepHoles.length) {
+      document.getElementById('prepFileStatus').textContent = '❌ Ошибка формата CSV';
+      document.getElementById('prepFileStatus').style.color = '#E87070';
+      return;
+    }
+    const n = prepHoles.length;
+    const ti = prepHoles.reduce((s, h) => s + h.intervals.length, 0);
+    document.getElementById('prepFileStatus').textContent = `✓ ${file.name} — ${n} скважин, ${ti} интервалов`;
+    document.getElementById('prepFileStatus').style.color = '#7ee787';
+
+    const btn = document.getElementById('prepRunBtn');
+    btn.className = 'prep-run ready';
+    btn.disabled = false;
+    document.getElementById('prepRunText').textContent = '▶ Запустить подготовку данных';
+  };
+  reader.readAsText(file);
+}
+
+document.getElementById('prepRunBtn')?.addEventListener('click', runPrep);
+
+function runPrep() {
+  if (!prepHoles.length) return;
+  const btn = document.getElementById('prepRunBtn');
+  btn.className = 'prep-run';
+  btn.disabled = true;
+  document.getElementById('prepRunText').textContent = '⚙ Обработка…';
+
+  // Показываем панель результатов
+  document.getElementById('prepResult').classList.add('visible');
+  document.getElementById('prepPlaceholder').style.display = 'none';
+
+  setTimeout(() => {
+    const ops = {
+      validate:   document.getElementById('opValidate')?.checked,
+      composite:  document.getElementById('opComposite')?.checked,
+      decluster:  document.getElementById('opDecluster')?.checked,
+      wireframe:  document.getElementById('opWireframe')?.checked,
+      script:     document.getElementById('opScript')?.checked,
+    };
+    const compLen = +document.getElementById('prepCompLen')?.value || 2;
+    const cutoff  = +document.getElementById('prepCutoff')?.value || 1.0;
+
+    // 1. Валидация
+    if (ops.validate) {
+      const res = validateCSV(prepHoles);
+      const el = document.getElementById('resValidate');
+      if (res.errors.length) {
+        el.className = 'pri-status warn';
+        el.textContent = `⚠ ${res.errors.length} предупреждений`;
+      } else {
+        el.className = 'pri-status';
+        el.textContent = `✓ Ошибок не найдено`;
+      }
+    }
+
+    // 2. Композитирование
+    if (ops.composite) {
+      const composites = compositeIntervals(prepHoles, compLen);
+      prepResults.composite = composites;
+      const total = composites.reduce((s, h) => s + h.intervals.length, 0);
+      document.getElementById('resComposite').textContent = `✓ ${total} композитов по ${compLen} м`;
+      document.getElementById('dlComposite').style.display = 'block';
+    }
+
+    // 3. Каркас OBJ
+    if (ops.wireframe) {
+      const obj = buildConvexHullOBJ(prepHoles);
+      prepResults.wireframe = obj;
+      document.getElementById('resWireframe').textContent = '✓ Каркас построен (convex hull)';
+      document.getElementById('dlWireframe').style.display = 'block';
+    }
+
+    // 4. Скрипт .mac
+    if (ops.script) {
+      const mac = generateMac(prepHoles, compLen, cutoff);
+      prepResults.script = mac;
+      document.getElementById('resScript').textContent = '✓ Макрос сгенерирован';
+      document.getElementById('dlScript').style.display = 'block';
+    }
+
+    // 5. Статистика
+    const statsEl = document.getElementById('resStats');
+    if (statsEl) {
+      let ti = 0, tg = 0, hi = 0, maxV = 0;
+      prepHoles.forEach(h => h.intervals.forEach(([,,v]) => {
+        ti++; tg += v; if (v > 5) hi++; if (v > maxV) maxV = v;
+      }));
+      const avg = ti ? (tg / ti).toFixed(3) : 0;
+      statsEl.textContent =
+`Скважин:       ${prepHoles.length}
+Интервалов:    ${ti}
+Среднее:       ${avg} г/т
+Макс:          ${maxV.toFixed(2)} г/т
+Высокое >5:    ${hi} интервалов`;
+    }
+
+    btn.className = 'prep-run ready';
+    btn.disabled = false;
+    document.getElementById('prepRunText').textContent = '✓ Готово · Запустить снова';
+  }, 800);
+}
+
+// ── Валидация CSV ──────────────────────────────────────────
+function validateCSV(holes) {
+  const errors = [];
+  const vals = [];
+  holes.forEach(h => h.intervals.forEach(([f, t, v]) => {
+    if (t <= f) errors.push(`${h.id}: to(${t}) <= from(${f})`);
+    if (isNaN(v)) errors.push(`${h.id}: значение не число`);
+    if (v < 0) errors.push(`${h.id}: отрицательное значение ${v}`);
+    vals.push(v);
+  }));
+  // IQR выбросы
+  const sorted = [...vals].sort((a, b) => a - b);
+  const q1 = sorted[Math.floor(sorted.length * 0.25)];
+  const q3 = sorted[Math.floor(sorted.length * 0.75)];
+  const iqr = q3 - q1;
+  const upper = q3 + 3 * iqr;
+  vals.forEach((v, i) => { if (v > upper) errors.push(`Возможный выброс: ${v.toFixed(2)} (>${upper.toFixed(2)})`); });
+  return { errors };
+}
+
+// ── Композитирование ───────────────────────────────────────
+function compositeIntervals(holes, length) {
+  return holes.map(h => {
+    const comps = [];
+    let cur = 0;
+    while (cur < h.depth) {
+      const to = Math.min(cur + length, h.depth);
+      let wSum = 0, vSum = 0;
+      h.intervals.forEach(([f, t, v]) => {
+        const overlap = Math.max(0, Math.min(t, to) - Math.max(f, cur));
+        if (overlap > 0) { wSum += overlap; vSum += v * overlap; }
+      });
+      if (wSum > 0) comps.push([cur, to, vSum / wSum]);
+      cur = to;
+    }
+    return { ...h, intervals: comps };
+  });
+}
+
+// ── Convex Hull OBJ ────────────────────────────────────────
+function buildConvexHullOBJ(holes) {
+  // Упрощённый выпуклый каркас по позициям скважин
+  const pts = holes.map(h => [h.x, 0, h.z]);
+  // Добавляем глубинные точки
+  holes.forEach(h => pts.push([h.x, -h.depth * 0.5, h.z]));
+
+  let obj = '# GeoCore Academy — Wireframe (Convex Hull)\n# Скважин: ' + holes.length + '\n\n';
+  pts.forEach(p => { obj += `v ${p[0].toFixed(2)} ${p[1].toFixed(2)} ${p[2].toFixed(2)}\n`; });
+
+  // Простые треугольные грани между соседними точками
+  const n = holes.length;
+  for (let i = 0; i < n - 1; i++) {
+    obj += `f ${i+1} ${i+2} ${i+n+2}\n`;
+    obj += `f ${i+1} ${i+n+2} ${i+n+1}\n`;
+  }
+  obj += `f ${n} 1 ${n+1}\nf ${n} ${n+1} ${n*2}\n`;
+  return obj;
+}
+
+// ── Генерация .mac ─────────────────────────────────────────
+function generateMac(holes, compLen, cutoff) {
+  return `! GeoCore Academy — Datamine Macro
+! Скважин: ${holes.length} | Композит: ${compLen}м | Cutoff: ${cutoff}
+! Дата: ${new Date().toLocaleString('ru')}
+
+!READ assay.csv /CREATE=assay /FIELD=1:HOLEID,2:FROM,3:TO,4:AU
+!COMP assay /LENGTH=${compLen} /FIELD=AU /CREATE=comp_assay
+!BLKMOD /CREATE=bm /ORIGIN=(-50,-25,-25) /SIZE=(5,5,5) /BLOCKS=(20,10,10)
+!ESTIMA /DATA=comp_assay /FIELD=AU /METHOD=IDW /POWER=2 /MAX=12 /MIN=3 /SEARCH=40 /MODEL=bm /CREATE=bm_est
+!FILTER bm_est /CONDITION="AU >= ${cutoff}" /CREATE=bm_cut
+!REPORT bm_cut /FIELDS=AU,TONNES /DENSITY=2.7 /OUT=report.txt
+!WRITE bm_est /FILE=result.blockmodel /FORMAT=BINARY
+!PRINT "Done!"`;
+}
+
+// ── Скачивание результатов ─────────────────────────────────
+window.downloadPrepResult = function(type) {
+  const map = {
+    composite: { data: () => {
+      let csv = 'HoleID,From,To,Value\n';
+      (prepResults.composite || []).forEach(h => h.intervals.forEach(([f, t, v]) => {
+        csv += `${h.id},${f.toFixed(2)},${t.toFixed(2)},${v.toFixed(4)}\n`;
+      }));
+      return csv;
+    }, name: 'composites.csv', type: 'text/csv' },
+    wireframe: { data: () => prepResults.wireframe || '', name: 'wireframe.obj', type: 'text/plain' },
+    script:    { data: () => prepResults.script || '', name: 'datamine_script.mac', type: 'text/plain' },
+  };
+  const m = map[type];
+  if (!m) return;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([m.data()], { type: m.type }));
+  a.download = m.name;
+  a.click();
+};
+</script>
+
+</body>
+</html>
