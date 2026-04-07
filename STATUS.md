@@ -1,116 +1,91 @@
 # GeoCore Academy — Статус проекта
 
-> Последнее обновление: 6 апреля 2026  
+> Последнее обновление: апрель 2026  
 > Репозиторий: https://github.com/Andreyhiitola/geocore  
-> VPS: 176.123.169.77 (   )  
 > Домен: geocore-academy.ru
 
 ---
 
-## Что уже сделано
-
-### Docker инфраструктура
-- [x] `moodle/Dockerfile` — единый для Moodle 4.x и 5.x, загрузка через tarball
-- [x] `moodle/entrypoint.sh` — автоматическая установка и обновление Moodle при старте контейнера
-- [x] `backend/Dockerfile` — FastAPI на python:3.11-slim
-- [x] `docker-compose.yml` — production (образы с Docker Hub, порты только на 127.0.0.1)
-- [x] `docker-compose.test.yml` — локальный тест (сборка локально, порт 8081/8001)
-- [x] `nginx/geocore.conf` — reverse proxy с SSL для обоих поддоменов
-- [x] `.env.example` — шаблон всех переменных окружения
-- [x] `.gitignore` — исключены секреты (.env, config.php и т.д.)
-
-### CI/CD
-- [x] `.github/workflows/deploy.yml` — GitHub Actions pipeline:
-  - backend пересобирается при изменении `backend/`
-  - moodle пересобирается при изменении `moodle/`
-  - деплой на VPS по SSH после каждого push в main
-
-### Документация
-- [x] `MOODLE_GUIDE.md` — как проверять версию, отслеживать релизы, тестировать обновления
-- [x] `ARCHITECTURE.md` — архитектура проекта (эталонная схема)
-
-### Тест локально — ПРОЙДЕН
-- [x] Moodle 5.1.3 собирается автоматически
-- [x] Установка проходит без ручного вмешательства (CLI installer)
-- [x] При смене версии — автоматически запускает upgrade.php (данные сохраняются)
-- [x] Backend (FastAPI) запускается
-
----
-
-## Что осталось сделать
-
-### GitHub (приоритет 1)
-- [ ] Добавить 5 секретов в Settings → Secrets and variables → Actions:
-
-| Secret | Значение |
-|--------|----------|
-| `DOCKERHUB_USERNAME` | логин Docker Hub |
-| `DOCKERHUB_TOKEN` | токен из Docker Hub → Account Settings → Personal Access Tokens |
-| `VPS_HOST` | `176.123.169.77` |
-| `VPS_USER` | `  ` |
-| `VPS_SSH_KEY` | содержимое `~/.ssh/id_rsa` или `~/.ssh/id_ed25519` |
-
-### DNS (приоритет 2)
-- [ ] У регистратора домена добавить два A-record:
-
-| Имя | Тип | IP |
-|-----|-----|----|
-| `courses` | A | `176.123.169.77` |
-| `api` | A | `176.123.169.77` |
-
-Проверить распространение: https://dnschecker.org
-
-### VPS — настройка (приоритет 3)
-Выполнить после распространения DNS:
-
-```bash
-# 1. Установка пакетов
-apt update && apt install -y nginx certbot python3-certbot-nginx git
-
-# 2. Клонирование проекта
-git clone https://github.com/Andreyhiitola/geocore /opt/geocore
-
-# 3. Создание .env из шаблона (заполнить реальными паролями!)
-cd /opt/geocore && cp .env.example .env && nano .env
-
-# 4. Nginx конфиг
-cp /opt/geocore/nginx/geocore.conf /etc/nginx/sites-available/geocore
-ln -s /etc/nginx/sites-available/geocore /etc/nginx/sites-enabled/
-nginx -t && systemctl reload nginx
-
-# 5. SSL сертификаты
-certbot --nginx -d courses.geocore-academy.ru -d api.geocore-academy.ru
-
-# 6. Первый запуск (образы подтянутся с Docker Hub)
-cd /opt/geocore && docker compose up -d
-```
-
-### Первый деплой через GitHub Actions
-- [ ] После настройки VPS сделать `git push` — Actions запустится автоматически
-- [ ] Проверить что pipeline прошёл: GitHub → Actions вкладка
-- [ ] Открыть https://courses.geocore-academy.ru
-
----
-
-## Архитектура (итоговая схема)
+## Архитектура
 
 ```
 Браузер
    ↓ HTTPS
 nginx (на VPS, хост)
-   ├── courses.geocore-academy.ru → 127.0.0.1:8080 → контейнер geocore_moodle
-   └── api.geocore-academy.ru    → 127.0.0.1:8000 → контейнер geocore_api
+   ├── courses.geocore-academy.ru → 127.0.0.1:8080 → geocore_moodle (PHP/Apache)
+   └── api.geocore-academy.ru    → 127.0.0.1:8000 → geocore_api (FastAPI) [не запущен]
                                          ↓
-                                  контейнер geocore_db (MariaDB)
-                                  контейнер geocore_watchtower (авто-обновления)
+                                  geocore_db (MariaDB 10.11)
 ```
 
 ---
 
-## Переменные окружения (что заполнять в .env на VPS)
+## Текущий статус (апрель 2026)
+
+| Компонент | Статус |
+|-----------|--------|
+| DNS (courses, api → VPS) | ✅ настроен |
+| nginx + SSL (Let's Encrypt) | ✅ работает |
+| MariaDB контейнер | ✅ работает |
+| Moodle 5.1.3 контейнер | ✅ работает, тема geocore активна |
+| courses.geocore-academy.ru | ✅ открывается |
+| GitHub Actions CI/CD | ⏳ нет Secrets — автодеплой не настроен |
+| FastAPI контейнер | ❌ не запущен |
+| api.geocore-academy.ru | ❌ 502 |
+| Фронтенд (index/courses/lab) | ⏳ в репозитории, не подключён |
+
+---
+
+## Что сделано
+
+### Инфраструктура
+- `moodle/Dockerfile` — единый для Moodle 4.x и 5.x, загрузка через tarball
+- `moodle/entrypoint.sh` — автоустановка, автообновление (upgrade.php), генерация config.php из env, sslproxy при HTTPS
+- `moodle/theme/geocore` — кастомная тёмная тема, активируется автоматически при первом старте
+- `backend/Dockerfile` — FastAPI на python:3.11-slim
+- `docker-compose.yml` — production (образы с Docker Hub)
+- `docker-compose.test.yml` — локальный тест (порт 8081/8001)
+- `nginx/geocore.conf` — reverse proxy с SSL для обоих поддоменов
+- `.env.example` — шаблон всех переменных
+- `.github/workflows/deploy.yml` — CI/CD: пересборка только при изменениях backend/ или moodle/, деплой на VPS по SSH
+
+### Решённые проблемы
+- **ERR_TOO_MANY_REDIRECTS** — Moodle за SSL-прокси уходил в бесконечный редирект. Фикс: `$CFG->sslproxy = true` в config.php (генерируется автоматически когда WWWROOT начинается с https://)
+- **cookiesecure** — при локальном тесте на HTTP отключается автоматически
+
+---
+
+## Что осталось сделать
+
+### 1. GitHub Secrets (нужны для CI/CD автодеплоя)
+Добавить в Settings → Secrets and variables → Actions:
+
+| Secret | Что это |
+|--------|---------|
+| `DOCKERHUB_USERNAME` | логин Docker Hub |
+| `DOCKERHUB_TOKEN` | токен из Docker Hub → Account Settings → Personal Access Tokens |
+| `VPS_HOST` | IP-адрес VPS |
+| `VPS_USER` | пользователь SSH |
+| `VPS_SSH_KEY` | приватный SSH-ключ (`~/.ssh/id_rsa` или `id_ed25519`) |
+
+### 2. FastAPI бэкенд
+- Описать API эндпоинты в `backend/main.py`
+- Прописать зависимости в `requirements.txt`
+- Добавить `geocore_api` сервис в `docker-compose.yml` (сейчас его там нет — поэтому 502)
+- Проверить локально через `docker-compose.test.yml`
+- После настройки Secrets — задеплоить через git push
+
+### 3. Фронтенд
+- Определиться со структурой: статика в nginx или SPA в отдельном контейнере
+- Подключить к домену (или поддомену)
+- Интегрировать с Moodle (SSO / ссылки на курсы)
+
+---
+
+## Переменные окружения (`.env` на VPS, заполнять вручную)
 
 ```env
-DOCKERHUB_USER=andreyhiitola
+DOCKERHUB_USER=...
 MOODLE_VERSION=5.1.3
 
 DB_ROOT_PASSWORD=         # сильный пароль
@@ -136,13 +111,13 @@ API_SECRET_KEY=           # случайная строка 32+ символа
 
 ```
 1. Вышел новый тег (например v5.1.4)
-2. Меняешь в docker-compose.test.yml: MOODLE_TEST_VERSION: 5.1.4
+2. Меняешь MOODLE_VERSION в docker-compose.test.yml
 3. docker compose -f docker-compose.test.yml down -v
 4. docker compose -f docker-compose.test.yml up --build
 5. Проверяешь localhost:8081
-6. Если OK → меняешь в .github/workflows/deploy.yml: MOODLE_VERSION: '5.1.4'
+6. Если OK → меняешь MOODLE_VERSION в .github/workflows/deploy.yml
 7. git commit && git push → автодеплой на VPS
-8. Данные на VPS сохраняются (upgrade.php обновляет только схему БД)
+8. Данные сохраняются (upgrade.php обновляет только схему БД)
 ```
 
 ---
@@ -151,26 +126,23 @@ API_SECRET_KEY=           # случайная строка 32+ символа
 
 ```
 geocore/
-├── .env.example                # шаблон переменных окружения
-├── .github/
-│   └── workflows/
-│       └── deploy.yml          # CI/CD: build → Docker Hub → VPS
-├── .gitignore
+├── .env.example
+├── .github/workflows/deploy.yml   # CI/CD
 ├── backend/
 │   ├── Dockerfile
-│   ├── main.py                 # FastAPI приложение
+│   ├── main.py                    # FastAPI
 │   ├── requirements.txt
-│   └── processing/             # геологические алгоритмы
-├── docker-compose.yml          # production
-├── docker-compose.test.yml     # локальный тест
+│   └── processing/                # геологические алгоритмы
 ├── moodle/
-│   ├── Dockerfile              # единый для 4.x и 5.x
-│   ├── entrypoint.sh           # авто-установка и авто-обновление
-│   └── php.ini
-├── nginx/
-│   └── geocore.conf            # reverse proxy + SSL
-├── ARCHITECTURE.md             # архитектурная схема
-├── MOODLE_GUIDE.md             # инструкция по Moodle
-├── STATUS.md                   # этот файл
-└── index.html / courses.html / lab.html  # фронтенд
+│   ├── Dockerfile
+│   ├── entrypoint.sh
+│   ├── php.ini
+│   └── theme/geocore/             # кастомная тёмная тема
+├── nginx/geocore.conf
+├── docker-compose.yml             # production
+├── docker-compose.test.yml        # локальный тест
+├── index.html / courses.html / lab.html
+├── ARCHITECTURE.md
+├── MOODLE_GUIDE.md
+└── STATUS.md                      # этот файл
 ```
