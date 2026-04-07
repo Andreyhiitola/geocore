@@ -7,6 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Обязательно прочитать:
 1. `STATUS.md` — текущий статус всех компонентов и список задач
 2. `SESSION_LOG.md` — история сессий, принятые решения, что отложено
+3. `WORKFLOW.md` — протокол работы: ветки, коммиты, правила
 
 ## Архитектура
 
