@@ -3,6 +3,7 @@
  * Точка входа. Инициализация и обработчики событий.
  */
 
+import { initSite } from './data/siteRenderer.js';
 import { init3D } from './core/threeInit.js';
 import { loadTemplate } from './data/templates.js';
 import { runModel } from './core/model.js';
@@ -347,6 +348,7 @@ function _download(content, filename, type) {
 
 // ─── Запуск ───────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  initSite();
   init3D();
   wireEvents();
 });

@@ -1,0 +1,112 @@
+{
+  "nav": {
+    "links": [
+      { "label": "Курсы",         "href": "#courses" },
+      { "label": "Песочница",     "href": "#sandbox" },
+      { "label": "Лаборатория",   "href": "lab.html" },
+      { "label": "Проекты",       "href": "#projects" },
+      { "label": "Консультации",  "href": "#consult" },
+      { "label": "Блог",          "href": "#blog" },
+      { "label": "Цены",          "href": "#pricing" }
+    ],
+    "cta": { "label": "Начать обучение", "href": "#pricing" }
+  },
+
+  "courses": [
+    {
+      "num": "01 / 06",
+      "icon": "⛏️",
+      "tag": "Datamine · Базовый → Продвинутый",
+      "title": "Datamine Studio RM: полный курс",
+      "desc": "От импорта скважин до подсчёта запасов. Блочное моделирование, геостатистика, отчёты.",
+      "meta": [{ "icon": "🕐", "text": "48 уроков" }, { "icon": "📁", "text": "Шаблоны" }],
+      "featured": true,
+      "href": "https://courses.geocore-academy.ru"
+    },
+    {
+      "num": "02 / 06",
+      "icon": "🌍",
+      "tag": "Leapfrog · Средний",
+      "title": "Leapfrog Geo: неявное моделирование",
+      "desc": "Implicit modelling для рудных тел. Быстрое обновление при новых данных бурения.",
+      "meta": [{ "icon": "🕐", "text": "32 урока" }, { "icon": "🎯", "text": "Практика" }],
+      "featured": false,
+      "href": "https://courses.geocore-academy.ru"
+    },
+    {
+      "num": "03 / 06",
+      "icon": "📐",
+      "tag": "Методика · JORC / ГКЗ",
+      "title": "Подсчёт запасов: международные стандарты",
+      "desc": "JORC, ГКЗ, NI 43-101, NAEN. Категории, CPR, отчётность для инвесторов.",
+      "meta": [{ "icon": "🕐", "text": "24 урока" }, { "icon": "📄", "text": "Шаблоны CPR" }],
+      "featured": false,
+      "href": "https://courses.geocore-academy.ru"
+    },
+    {
+      "num": "04 / 06",
+      "icon": "📊",
+      "tag": "Геостатистика",
+      "title": "Геостатистика и кригинг: от основ",
+      "desc": "Вариография, ординарный кригинг, условная симуляция. Python + горное ПО.",
+      "meta": [{ "icon": "🕐", "text": "28 уроков" }, { "icon": "🐍", "text": "Python" }],
+      "featured": false,
+      "href": "https://courses.geocore-academy.ru"
+    },
+    {
+      "num": "05 / 06",
+      "icon": "💼",
+      "tag": "Для инвесторов",
+      "title": "Читаем геологические отчёты",
+      "desc": "Как оценивать JORC-отчёты, понимать категории запасов, выявлять риски.",
+      "meta": [{ "icon": "🕐", "text": "12 уроков" }, { "icon": "📈", "text": "Кейсы" }],
+      "featured": false,
+      "href": "https://courses.geocore-academy.ru"
+    },
+    {
+      "num": "06 / 06",
+      "icon": "🗺️",
+      "tag": "Surpac · Средний",
+      "title": "Surpac: маркшейдерия и горное планирование",
+      "desc": "3D-моделирование рудных тел, маркшейдерские расчёты, планирование.",
+      "meta": [{ "icon": "🕐", "text": "36 уроков" }, { "icon": "🔧", "text": "Практика" }],
+      "featured": false,
+      "href": "https://courses.geocore-academy.ru"
+    }
+  ],
+
+  "footer": {
+    "description": "Профессиональное обучение оценке месторождений. Россия, СНГ и международный рынок.",
+    "copyright": "© 2025 GeoCore Academy · Все права защищены",
+    "columns": [
+      {
+        "title": "Курсы",
+        "links": [
+          { "label": "Datamine Studio",  "href": "https://courses.geocore-academy.ru" },
+          { "label": "Leapfrog Geo",     "href": "https://courses.geocore-academy.ru" },
+          { "label": "Surpac",           "href": "https://courses.geocore-academy.ru" },
+          { "label": "Методика JORC",    "href": "https://courses.geocore-academy.ru" },
+          { "label": "Геостатистика",    "href": "https://courses.geocore-academy.ru" }
+        ]
+      },
+      {
+        "title": "Платформа",
+        "links": [
+          { "label": "Песочница",     "href": "#sandbox" },
+          { "label": "Шаблоны",       "href": "#lab" },
+          { "label": "Консультации",  "href": "#consult" },
+          { "label": "Блог",          "href": "#blog" }
+        ]
+      },
+      {
+        "title": "Контакты",
+        "links": [
+          { "label": "Telegram",      "href": "#" },
+          { "label": "LinkedIn",      "href": "#" },
+          { "label": "Email",         "href": "#" },
+          { "label": "Корпоративным", "href": "#" }
+        ]
+      }
+    ]
+  }
+}
