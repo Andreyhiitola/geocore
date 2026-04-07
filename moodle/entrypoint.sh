@@ -23,6 +23,7 @@ global \$CFG;
 \$CFG->dbpass    = '${DB_PASS}';
 \$CFG->prefix    = 'mdl_';
 \$CFG->wwwroot   = '${WWWROOT}';
+$([ "${WWWROOT}" = "${WWWROOT#https://}" ] || echo "\$CFG->sslproxy  = true;")
 \$CFG->dataroot  = '${MOODLE_DATA}';
 \$CFG->directorypermissions = 0777;
 require_once(__DIR__ . '/lib/setup.php');
