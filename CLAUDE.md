@@ -20,7 +20,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
                                  geocore_db (MariaDB 10.11)
 ```
 
-- **VPS:** 176.123.169.77, пользователь `root`, путь `/opt/geocore`
+- **VPS:** путь `/opt/geocore`
 - **Docker Hub:** `andreysagurov` — образы `geocore-backend`, `geocore-frontend`, `geocore-moodle`
 - **CI/CD:** GitHub Actions — пересобирает образ только при изменениях в соответствующей папке (`backend/`, `frontend/`, `moodle/`), затем деплоит на VPS
 
