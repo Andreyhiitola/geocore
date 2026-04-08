@@ -14,7 +14,7 @@
 
   "courses": [
     {
-      "num": "01 / 06",
+      "num": "01 / 07",
       "icon": "⛏️",
       "tag": "Datamine · Базовый → Продвинутый",
       "title": "Datamine Studio RM: полный курс",
@@ -26,7 +26,7 @@
       "href": "https://courses.geocore-academy.ru"
     },
     {
-      "num": "02 / 06",
+      "num": "02 / 07",
       "icon": "🌍",
       "tag": "Leapfrog · Средний",
       "title": "Leapfrog Geo: неявное моделирование",
@@ -38,7 +38,7 @@
       "href": "https://courses.geocore-academy.ru"
     },
     {
-      "num": "03 / 06",
+      "num": "03 / 07",
       "icon": "📐",
       "tag": "Методика · JORC / ГКЗ",
       "title": "Подсчёт запасов: международные стандарты",
@@ -50,7 +50,7 @@
       "href": "https://courses.geocore-academy.ru"
     },
     {
-      "num": "04 / 06",
+      "num": "04 / 07",
       "icon": "📊",
       "tag": "Геостатистика",
       "title": "Геостатистика и кригинг: от основ",
@@ -62,7 +62,7 @@
       "href": "https://courses.geocore-academy.ru"
     },
     {
-      "num": "05 / 06",
+      "num": "05 / 07",
       "icon": "💼",
       "tag": "Для инвесторов",
       "title": "Читаем геологические отчёты",
@@ -74,7 +74,7 @@
       "href": "https://courses.geocore-academy.ru"
     },
     {
-      "num": "06 / 06",
+      "num": "06 / 07",
       "icon": "🗺️",
       "tag": "Surpac · Средний",
       "title": "Surpac: маркшейдерия и горное планирование",
@@ -84,6 +84,16 @@
       "currency": "₽",
       "featured": false,
       "href": "https://courses.geocore-academy.ru"
+    },
+    {
+      "num": "07 / 07",
+      "icon": "👁️",
+      "tag": "Leapfrog · Для руководителей",
+      "title": "Leapfrog Viewer для руководителей",
+      "desc": "Работа с 3D-моделями месторождений в Leapfrog Viewer: навигация, анализ литологии, разрезы, рудные тела. Для геологов и руководителей без опыта моделирования.",
+      "meta": [{ "icon": "🕐", "text": "16 уроков" }, { "icon": "🎯", "text": "Практика" }],
+      "featured": false,
+      "href": "https://courses.geocore-academy.ru/course/view.php?id=8"
     }
   ],
 
