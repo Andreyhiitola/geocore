@@ -1,5 +1,5 @@
 {
-  "moodleCourseOrder": [9, 10],
+  "moodleCourseOrder": [11, 10],
 
   "moodleMeta": {
     "10": {
@@ -20,7 +20,7 @@
         "format": "SCORM — проходите в браузере в удобном темпе"
       }
     },
-    "9": {
+    "11": {
       "icon": "👁️",
       "tag": "Leapfrog · Для руководителей",
       "meta": [{ "icon": "🕐", "text": "~2 часа · 16 уроков" }, { "icon": "🎯", "text": "SCORM" }],
