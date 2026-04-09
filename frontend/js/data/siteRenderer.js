@@ -55,7 +55,7 @@ export function renderCourses(data, upcomingCourses = []) {
 
   const activeHtml = data.courses.map((c, i) => renderActiveCard(c, i)).join('');
   const upcomingHtml = upcomingCourses.map((c, i) => renderUpcomingCard(c, i)).join('');
-  grid.innerHTML = activeHtml + upcomingHtml;
+  grid.innerHTML = upcomingHtml + activeHtml;
 
   if (upcomingCourses.length) {
     ensureModal();
