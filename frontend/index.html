@@ -73,7 +73,14 @@ h2.sec-t{font-family:'Playfair Display',serif;font-size:clamp(34px,3.2vw,50px);f
 .sec-d{font-size:15px;font-weight:300;line-height:1.75;color:var(--text-muted);max-width:540px;}
 
 /* ── COURSES ── */
-.courses-sec{padding:110px 0;background:var(--dark);}
+.courses-sec{padding:80px 0 32px;background:var(--dark);}
+/* ── STATS STRIP ── */
+.stats-strip{padding:32px 0;background:var(--dark-2);border-top:1px solid var(--gold-dim);border-bottom:1px solid var(--gold-dim);}
+.stats-strip .inner{display:flex;justify-content:space-between;align-items:center;gap:32px;}
+.stat-item{display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;}
+.stat-num{font-family:'Playfair Display',serif;font-size:42px;font-weight:700;color:var(--gold);line-height:1;}
+.stat-lbl{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-muted);text-align:center;}
+.stat-divider{width:1px;height:52px;background:var(--border-dim);flex-shrink:0;}
 .ch{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:56px;}
 .cg{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;}
 .cc{background:var(--dark-3);padding:36px 32px;position:relative;overflow:hidden;transition:all .3s;border:1px solid transparent;cursor:pointer;}
@@ -101,7 +108,7 @@ h3.cc-t{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;line
 .cc-soon:hover::before{height:0;}
 
 /* ── В РАЗРАБОТКЕ CARDS ── */
-.cc-planned{opacity:.22;cursor:default;border:1px dashed rgba(255,255,255,0.03) !important;}
+.cc-planned{opacity:.38;cursor:default;border:1px dashed rgba(255,255,255,0.08) !important;}
 .cc-planned::after{content:'В РАЗРАБОТКЕ';position:absolute;top:18px;right:18px;font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.10em;color:var(--text-dim);background:var(--dark-2);padding:3px 9px;clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);}
 .cc-planned:hover{background:var(--dark-3);transform:none;}
 .cc-planned:hover::before{height:0;}
@@ -135,7 +142,7 @@ h3.cc-t{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;line
 .modal-soon-text{font-size:13px;font-weight:300;color:var(--text-muted);line-height:1.5;}
 
 /* ── WHO ── */
-.who-sec{padding:110px 0;background:var(--dark-2);border-top:1px solid var(--border-dim);}
+.who-sec{padding:60px 0 100px;background:var(--dark-2);border-top:none;}
 .who-g{display:grid;grid-template-columns:1fr 1fr;gap:100px;align-items:center;margin-top:72px;}
 .who-item{display:flex;gap:18px;padding:26px 0;border-bottom:1px solid var(--border-dim);transition:all .2s;}
 .who-item:hover .wi-num{color:var(--gold);}
@@ -403,6 +410,9 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:5
 .stg.vis>*:nth-child(4){opacity:1;transform:none;transition-delay:.32s;}
 .stg.vis>*:nth-child(5){opacity:1;transform:none;transition-delay:.40s;}
 .stg.vis>*:nth-child(6){opacity:1;transform:none;transition-delay:.48s;}
+.stg.vis>*:nth-child(7){opacity:1;transform:none;transition-delay:.56s;}
+.stg.vis>*:nth-child(8){opacity:1;transform:none;transition-delay:.64s;}
+.stg.vis>*:nth-child(9){opacity:1;transform:none;transition-delay:.72s;}
 
 /* ── RESPONSIVE ── */
 @media(max-width:1080px){
@@ -511,16 +521,24 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:5
   </div>
   <a href="courses.html" class="btn-s">Все курсы →</a>
 </div>
-    <div class="cg stg">
-      <a href="https://courses.geocore-academy.ru" class="cc feat" style="text-decoration:none;color:inherit;"><div class="cc-num">01 / 06</div><span class="cc-icon">⛏️</span><div class="cc-tag">Datamine · Базовый → Продвинутый</div><h3 class="cc-t">Datamine Studio RM: полный курс</h3><p class="cc-d">От импорта скважин до подсчёта запасов. Блочное моделирование, геостатистика, отчёты.</p><div class="cc-meta"><div class="cc-m">🕐 <strong>48 уроков</strong></div><div class="cc-m">📁 <strong>Шаблоны</strong></div></div></a>
-      <a href="https://courses.geocore-academy.ru" class="cc" style="text-decoration:none;color:inherit;"><div class="cc-num">02 / 06</div><span class="cc-icon">🌍</span><div class="cc-tag">Leapfrog · Средний</div><h3 class="cc-t">Leapfrog Geo: неявное моделирование</h3><p class="cc-d">Implicit modelling для рудных тел. Быстрое обновление при новых данных бурения.</p><div class="cc-meta"><div class="cc-m">🕐 <strong>32 урока</strong></div><div class="cc-m">🎯 <strong>Практика</strong></div></div></a>
-      <a href="https://courses.geocore-academy.ru" class="cc" style="text-decoration:none;color:inherit;"><div class="cc-num">03 / 06</div><span class="cc-icon">📐</span><div class="cc-tag">Методика · JORC / ГКЗ</div><h3 class="cc-t">Подсчёт запасов: международные стандарты</h3><p class="cc-d">JORC, ГКЗ, NI 43-101, NAEN. Категории, CPR, отчётность для инвесторов.</p><div class="cc-meta"><div class="cc-m">🕐 <strong>24 урока</strong></div><div class="cc-m">📄 <strong>Шаблоны CPR</strong></div></div></a>
-      <a href="https://courses.geocore-academy.ru" class="cc" style="text-decoration:none;color:inherit;"><div class="cc-num">04 / 06</div><span class="cc-icon">📊</span><div class="cc-tag">Геостатистика</div><h3 class="cc-t">Геостатистика и кригинг: от основ</h3><p class="cc-d">Вариография, ординарный кригинг, условная симуляция. Python + горное ПО.</p><div class="cc-meta"><div class="cc-m">🕐 <strong>28 уроков</strong></div><div class="cc-m">🐍 <strong>Python</strong></div></div></a>
-      <a href="https://courses.geocore-academy.ru" class="cc" style="text-decoration:none;color:inherit;"><div class="cc-num">05 / 06</div><span class="cc-icon">💼</span><div class="cc-tag">Для инвесторов</div><h3 class="cc-t">Читаем геологические отчёты</h3><p class="cc-d">Как оценивать JORC-отчёты, понимать категории запасов, выявлять риски.</p><div class="cc-meta"><div class="cc-m">🕐 <strong>12 уроков</strong></div><div class="cc-m">📈 <strong>Кейсы</strong></div></div></a>
-      <a href="https://courses.geocore-academy.ru" class="cc" style="text-decoration:none;color:inherit;"><div class="cc-num">06 / 06</div><span class="cc-icon">🗺️</span><div class="cc-tag">Surpac · Средний</div><h3 class="cc-t">Surpac: маркшейдерия и горное планирование</h3><p class="cc-d">3D-моделирование рудных тел, маркшейдерские расчёты, планирование.</p><div class="cc-meta"><div class="cc-m">🕐 <strong>36 уроков</strong></div><div class="cc-m">🔧 <strong>Практика</strong></div></div></a>
-    </div>
+    <div class="cg stg"></div>
   </div>
 </section>
+
+<!-- ── STATS STRIP ── -->
+<div class="stats-strip">
+  <div class="inner">
+    <div class="stat-item"><span class="stat-num">2</span><span class="stat-lbl">Курса открыто</span></div>
+    <div class="stat-divider"></div>
+    <div class="stat-item"><span class="stat-num">6</span><span class="stat-lbl">В разработке</span></div>
+    <div class="stat-divider"></div>
+    <div class="stat-item"><span class="stat-num">16</span><span class="stat-lbl">Уроков в Leapfrog</span></div>
+    <div class="stat-divider"></div>
+    <div class="stat-item"><span class="stat-num">SCORM</span><span class="stat-lbl">Проходите в браузере</span></div>
+    <div class="stat-divider"></div>
+    <div class="stat-item"><span class="stat-num">JORC</span><span class="stat-lbl">ГКЗ · NI 43-101 · NAEN</span></div>
+  </div>
+</div>
 
 <!-- ── WHO ── -->
 <section class="who-sec sec" id="who">
@@ -547,122 +565,6 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:5
       <div class="consult-steps rv"><div class="cs"><div class="cs-connector"></div><div class="cs-num">01</div><div><div class="cs-t">Опишите проект</div><div class="cs-d">Тип месторождения, стадия, стандарт. Ассистент задаст уточняющие вопросы.</div></div></div><div class="cs"><div class="cs-connector"></div><div class="cs-num">02</div><div><div class="cs-t">Получите анализ</div><div class="cs-d">Рекомендации по методике, ПО, параметрам интерполяции.</div></div></div><div class="cs"><div class="cs-connector"></div><div class="cs-num">03</div><div><div class="cs-t">Запись к эксперту</div><div class="cs-d">Бот помогает сформировать бриф и предлагает удобное время.</div></div></div><div class="cs"><div class="cs-num">04</div><div><div class="cs-t">NDA и сессия</div><div class="cs-d">Для конфиденциальных проектов — соглашение о неразглашении.</div></div></div></div>
       <div class="chat-box rv"><div class="chat-hd"><div class="ch-av">⛏</div><div><div class="ch-name">GeoCore Assistant</div><div class="ch-status">online · горное дело · оценка месторождений</div></div></div><div class="chat-msgs" id="chatMsgs"><div class="msg bot"><div class="msg-b">Здравствуйте! Задайте вопрос по Datamine, Surpac, Leapfrog, методике JORC/ГКЗ или геостатистике.</div><div class="msg-t">сейчас</div></div></div><div class="chat-inp"><input type="text" id="chatInput" placeholder="Вопрос по Datamine, JORC, геостатистике…"><button class="chat-send" id="chatSend">Отправить</button></div><div class="api-notice">Локальный ассистент · для AI-ответов подключите API-ключ</div></div>
     </div>
-  </div>
-</section>
-
-<!-- ── PRICING ── -->
-<!-- ── ЛАБОРАТОРИЯ ── -->
-<section class="lab-sec sec" id="lab">
-  <div class="inner">
-
-    <!-- Заголовок + описание -->
-    <div class="rv">
-      <div class="sec-lbl">Лаборатория · Демо-датасеты</div>
-      <h2 class="sec-t">Архив геологических<br>данных</h2>
-    </div>
-
-    <div class="lab-intro rv">
-      <div>
-        <p class="lab-desc">7 типов месторождений с реалистичными параметрами. Скачайте CSV и OBJ или откройте датасет в <a href="sandbox.html" style="color:var(--gold)">3D-Песочнице</a> для анализа прямо в браузере.</p>
-        <p class="lab-desc" style="margin-top:16px">Полный инструментарий для подготовки данных — <a href="lab.html" style="color:var(--gold)">Лаборатория данных →</a></p>
-      </div>
-      <div class="lab-steps">
-        <div class="lab-step"><div class="lab-step-num">01</div><div class="lab-step-text"><strong>Загрузить CSV</strong> — данные опробования скважин</div></div>
-        <div class="lab-step"><div class="lab-step-num">02</div><div class="lab-step-text"><strong>Валидация</strong> — проверка формата, пропусков, выбросов</div></div>
-        <div class="lab-step"><div class="lab-step-num">03</div><div class="lab-step-text"><strong>Обработка</strong> — композитирование, декластеризация</div></div>
-        <div class="lab-step"><div class="lab-step-num">04</div><div class="lab-step-text"><strong>Каркас OBJ</strong> — автопостроение по контурам скважин</div></div>
-        <div class="lab-step"><div class="lab-step-num">05</div><div class="lab-step-text"><strong>Скрипт .mac</strong> — готовый макрос для Datamine Studio RM</div></div>
-      </div>
-    </div>
-
-    <!-- Архив месторождений -->
-    <div class="rv">
-      <div class="sec-lbl">Архив · 7 типов месторождений</div>
-      <h3 style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin-bottom:32px;">Демонстрационные датасеты</h3>
-    </div>
-
-    <div class="archive-grid stg">
-
-      <div class="archive-card au" onclick="window.location.href='sandbox.html?t=gold'">
-        <div class="ac-badge">CSV + OBJ</div>
-        <span class="ac-icon">🥇</span>
-        <div class="ac-type">Золото · Эпитермальное</div>
-        <div class="ac-name">Малосульфидное Au месторождение</div>
-        <div class="ac-desc">Жильно-прожилковая минерализация, зональность, сложная морфология. 15 скважин, до 22 г/т Au.</div>
-        <div class="ac-files">
-          <span class="ac-file" onclick="event.stopPropagation();dlLabFile('epithermal_gold_demo.csv')">CSV</span>
-          <span class="ac-file" onclick="event.stopPropagation();dlLabFile('ore_body_gold.obj')">OBJ</span>
-          <span class="ac-file" onclick="event.stopPropagation();window.open('articles/bortsov_epithermal_gold.html','_blank')">Кейс →</span>
-        </div>
-      </div>
-
-      <div class="archive-card au" onclick="window.location.href='sandbox.html?t=gold'">
-        <span class="ac-icon">🔶</span>
-        <div class="ac-type">Золото · Порфировое</div>
-        <div class="ac-name">Золото-порфировое месторождение</div>
-        <div class="ac-desc">Штокверковая минерализация, равномерное распределение, большой объём. 20 скважин, 0.5–8 г/т Au.</div>
-        <div class="ac-files">
-          <span class="ac-file" onclick="event.stopPropagation();dlLabFile('porphyry_gold_demo.csv')">CSV</span>
-          <span class="ac-file" onclick="event.stopPropagation();dlLabFile('ore_body_gold.obj')">OBJ</span>
-        </div>
-      </div>
-
-      <div class="archive-card cu" onclick="window.location.href='sandbox.html?t=copper'">
-        <span class="ac-icon">🔴</span>
-        <div class="ac-type">Медь · Порфировое</div>
-        <div class="ac-name">Медно-порфировое месторождение</div>
-        <div class="ac-desc">Вкрапленная Cu-Mo минерализация. 20 скважин, 0.2–2.5% Cu, Mo попутный.</div>
-        <div class="ac-files">
-          <span class="ac-file" onclick="event.stopPropagation();dlLabFile('copper_demo.csv')">CSV</span>
-          <span class="ac-file" onclick="event.stopPropagation();dlLabFile('ore_body_copper.obj')">OBJ</span>
-        </div>
-      </div>
-
-      <div class="archive-card coal" onclick="window.location.href='sandbox.html?t=coal'">
-        <span class="ac-icon">⚫</span>
-        <div class="ac-type">Уголь · Пластовый</div>
-        <div class="ac-name">Каменноугольный пласт</div>
-        <div class="ac-desc">Два рабочих пласта мощностью 2–6 м. 13 скважин, выдержанная мощность. Стандарт ГКЗ.</div>
-        <div class="ac-files">
-          <span class="ac-file" onclick="event.stopPropagation();dlLabFile('coal_demo.csv')">CSV</span>
-        </div>
-      </div>
-
-      <div class="archive-card poly" onclick="window.location.href='sandbox.html?t=copper'">
-        <span class="ac-icon">🔵</span>
-        <div class="ac-type">Полиметаллы · Pb-Zn-Ag</div>
-        <div class="ac-name">Свинцово-цинковое месторождение</div>
-        <div class="ac-desc">Стратиформная минерализация. 18 скважин, Pb до 8%, Zn до 12%, попутное Ag.</div>
-        <div class="ac-files">
-          <span class="ac-file" onclick="event.stopPropagation();dlLabFile('polymetallic_demo.csv')">CSV</span>
-          <span class="ac-file" onclick="event.stopPropagation();dlLabFile('ore_body_poly.obj')">OBJ</span>
-          <span class="ac-file" style="color:var(--text-dim);border-color:var(--border-dim);cursor:default;">Скоро</span>
-        </div>
-      </div>
-
-      <div class="archive-card fe" onclick="window.location.href='sandbox.html?t=gold'">
-        <span class="ac-icon">🔩</span>
-        <div class="ac-type">Железо · МКЖ</div>
-        <div class="ac-name">Магнетитовые кварциты</div>
-        <div class="ac-desc">Пластообразное тело, содержание Fe 28–45%. 22 скважины. Стандарты JORC / ГКЗ.</div>
-        <div class="ac-files">
-          <span class="ac-file" onclick="event.stopPropagation();dlLabFile('iron_demo.csv')">CSV</span>
-          <span class="ac-file" style="color:var(--text-dim);border-color:var(--border-dim);cursor:default;">Скоро</span>
-        </div>
-      </div>
-
-      <div class="archive-card diamond">
-        <span class="ac-icon">💎</span>
-        <div class="ac-type">Алмазы · Кимберлит</div>
-        <div class="ac-name">Кимберлитовая трубка</div>
-        <div class="ac-desc">Трубкообразное тело, содержание карат/т. Специфика выборочного опробования. JORC.</div>
-        <div class="ac-files">
-          <span class="ac-file" style="color:var(--text-dim);border-color:var(--border-dim);cursor:default;">В разработке</span>
-        </div>
-      </div>
-
-    </div>
-
   </div>
 </section>
 
@@ -780,41 +682,67 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:5
   </div>
 </footer>
 
-<script type="importmap">
-  {
-    "imports": {
-      "three": "https://unpkg.com/three@0.128.0/build/three.module.js"
-    }
-  }
-</script>
-<script type="module" src="js/main.js"></script>
-<!-- Модальное окно для вариограммы -->
-
-<div id="variogramModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center;">
-
-  <div style="background: var(--dark-3); border: 1px solid var(--border); border-radius: 12px; width: 90%; max-width: 900px; padding: 20px; position: relative;">
-
-    <button id="closeVariogramModal" style="position: absolute; top: 10px; right: 20px; background: none; border: none; color: var(--text-muted); font-size: 28px; cursor: pointer;">&times;</button>
-
-    <h3 style="font-family: Playfair Display, serif; margin-bottom: 16px;">📈 Экспериментальная вариограмма</h3>
-
-    <canvas id="variogramPlotLarge" width="800" height="500" style="width: 100%; height: auto; background: #0a121c; border-radius: 8px;"></canvas>
-
-    <div id="variogramStatsLarge" style="font-family: monospace; font-size: 12px; margin-top: 16px; color: #7ee787; text-align: center;"></div>
-
-  </div>
-
-</div>
-
-<!-- ── ЛАБ JS ── -->
 <script type="module">
-// ── Скачать файл из data/ ──────────────────────────────────
-window.dlLabFile = function(filename) {
-  const a = document.createElement('a');
-  a.href = `data/${filename}`;
-  a.download = filename;
-  a.click();
-};
+import { initSite } from './js/data/siteRenderer.js';
+import { botReply } from './js/ui/chat.js';
+
+document.addEventListener('DOMContentLoaded', () => {
+  initSite({ showPlanned: true, showSoon: false });
+
+  // ── Тема ──────────────────────────────────────────────────
+  const themeBtn = document.getElementById('themeBtn');
+  let dark = !localStorage.getItem('geocoreLight');
+  function applyTheme() {
+    document.body.classList.toggle('light', !dark);
+    if (themeBtn) themeBtn.textContent = dark ? '🌙' : '☀️';
+  }
+  applyTheme();
+  themeBtn?.addEventListener('click', () => {
+    dark = !dark;
+    localStorage.setItem('geocoreLight', dark ? '' : '1');
+    applyTheme();
+  });
+
+  // ── Scroll reveal ─────────────────────────────────────────
+  const obs = new IntersectionObserver(
+    entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('vis'); }),
+    { threshold: 0.08 }
+  );
+  document.querySelectorAll('.rv, .stg').forEach(el => obs.observe(el));
+
+  // ── Плавная навигация ────────────────────────────────────
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const id = a.getAttribute('href');
+      if (id && id !== '#') {
+        e.preventDefault();
+        document.querySelector(id)?.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  });
+
+  // ── Чат ──────────────────────────────────────────────────
+  const chatMsgs  = document.getElementById('chatMsgs');
+  const chatInput = document.getElementById('chatInput');
+  const chatSend  = document.getElementById('chatSend');
+
+  function addChatMsg(role, text) {
+    const div = document.createElement('div');
+    div.className = `msg ${role}`;
+    div.innerHTML = `<div class="msg-b">${text}</div><div class="msg-t">сейчас</div>`;
+    chatMsgs?.appendChild(div);
+    chatMsgs?.scrollTo(0, chatMsgs.scrollHeight);
+  }
+
+  chatSend?.addEventListener('click', () => {
+    const q = chatInput?.value.trim();
+    if (!q) return;
+    chatInput.value = '';
+    addChatMsg('user', q);
+    setTimeout(() => addChatMsg('bot', botReply(q)), 500);
+  });
+  chatInput?.addEventListener('keypress', e => { if (e.key === 'Enter') chatSend?.click(); });
+});
 </script>
 
 </body>

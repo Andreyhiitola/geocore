@@ -109,6 +109,31 @@ h1.page-title{font-family:'Playfair Display',serif;font-size:clamp(40px,4vw,56px
 .info-note{margin-top:20px;padding:16px;background:rgba(201,168,76,.08);border:1px solid var(--border-dim);border-radius:12px;}
 .info-note-title{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--gold);margin-bottom:8px;}
 .info-note-text{font-size:12px;font-weight:300;line-height:1.65;color:var(--text-muted);}
+/* ── ARCHIVE ── */
+.archive-section{margin-bottom:60px;}
+.archive-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.archive-eyebrow::after{content:'';flex:1;max-width:50px;height:1px;background:var(--gold-dim);}
+.archive-h{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin-bottom:32px;}
+.archive-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-bottom:0;}
+.archive-card{background:var(--dark-3);padding:28px 24px;border:1px solid transparent;transition:all .3s;cursor:pointer;position:relative;overflow:hidden;}
+.archive-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:0;transition:height .4s;}
+.archive-card:hover{background:var(--dark-4);border-color:var(--border);transform:translateY(-3px);}
+.archive-card:hover::before{height:100%;}
+.archive-card.au::before{background:#C9A84C;}
+.archive-card.cu::before{background:#c06030;}
+.archive-card.coal::before{background:#666;}
+.archive-card.poly::before{background:#7070cc;}
+.archive-card.fe::before{background:#cc4444;}
+.archive-card.diamond::before{background:#88ccff;}
+.ac-icon{font-size:28px;margin-bottom:12px;display:block;}
+.ac-badge{position:absolute;top:14px;right:14px;font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:.12em;color:var(--dark);background:var(--gold);padding:2px 7px;clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);}
+.ac-type{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px;}
+.ac-name{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;line-height:1.3;margin-bottom:8px;}
+.ac-desc{font-size:12px;font-weight:300;line-height:1.55;color:var(--text-muted);margin-bottom:16px;}
+.ac-files{display:flex;gap:8px;flex-wrap:wrap;padding-top:14px;border-top:1px solid var(--border-dim);}
+.ac-file{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold-dim);padding:3px 8px;cursor:pointer;transition:all .2s;}
+.ac-file:hover{background:var(--gold);color:var(--dark);}
+@media(max-width:900px){.archive-grid{grid-template-columns:repeat(2,1fr);}}
 footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:40px 48px;margin-top:60px;display:flex;justify-content:space-between;align-items:center;}
 .f-copy{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.07em;color:var(--text-dim);}
 .f-back{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);text-decoration:none;}
@@ -169,7 +194,7 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:4
           <h2 style="font-family:'Playfair Display',serif;font-size:32px;font-weight:700;margin-bottom:16px;">Подготовка данных<br>для Datamine Studio RM</h2>
         </div>
         <p class="lab-desc">Загрузите свои данные опробования — система автоматически проверит формат, выполнит композитирование, декластеризацию и построит каркас рудного тела. На выходе — файлы готовые для импорта в Datamine и готовый макрос <code style="font-family:'IBM Plex Mono',monospace;color:var(--gold)">.mac</code>.</p>
-        <p class="lab-desc" style="margin-top: 16px;">Или скачайте демонстрационные данные из <a href="index.html#sandbox" style="color:var(--gold);">архива в песочнице</a> — 7 типов месторождений с реалистичными параметрами.</p>
+        <p class="lab-desc" style="margin-top: 16px;">Или скачайте демонстрационные данные из архива ниже — 7 типов месторождений с реалистичными параметрами. Откройте в <a href="sandbox.html" style="color:var(--gold);">3D-Песочнице →</a></p>
       </div>
       <div class="lab-steps">
         <div class="lab-step"><div class="lab-step-num">01</div><div class="lab-step-text"><strong>Загрузить CSV</strong> — данные опробования скважин</div></div>
@@ -177,6 +202,93 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:4
         <div class="lab-step"><div class="lab-step-num">03</div><div class="lab-step-text"><strong>Обработка</strong> — композитирование, декластеризация</div></div>
         <div class="lab-step"><div class="lab-step-num">04</div><div class="lab-step-text"><strong>Каркас OBJ</strong> — автопостроение по контурам скважин</div></div>
         <div class="lab-step"><div class="lab-step-num">05</div><div class="lab-step-text"><strong>Скрипт .mac</strong> — готовый макрос для Datamine Studio RM</div></div>
+      </div>
+    </div>
+
+    <!-- ── АРХИВ ДАТАСЕТОВ ── -->
+    <div class="archive-section">
+      <div class="archive-eyebrow">Архив · 7 типов месторождений</div>
+      <h3 class="archive-h">Демонстрационные датасеты</h3>
+      <div class="archive-grid">
+
+        <div class="archive-card au" onclick="window.location.href='sandbox.html?t=gold'">
+          <div class="ac-badge">CSV + OBJ</div>
+          <span class="ac-icon">🥇</span>
+          <div class="ac-type">Золото · Эпитермальное</div>
+          <div class="ac-name">Малосульфидное Au месторождение</div>
+          <div class="ac-desc">Жильно-прожилковая минерализация, зональность, сложная морфология. 15 скважин, до 22 г/т Au.</div>
+          <div class="ac-files">
+            <span class="ac-file" onclick="event.stopPropagation();dlLabFile('epithermal_gold_demo.csv')">CSV</span>
+            <span class="ac-file" onclick="event.stopPropagation();dlLabFile('ore_body_gold.obj')">OBJ</span>
+            <span class="ac-file" onclick="event.stopPropagation();window.open('articles/bortsov_epithermal_gold.html','_blank')">Кейс →</span>
+          </div>
+        </div>
+
+        <div class="archive-card au" onclick="window.location.href='sandbox.html?t=gold'">
+          <span class="ac-icon">🔶</span>
+          <div class="ac-type">Золото · Порфировое</div>
+          <div class="ac-name">Золото-порфировое месторождение</div>
+          <div class="ac-desc">Штокверковая минерализация, равномерное распределение. 20 скважин, 0.5–8 г/т Au.</div>
+          <div class="ac-files">
+            <span class="ac-file" onclick="event.stopPropagation();dlLabFile('porphyry_gold_demo.csv')">CSV</span>
+            <span class="ac-file" onclick="event.stopPropagation();dlLabFile('ore_body_gold.obj')">OBJ</span>
+          </div>
+        </div>
+
+        <div class="archive-card cu" onclick="window.location.href='sandbox.html?t=copper'">
+          <span class="ac-icon">🔴</span>
+          <div class="ac-type">Медь · Порфировое</div>
+          <div class="ac-name">Медно-порфировое месторождение</div>
+          <div class="ac-desc">Вкрапленная Cu-Mo минерализация. 20 скважин, 0.2–2.5% Cu, Mo попутный.</div>
+          <div class="ac-files">
+            <span class="ac-file" onclick="event.stopPropagation();dlLabFile('copper_demo.csv')">CSV</span>
+            <span class="ac-file" onclick="event.stopPropagation();dlLabFile('ore_body_copper.obj')">OBJ</span>
+          </div>
+        </div>
+
+        <div class="archive-card coal" onclick="window.location.href='sandbox.html?t=coal'">
+          <span class="ac-icon">⚫</span>
+          <div class="ac-type">Уголь · Пластовый</div>
+          <div class="ac-name">Каменноугольный пласт</div>
+          <div class="ac-desc">Два рабочих пласта мощностью 2–6 м. 13 скважин, выдержанная мощность. Стандарт ГКЗ.</div>
+          <div class="ac-files">
+            <span class="ac-file" onclick="event.stopPropagation();dlLabFile('coal_demo.csv')">CSV</span>
+          </div>
+        </div>
+
+        <div class="archive-card poly" onclick="window.location.href='sandbox.html?t=copper'">
+          <span class="ac-icon">🔵</span>
+          <div class="ac-type">Полиметаллы · Pb-Zn-Ag</div>
+          <div class="ac-name">Свинцово-цинковое месторождение</div>
+          <div class="ac-desc">Стратиформная минерализация. 18 скважин, Pb до 8%, Zn до 12%, попутное Ag.</div>
+          <div class="ac-files">
+            <span class="ac-file" onclick="event.stopPropagation();dlLabFile('polymetallic_demo.csv')">CSV</span>
+            <span class="ac-file" onclick="event.stopPropagation();dlLabFile('ore_body_poly.obj')">OBJ</span>
+            <span class="ac-file" style="color:var(--text-dim);border-color:var(--border-dim);cursor:default;">Скоро</span>
+          </div>
+        </div>
+
+        <div class="archive-card fe" onclick="window.location.href='sandbox.html?t=gold'">
+          <span class="ac-icon">🔩</span>
+          <div class="ac-type">Железо · МКЖ</div>
+          <div class="ac-name">Магнетитовые кварциты</div>
+          <div class="ac-desc">Пластообразное тело, содержание Fe 28–45%. 22 скважины. Стандарты JORC / ГКЗ.</div>
+          <div class="ac-files">
+            <span class="ac-file" onclick="event.stopPropagation();dlLabFile('iron_demo.csv')">CSV</span>
+            <span class="ac-file" style="color:var(--text-dim);border-color:var(--border-dim);cursor:default;">Скоро</span>
+          </div>
+        </div>
+
+        <div class="archive-card diamond">
+          <span class="ac-icon">💎</span>
+          <div class="ac-type">Алмазы · Кимберлит</div>
+          <div class="ac-name">Кимберлитовая трубка</div>
+          <div class="ac-desc">Трубкообразное тело, содержание карат/т. Специфика выборочного опробования. JORC.</div>
+          <div class="ac-files">
+            <span class="ac-file" style="color:var(--text-dim);border-color:var(--border-dim);cursor:default;">В разработке</span>
+          </div>
+        </div>
+
       </div>
     </div>
 

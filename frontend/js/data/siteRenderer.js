@@ -194,7 +194,7 @@ export function renderFooter(data) {
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 
-export async function initSite() {
+export async function initSite({ showPlanned = true, showSoon = true } = {}) {
   try {
     const data = await loadSiteData();
     renderNav(data);
@@ -202,7 +202,7 @@ export async function initSite() {
 
     const order   = data.moodleCourseOrder || [];
     const metaMap = data.moodleMeta || {};
-    const planned = (data.courses || []).filter(c => c.planned);
+    const planned = showPlanned ? (data.courses || []).filter(c => c.planned) : [];
 
     try {
       const all = await fetchCoursesFromAPI();
@@ -211,7 +211,7 @@ export async function initSite() {
       const live = liveRaw.map((c, i) =>
         moodleToCourse(c, i, liveRaw.length, metaMap[c.id] || {}));
 
-      const soonRaw = all.filter(c => !order.includes(c.id));
+      const soonRaw = showSoon ? all.filter(c => !order.includes(c.id)) : [];
       const soon = soonRaw.map((c, i) =>
         moodleToCourse(c, i, soonRaw.length, metaMap[c.id] || {}));
 

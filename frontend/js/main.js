@@ -348,7 +348,7 @@ function _download(content, filename, type) {
 
 // ─── Запуск ───────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  initSite();
+  initSite({ showPlanned: false });
   init3D();
   wireEvents();
 });
