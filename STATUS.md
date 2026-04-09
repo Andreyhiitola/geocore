@@ -58,7 +58,11 @@ nginx (на VPS, хост)
 
 ## Что осталось сделать
 
-### 1. Саморегистрация студентов в Moodle
+### 1. Адаптация под мобильные и планшеты
+Сделать index.html, courses.html, lab.html, sandbox.html responsive.
+Приоритет: index.html (главная) и courses.html.
+
+### 2. Саморегистрация студентов в Moodle
 Настроить самостоятельную запись на курсы.
 
 ### 3. www.geocore-academy.ru
