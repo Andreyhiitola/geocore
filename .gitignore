@@ -69,3 +69,6 @@ out/
 # Локальные утилиты (не нужны в репо)
 generate-compose.sh
 docker-compose.template.yml
+
+# Рабочие документы (не для репо)
+SCORM_REBRANDING.md

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Все курсы — GeoCore Academy</title>
-<meta name="description" content="Полный каталог курсов по горному делу: Datamine, Leapfrog, ArcGIS, геостатистика, машинное обучение, тренажёр поисков и разведки.">
+<meta name="description" content="Полный каталог курсов по геологии и горному делу: Leapfrog, Datamine, Surpac, геостатистика, паспортизация. SCORM-курсы доступны прямо сейчас.">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -42,9 +42,8 @@ body.light nav{background:rgba(245,243,238,.92);}
 .nav-back{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);text-decoration:none;display:flex;align-items:center;gap:8px;}
 .nav-back:hover{color:var(--gold);}
 
-/* MAIN CONTENT */
+/* PAGE */
 .courses-page{max-width:1240px;margin:0 auto;padding:120px 100px 80px;}
-.page-header{margin-bottom:56px;}
 .page-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:10px;margin-bottom:20px;}
 .page-eyebrow::before{content:'';width:32px;height:1px;background:var(--gold);}
 h1.page-title{font-family:'Playfair Display',serif;font-size:clamp(40px,4vw,56px);font-weight:900;line-height:1.1;margin-bottom:20px;}
@@ -57,14 +56,11 @@ h1.page-title{font-family:'Playfair Display',serif;font-size:clamp(40px,4vw,56px
 .filter-btn.active{background:var(--gold);border-color:var(--gold);color:var(--dark);}
 
 /* COURSES GRID */
-.courses-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;}
-.cc-link{text-decoration:none;display:block;}
-.cc-link:hover .cc{transform:translateY(-4px);border-color:var(--border);background:var(--dark-4);}
+.cg{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;}
 .cc{background:var(--dark-3);padding:36px 32px;position:relative;overflow:hidden;transition:all .3s;border:1px solid transparent;cursor:pointer;}
 .cc::before{content:'';position:absolute;top:0;left:0;width:3px;height:0;background:var(--gold);transition:height .4s ease;}
-.cc-link:hover .cc::before{height:100%;}
-.cc.feat{background:var(--dark-4);border-color:var(--border);}
-.cc.feat::after{content:'ПОПУЛЯРНО';position:absolute;top:18px;right:18px;font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.14em;color:var(--dark);background:var(--gold);padding:3px 9px;clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);}
+.cc:hover{background:var(--dark-4);border-color:var(--border);transform:translateY(-4px);}
+.cc:hover::before{height:100%;}
 .cc-num{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--text-dim);margin-bottom:18px;}
 .cc-icon{font-size:30px;margin-bottom:16px;display:block;}
 .cc-tag{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold-dim);padding:3px 7px;margin-bottom:14px;}
@@ -72,7 +68,43 @@ h3.cc-t{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;line
 .cc-d{font-size:13px;font-weight:300;line-height:1.6;color:var(--text-muted);margin-bottom:24px;}
 .cc-meta{display:flex;gap:18px;padding-top:20px;border-top:1px solid var(--border-dim);}
 .cc-m{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.07em;color:var(--text-dim);display:flex;align-items:center;gap:5px;}
-.author-badge{font-size:9px;color:var(--gold-dim);margin-left:8px;}
+.cc-live{cursor:pointer;}
+.cc-live::after{content:'ОТКРЫТ';position:absolute;top:18px;right:18px;font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.14em;color:var(--dark);background:var(--gold);padding:3px 9px;clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);}
+.cc-soon{opacity:.45;cursor:default;border:1px dashed rgba(255,255,255,0.06) !important;}
+.cc-soon::after{content:'СКОРО';position:absolute;top:18px;right:18px;font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.14em;color:var(--text-dim);background:var(--dark-2);border:1px solid var(--border-dim);padding:3px 9px;clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);}
+.cc-soon:hover{background:var(--dark-3);transform:none;}
+.cc-soon:hover::before{height:0;}
+.cc-planned{opacity:.22;cursor:default;border:1px dashed rgba(255,255,255,0.03) !important;}
+.cc-planned::after{content:'В РАЗРАБОТКЕ';position:absolute;top:18px;right:18px;font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.10em;color:var(--text-dim);background:var(--dark-2);padding:3px 9px;clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);}
+.cc-planned:hover{background:var(--dark-3);transform:none;}
+.cc-planned:hover::before{height:0;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s;}
+.modal-overlay.open{opacity:1;visibility:visible;}
+.modal-panel{background:var(--dark-4);border:1px solid var(--border);max-width:620px;width:90%;max-height:88vh;overflow-y:auto;padding:52px 48px 48px;position:relative;transform:translateY(16px);transition:transform .3s;}
+.modal-overlay.open .modal-panel{transform:translateY(0);}
+.modal-panel::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--gold);}
+.modal-close{position:absolute;top:20px;right:20px;background:none;border:1px solid var(--border-dim);color:var(--text-dim);width:34px;height:34px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .2s;font-family:'IBM Plex Mono',monospace;}
+.modal-close:hover{border-color:var(--gold);color:var(--gold);}
+.modal-tag{font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold-dim);padding:3px 7px;display:inline-block;margin-bottom:20px;}
+.modal-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;line-height:1.2;margin-bottom:12px;}
+.modal-tagline{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;color:var(--gold-light);margin-bottom:20px;line-height:1.5;}
+.modal-desc{font-size:13.5px;font-weight:300;line-height:1.75;color:var(--text-muted);margin-bottom:32px;}
+.modal-section{margin-bottom:32px;}
+.modal-section-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.18em;color:var(--text-dim);margin-bottom:14px;}
+.modal-highlights{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.modal-hi{font-size:13px;font-weight:300;line-height:1.5;color:var(--text);padding-left:20px;position:relative;}
+.modal-hi::before{content:'◆';position:absolute;left:0;color:var(--gold);font-size:7px;top:4px;}
+.modal-meta-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:24px 0;border-top:1px solid var(--border-dim);border-bottom:1px solid var(--border-dim);margin-bottom:28px;}
+.modal-meta-label{font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.14em;color:var(--text-dim);margin-bottom:6px;}
+.modal-meta-val{font-size:12.5px;font-weight:400;color:var(--text);line-height:1.4;}
+.modal-cta{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dark);background:var(--gold);padding:14px 32px;text-decoration:none;clip-path:polygon(7px 0%,100% 0%,calc(100% - 7px) 100%,0% 100%);transition:background .2s;margin-top:8px;}
+.modal-cta:hover{background:var(--gold-light);}
+.modal-soon-note{display:flex;align-items:flex-start;gap:16px;padding:20px 24px;background:var(--dark-3);border:1px solid var(--border-dim);margin-top:8px;}
+.modal-soon-icon{font-size:22px;flex-shrink:0;}
+.modal-soon-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.16em;color:var(--text-dim);margin-bottom:6px;}
+.modal-soon-text{font-size:13px;font-weight:300;color:var(--text-muted);line-height:1.5;}
 
 /* FOOTER */
 footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:56px 0 36px;margin-top:80px;}
@@ -84,19 +116,11 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:5
 .fl a:hover{color:var(--gold);}
 .fb{max-width:1240px;margin:0 auto;padding:22px 100px 0;border-top:1px solid var(--border-dim);display:flex;justify-content:space-between;align-items:center;}
 .fc{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.07em;color:var(--text-dim);}
-.fl-langs{display:flex;gap:14px;}
-.fl-lang{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;color:var(--text-dim);cursor:pointer;}
-.fl-lang.act{color:var(--gold);}
 
-/* REVEAL */
-.rv{opacity:0;transform:translateY(28px);transition:opacity .65s ease,transform .65s ease;}
-.rv.vis{opacity:1;transform:none;}
-
-/* RESPONSIVE */
 @media(max-width:1080px){
   nav{padding:0 24px;}.nav-links{display:none;}
   .courses-page{padding:100px 24px 60px;}
-  .courses-grid{grid-template-columns:1fr;}
+  .cg{grid-template-columns:1fr;}
   .fi,.fb{padding-left:24px;padding-right:24px;}
   .fi{grid-template-columns:1fr 1fr;}
 }
@@ -105,22 +129,14 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:5
 <body>
 
 <nav>
-  <div style="display: flex; align-items: center; gap: 24px;">
+  <div style="display:flex;align-items:center;gap:24px;">
     <a href="index.html" class="nav-logo">
       <div class="logo-hex"></div>
       <span class="logo-text">Geo<span>Core</span></span>
     </a>
     <a href="index.html" class="nav-back">← На главную</a>
   </div>
-  <ul class="nav-links">
-    <li><a href="index.html#courses">Курсы</a></li>
-    <li><a href="index.html#templates">Шаблоны</a></li>
-    <li><a href="index.html#sandbox">Песочница</a></li>
-    <li><a href="index.html#projects">Проекты</a></li>
-    <li><a href="index.html#consult">Консультации</a></li>
-    <li><a href="index.html#blog">Блог</a></li>
-    <li><a href="index.html#pricing">Цены</a></li>
-  </ul>
+  <ul class="nav-links"></ul>
   <div class="nav-right">
     <button class="theme-btn" id="themeBtn" title="Сменить тему">🌙</button>
     <a href="index.html#pricing" class="nav-cta">Начать обучение</a>
@@ -128,293 +144,58 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:5
 </nav>
 
 <main class="courses-page">
-  <div class="rv">
-    <div class="page-eyebrow">Полный каталог</div>
-    <h1 class="page-title">Все курсы GeoCore Academy</h1>
-    <p class="page-desc">12 профессиональных курсов для геологов, маркшейдеров и горных инженеров. Авторские программы от экспертов отрасли.</p>
-  </div>
+  <div class="page-eyebrow">Полный каталог</div>
+  <h1 class="page-title">Все курсы GeoCore Academy</h1>
+  <p class="page-desc">Профессиональные курсы для геологов, маркшейдеров и горных инженеров. SCORM-курсы доступны прямо сейчас.</p>
 
-  <div class="filters rv">
+  <div class="filters">
     <button class="filter-btn active" data-filter="all">Все курсы</button>
-    <button class="filter-btn" data-filter="geocore">GeoCore Academy</button>
-    <button class="filter-btn" data-filter="bortsov">К.В. Борцов</button>
-    <button class="filter-btn" data-filter="datamine">Datamine</button>
-    <button class="filter-btn" data-filter="leapfrog">Leapfrog</button>
-    <button class="filter-btn" data-filter="ml">ML / Геостатистика</button>
+    <button class="filter-btn" data-filter="live">Открыт</button>
+    <button class="filter-btn" data-filter="soon">Скоро</button>
+    <button class="filter-btn" data-filter="planned">В разработке</button>
   </div>
 
-  <div class="courses-grid stg" id="coursesGrid">
-    <!-- КУРС 1: Datamine Studio RM -->
-    <a href="#" class="cc-link" data-category="geocore datamine">
-      <div class="cc feat">
-        <div class="cc-num">01 / 12</div>
-        <span class="cc-icon">⛏️</span>
-        <div class="cc-tag">Datamine · Базовый → Продвинутый</div>
-        <h3 class="cc-t">Datamine Studio RM: полный курс</h3>
-        <p class="cc-d">От импорта скважин до подсчёта запасов. Блочное моделирование, геостатистика, отчёты.</p>
-        <div class="cc-meta">
-          <div class="cc-m">🕐 <strong>48 уроков</strong></div>
-          <div class="cc-m">📁 <strong>Шаблоны</strong></div>
-        </div>
-      </div>
-    </a>
-
-    <!-- КУРС 2: Leapfrog Geo -->
-    <a href="#" class="cc-link" data-category="geocore leapfrog">
-      <div class="cc">
-        <div class="cc-num">02 / 12</div>
-        <span class="cc-icon">🌍</span>
-        <div class="cc-tag">Leapfrog · Средний</div>
-        <h3 class="cc-t">Leapfrog Geo: неявное моделирование</h3>
-        <p class="cc-d">Implicit modelling для рудных тел. Быстрое обновление при новых данных бурения.</p>
-        <div class="cc-meta">
-          <div class="cc-m">🕐 <strong>32 урока</strong></div>
-          <div class="cc-m">🎯 <strong>Практика</strong></div>
-        </div>
-      </div>
-    </a>
-
-    <!-- КУРС 3: Методика JORC/ГКЗ -->
-    <a href="#" class="cc-link" data-category="geocore">
-      <div class="cc">
-        <div class="cc-num">03 / 12</div>
-        <span class="cc-icon">📐</span>
-        <div class="cc-tag">Методика · JORC / ГКЗ</div>
-        <h3 class="cc-t">Подсчёт запасов: международные стандарты</h3>
-        <p class="cc-d">JORC, ГКЗ, NI 43-101, NAEN. Категории, CPR, отчётность для инвесторов.</p>
-        <div class="cc-meta">
-          <div class="cc-m">🕐 <strong>24 урока</strong></div>
-          <div class="cc-m">📄 <strong>Шаблоны CPR</strong></div>
-        </div>
-      </div>
-    </a>
-
-    <!-- КУРС 4: Геостатистика -->
-    <a href="#" class="cc-link" data-category="geocore ml">
-      <div class="cc">
-        <div class="cc-num">04 / 12</div>
-        <span class="cc-icon">📊</span>
-        <div class="cc-tag">Геостатистика</div>
-        <h3 class="cc-t">Геостатистика и кригинг: от основ</h3>
-        <p class="cc-d">Вариография, ординарный кригинг, условная симуляция. Python + горное ПО.</p>
-        <div class="cc-meta">
-          <div class="cc-m">🕐 <strong>28 уроков</strong></div>
-          <div class="cc-m">🐍 <strong>Python</strong></div>
-        </div>
-      </div>
-    </a>
-
-    <!-- КУРС 5: Для инвесторов -->
-    <a href="#" class="cc-link" data-category="geocore">
-      <div class="cc">
-        <div class="cc-num">05 / 12</div>
-        <span class="cc-icon">💼</span>
-        <div class="cc-tag">Для инвесторов</div>
-        <h3 class="cc-t">Читаем геологические отчёты</h3>
-        <p class="cc-d">Как оценивать JORC-отчёты, понимать категории запасов, выявлять риски.</p>
-        <div class="cc-meta">
-          <div class="cc-m">🕐 <strong>12 уроков</strong></div>
-          <div class="cc-m">📈 <strong>Кейсы</strong></div>
-        </div>
-      </div>
-    </a>
-
-    <!-- КУРС 6: Surpac -->
-    <a href="#" class="cc-link" data-category="geocore">
-      <div class="cc">
-        <div class="cc-num">06 / 12</div>
-        <span class="cc-icon">🗺️</span>
-        <div class="cc-tag">Surpac · Средний</div>
-        <h3 class="cc-t">Surpac: маркшейдерия и горное планирование</h3>
-        <p class="cc-d">3D-моделирование рудных тел, маркшейдерские расчёты, планирование.</p>
-        <div class="cc-meta">
-          <div class="cc-m">🕐 <strong>36 уроков</strong></div>
-          <div class="cc-m">🔧 <strong>Практика</strong></div>
-        </div>
-      </div>
-    </a>
-
-    <!-- КУРС 7: Datamine от Борцова -->
-    <a href="#" class="cc-link" data-category="bortsov datamine">
-      <div class="cc">
-        <div class="cc-num">07 / 12</div>
-        <span class="cc-icon">⛏️</span>
-        <div class="cc-tag">Автор: К.В. Борцов · Datamine</div>
-        <h3 class="cc-t">Datamine: базовый → продвинутый</h3>
-        <p class="cc-d">Полный курс от эксперта с 30+ лет опыта. Импорт данных, блочное моделирование, геостатистика, подготовка отчётов JORC/ГКЗ.</p>
-        <div class="cc-meta">
-          <div class="cc-m">🕐 <strong>42 урока</strong></div>
-          <div class="cc-m">📁 <strong>Реальные кейсы</strong></div>
-          <div class="cc-m">🎓 <strong>MIMMM</strong></div>
-        </div>
-      </div>
-    </a>
-
-    <!-- КУРС 8: Leapfrog от Борцова -->
-    <a href="#" class="cc-link" data-category="bortsov leapfrog">
-      <div class="cc">
-        <div class="cc-num">08 / 12</div>
-        <span class="cc-icon">🌍</span>
-        <div class="cc-tag">Автор: К.В. Борцов · Leapfrog</div>
-        <h3 class="cc-t">Leapfrog Geo: неявное 3D-моделирование</h3>
-        <p class="cc-d">Implicit modelling для рудных тел. Быстрое обновление модели при поступлении новых данных бурения. Кейсы по золоту и меди.</p>
-        <div class="cc-meta">
-          <div class="cc-m">🕐 <strong>28 уроков</strong></div>
-          <div class="cc-m">🎯 <strong>Практика</strong></div>
-          <div class="cc-m">📊 <strong>3 кейса</strong></div>
-        </div>
-      </div>
-    </a>
-
-    <!-- КУРС 9: ArcGIS от Борцова -->
-    <a href="#" class="cc-link" data-category="bortsov">
-      <div class="cc">
-        <div class="cc-num">09 / 12</div>
-        <span class="cc-icon">🗺️</span>
-        <div class="cc-tag">Автор: К.В. Борцов · ArcGIS</div>
-        <h3 class="cc-t">ArcGIS для геологов: ArcMap 10</h3>
-        <p class="cc-d">Пространственный анализ геологических данных, построение карт, моделирование структур, подготовка данных для поисковых работ.</p>
-        <div class="cc-meta">
-          <div class="cc-m">🕐 <strong>24 урока</strong></div>
-          <div class="cc-m">🗺️ <strong>Карты</strong></div>
-          <div class="cc-m">📐 <strong>ГИС-проекты</strong></div>
-        </div>
-      </div>
-    </a>
-
-    <!-- КУРС 10: Мат. методы и ML от Борцова -->
-    <a href="#" class="cc-link" data-category="bortsov ml">
-      <div class="cc feat">
-        <div class="cc-num">10 / 12</div>
-        <span class="cc-icon">🤖</span>
-        <div class="cc-tag">Автор: К.В. Борцов · ML</div>
-        <h3 class="cc-t">Математические методы и машинное обучение</h3>
-        <p class="cc-d">Применение ML в поисковых задачах. Кластеризация, прогнозирование рудных зон, обработка геофизических данных, Python.</p>
-        <div class="cc-meta">
-          <div class="cc-m">🕐 <strong>32 урока</strong></div>
-          <div class="cc-m">🐍 <strong>Python</strong></div>
-          <div class="cc-m">📈 <strong>Кейсы</strong></div>
-        </div>
-      </div>
-    </a>
-
-    <!-- КУРС 11: Тренажёр от Борцова -->
-    <a href="#" class="cc-link" data-category="bortsov">
-      <div class="cc">
-        <div class="cc-num">11 / 12</div>
-        <span class="cc-icon">🎮</span>
-        <div class="cc-tag">Автор: К.В. Борцов · Тренажёр</div>
-        <h3 class="cc-t">Тренажёр поисков и разведки</h3>
-        <p class="cc-d">Интерактивная игра-симулятор для геологов. Реальные кейсы: эпитермальное золото, VMS, медно-порфировые месторождения.</p>
-        <div class="cc-meta">
-          <div class="cc-m">🕐 <strong>7 кейсов</strong></div>
-          <div class="cc-m">🎮 <strong>Симулятор</strong></div>
-          <div class="cc-m">🏆 <strong>Рудознатец</strong></div>
-        </div>
-      </div>
-    </a>
-
-    <!-- КУРС 12: Комплект курсов Борцова -->
-    <a href="#" class="cc-link" data-category="bortsov">
-      <div class="cc">
-        <div class="cc-num">12 / 12</div>
-        <span class="cc-icon">📚</span>
-        <div class="cc-tag">Автор: К.В. Борцов · Комплекс</div>
-        <h3 class="cc-t">Полный комплект курсов эксперта</h3>
-        <p class="cc-d">Доступ ко всем авторским курсам: Datamine, Leapfrog, ArcGIS, ML, тренажёр. Сертификат, поддержка, разбор реальных проектов.</p>
-        <div class="cc-meta">
-          <div class="cc-m">🕐 <strong>150+ уроков</strong></div>
-          <div class="cc-m">🎓 <strong>Сертификат MIMMM</strong></div>
-          <div class="cc-m">⭐ <strong>Скидка 25%</strong></div>
-        </div>
-      </div>
-    </a>
-  </div>
+  <div class="cg"></div>
 </main>
 
 <footer>
-  <div class="fi">
-    <div>
-      <a href="index.html" class="nav-logo" style="text-decoration:none">
-        <div class="logo-hex"></div>
-        <span class="logo-text">Geo<span>Core</span></span>
-      </a>
-      <p class="fb-d">Профессиональное обучение оценке месторождений. Россия, СНГ и международный рынок.</p>
-    </div>
-    <div>
-      <div class="fc-t">Курсы</div>
-      <ul class="fl">
-        <li><a href="courses.html">Datamine Studio</a></li>
-        <li><a href="courses.html">Leapfrog Geo</a></li>
-        <li><a href="courses.html">Surpac</a></li>
-        <li><a href="courses.html">Методика JORC</a></li>
-        <li><a href="courses.html">Геостатистика</a></li>
-      </ul>
-    </div>
-    <div>
-      <div class="fc-t">Платформа</div>
-      <ul class="fl">
-        <li><a href="index.html#sandbox">Песочница</a></li>
-        <li><a href="index.html#templates">Шаблоны</a></li>
-        <li><a href="index.html#consult">Консультации</a></li>
-        <li><a href="index.html#blog">Блог</a></li>
-      </ul>
-    </div>
-    <div>
-      <div class="fc-t">Контакты</div>
-      <ul class="fl">
-        <li><a href="#">Telegram</a></li>
-        <li><a href="#">LinkedIn</a></li>
-        <li><a href="#">Email</a></li>
-        <li><a href="#">Корпоративным</a></li>
-      </ul>
-    </div>
-  </div>
+  <div class="fi"></div>
   <div class="fb">
-    <div class="fc">© 2025 GeoCore Academy · Все права защищены</div>
-    <div class="fl-langs">
-      <span class="fl-lang act">RU</span>
-      <span class="fl-lang">EN</span>
-    </div>
+    <div class="fc"></div>
   </div>
 </footer>
 
 <script>
-// Тема (светлая/тёмная)
 const themeBtn = document.getElementById('themeBtn');
-const savedTheme = localStorage.getItem('theme');
-if (savedTheme === 'light') document.body.classList.add('light');
+if (localStorage.getItem('theme') === 'light') document.body.classList.add('light');
 themeBtn.addEventListener('click', () => {
   document.body.classList.toggle('light');
   localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
+  themeBtn.textContent = document.body.classList.contains('light') ? '🌙' : '☀️';
 });
+</script>
 
-// Анимация появления
-const obs = new IntersectionObserver(entries => {
-  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('vis'); });
-}, { threshold: 0.08 });
-document.querySelectorAll('.rv, .stg').forEach(el => obs.observe(el));
+<script type="module">
+import { initSite } from '/js/data/siteRenderer.js';
 
-// Фильтры
-const filterBtns = document.querySelectorAll('.filter-btn');
-const courseCards = document.querySelectorAll('.cc-link');
+await initSite();
 
-filterBtns.forEach(btn => {
+// Фильтры по статусу карточки
+document.querySelectorAll('.filter-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    filterBtns.forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    const filter = btn.dataset.filter;
-    
-    courseCards.forEach(card => {
-      const categories = card.dataset.category;
-      if (filter === 'all' || categories.includes(filter)) {
-        card.style.display = 'block';
-      } else {
-        card.style.display = 'none';
-      }
+    const f = btn.dataset.filter;
+    document.querySelectorAll('.cg .cc').forEach(card => {
+      const show = f === 'all'
+        || (f === 'live'    && card.classList.contains('cc-live'))
+        || (f === 'soon'    && card.classList.contains('cc-soon'))
+        || (f === 'planned' && card.classList.contains('cc-planned'));
+      card.style.display = show ? '' : 'none';
     });
   });
 });
 </script>
+
 </body>
 </html>

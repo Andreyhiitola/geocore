@@ -1,8 +1,26 @@
 {
-  "moodleCourseOrder": [8],
+  "moodleCourseOrder": [9, 10],
 
   "moodleMeta": {
-    "8": {
+    "10": {
+      "icon": "📋",
+      "tag": "Методика · Базовый",
+      "meta": [{ "icon": "🕐", "text": "~3 часа" }, { "icon": "🎯", "text": "SCORM" }],
+      "modal": {
+        "tagline": "Профессиональная паспортизация геологоразведочных проектов",
+        "description": "Практический курс по оформлению геологической документации. Научитесь правильно составлять паспорта скважин, документировать керн и вести первичную геологическую отчётность.",
+        "highlights": [
+          "Стандарты оформления геологической документации",
+          "Паспортизация скважин и горных выработок",
+          "Документирование керна и шлама",
+          "Формы отчётности и требования регуляторов"
+        ],
+        "audience": "Геологи, техники-геологи, специалисты ГРР",
+        "duration": "~3 часа",
+        "format": "SCORM — проходите в браузере в удобном темпе"
+      }
+    },
+    "9": {
       "icon": "👁️",
       "tag": "Leapfrog · Для руководителей",
       "meta": [{ "icon": "🕐", "text": "~2 часа · 16 уроков" }, { "icon": "🎯", "text": "SCORM" }],
@@ -112,12 +130,11 @@
       {
         "title": "Контакты",
         "links": [
-          { "label": "📱 +7 (___) ___-__-__",      "href": "tel:+70000000000" },
-          { "label": "💬 WhatsApp",                 "href": "https://wa.me/70000000000" },
-          { "label": "✈️ Telegram",                 "href": "https://t.me/geocore_academy" },
-          { "label": "📧 info@geocore-academy.ru",  "href": "mailto:info@geocore-academy.ru" },
-          { "label": "💼 LinkedIn",                 "href": "https://linkedin.com/company/geocore-academy" },
-          { "label": "🏢 Корпоративным",            "href": "mailto:corp@geocore-academy.ru" }
+          { "label": "+7 (___) ___-__-__",       "href": "tel:+70000000000" },
+          { "label": "info@geocore-academy.ru",   "href": "mailto:info@geocore-academy.ru" },
+          { "label": "Telegram",                  "href": "https://t.me/geocore_academy" },
+          { "label": "LinkedIn",                  "href": "https://linkedin.com/company/geocore-academy" },
+          { "label": "Корпоративные запросы",     "href": "mailto:corp@geocore-academy.ru" }
         ]
       }
     ]
