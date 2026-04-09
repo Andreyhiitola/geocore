@@ -32,7 +32,7 @@ nginx (на VPS, хост)
 | GitHub Actions CI/CD | ✅ работает — автодеплой по git push |
 | FastAPI контейнер | ✅ работает |
 | api.geocore-academy.ru | ✅ отвечает |
-| Фронтенд (index/courses/lab) | ✅ работает — geocore-academy.ru |
+| Фронтенд (index/courses/lab/sandbox) | ✅ работает — geocore-academy.ru |
 
 ---
 
@@ -58,12 +58,7 @@ nginx (на VPS, хост)
 
 ## Что осталось сделать
 
-### 1. Ребрендинг SCORM — Паспортизация
-В SCORM-пакете Паспортизации на слайдах остался логотип Полиметала и упоминание «АО Полиметалл».
-Нужно определить координаты логотипа и запустить скрипт удаления (`tools/remove_logo.py`).
-Чеклист: `SCORM_REBRANDING.md`
-
-### 2. Саморегистрация студентов в Moodle
+### 1. Саморегистрация студентов в Moodle
 Настроить самостоятельную запись на курсы.
 
 ### 3. www.geocore-academy.ru
