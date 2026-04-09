@@ -1,5 +1,5 @@
 # GeoCore Academy
-**Сайт:** https://andreyhiitola.github.io/geocore/
+**Сайт:** https://geocore-academy.ru
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Three.js](https://img.shields.io/badge/Three.js-r128-green)](https://threejs.org/)
