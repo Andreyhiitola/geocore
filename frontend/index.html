@@ -90,11 +90,20 @@ h3.cc-t{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;line
 .cc-meta{display:flex;gap:18px;padding-top:20px;border-top:1px solid var(--border-dim);}
 .cc-m{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.07em;color:var(--text-dim);display:flex;align-items:center;gap:5px;}
 
-/* ── UPCOMING CARDS ── */
-.cc-soon{opacity:.5;border:1px dashed var(--border-dim) !important;}
+/* ── LIVE CARDS ── */
+.cc-live::after{content:'ОТКРЫТ';position:absolute;top:18px;right:18px;font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.14em;color:var(--dark);background:var(--gold);padding:3px 9px;clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);}
+
+/* ── СКОРО CARDS ── */
+.cc-soon{opacity:.45;cursor:default;border:1px dashed rgba(255,255,255,0.06) !important;}
 .cc-soon::after{content:'СКОРО';position:absolute;top:18px;right:18px;font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.14em;color:var(--text-dim);background:var(--dark-2);border:1px solid var(--border-dim);padding:3px 9px;clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);}
-.cc-soon:hover{opacity:.75;border-color:var(--border) !important;transform:translateY(-2px);}
-.cc-soon:hover::before{height:60%;}
+.cc-soon:hover{background:var(--dark-3);transform:none;}
+.cc-soon:hover::before{height:0;}
+
+/* ── В РАЗРАБОТКЕ CARDS ── */
+.cc-planned{opacity:.22;cursor:default;border:1px dashed rgba(255,255,255,0.03) !important;}
+.cc-planned::after{content:'В РАЗРАБОТКЕ';position:absolute;top:18px;right:18px;font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.10em;color:var(--text-dim);background:var(--dark-2);padding:3px 9px;clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);}
+.cc-planned:hover{background:var(--dark-3);transform:none;}
+.cc-planned:hover::before{height:0;}
 
 /* ── MODAL ── */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s;}
