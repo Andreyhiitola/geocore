@@ -2,9 +2,9 @@
  * siteRenderer.js — рендеринг nav, курсов и футера из site.json
  *
  * Три уровня курсов:
- *   live    — SCORM загружен, кликабельные (из Moodle, ID в moodleCourseOrder)
- *   скоро   — в Moodle но без SCORM, некликабельные (из Moodle, ID не в order)
- *   planned — только в планах, самые блёклые (из site.json, planned: true)
+ *   live    — SCORM загружен, клик → модалка с кнопкой «Записаться»
+ *   soon    — в Moodle без SCORM, клик → модалка-анонс без кнопки
+ *   planned — только в планах, некликабельные, самые блёклые
  */
 
 export async function loadSiteData() {
@@ -18,42 +18,30 @@ export function renderNav(data) {
   navLinks.innerHTML = data.nav.links
     .map(l => `<li><a href="${l.href}">${l.label}</a></li>`)
     .join('');
-
   const cta = document.querySelector('.nav-cta');
-  if (cta) {
-    cta.href = data.nav.cta.href;
-    cta.textContent = data.nav.cta.label;
-  }
+  if (cta) { cta.href = data.nav.cta.href; cta.textContent = data.nav.cta.label; }
 }
 
-// ── Рендер карточек ─────────────────────────────────────────────────────────
+// ── Карточки ────────────────────────────────────────────────────────────────
 
-function renderLiveCard(c) {
+function cardInner(c) {
   return `
-    <a href="${c.href}" class="cc cc-live" style="text-decoration:none;color:inherit;" target="_blank" rel="noopener">
-      <div class="cc-num">${c.num}</div>
-      <span class="cc-icon">${c.icon}</span>
-      <div class="cc-tag">${c.tag}</div>
-      <h3 class="cc-t">${c.title}</h3>
-      <p class="cc-d">${c.desc}</p>
-      <div class="cc-meta">
-        ${c.meta.map(m => `<div class="cc-m">${m.icon} <strong>${m.text}</strong></div>`).join('')}
-      </div>
-    </a>`;
-}
-
-function renderSoonCard(c) {
-  return `
-    <div class="cc cc-soon">
-      <div class="cc-num">${c.num}</div>
-      <span class="cc-icon">${c.icon}</span>
-      <div class="cc-tag">${c.tag}</div>
-      <h3 class="cc-t">${c.title}</h3>
-      <p class="cc-d">${c.desc}</p>
-      <div class="cc-meta">
-        ${c.meta.map(m => `<div class="cc-m">${m.icon} <strong>${m.text}</strong></div>`).join('')}
-      </div>
+    <div class="cc-num">${c.num}</div>
+    <span class="cc-icon">${c.icon}</span>
+    <div class="cc-tag">${c.tag}</div>
+    <h3 class="cc-t">${c.title}</h3>
+    <p class="cc-d">${c.desc}</p>
+    <div class="cc-meta">
+      ${c.meta.map(m => `<div class="cc-m">${m.icon} <strong>${m.text}</strong></div>`).join('')}
     </div>`;
+}
+
+function renderLiveCard(c, idx) {
+  return `<div class="cc cc-live" data-modal="live" data-idx="${idx}" role="button" tabindex="0">${cardInner(c)}</div>`;
+}
+
+function renderSoonCard(c, idx) {
+  return `<div class="cc cc-soon" data-modal="soon" data-idx="${idx}" role="button" tabindex="0">${cardInner(c)}</div>`;
 }
 
 function renderPlannedCard(c) {
@@ -73,6 +61,88 @@ export function renderCourses(live, soon, planned) {
     live.map(renderLiveCard).join('') +
     soon.map(renderSoonCard).join('') +
     planned.map(renderPlannedCard).join('');
+
+  ensureModal();
+
+  grid.querySelectorAll('[data-modal]').forEach(el => {
+    const handler = () => {
+      const type = el.dataset.modal;
+      const idx  = parseInt(el.dataset.idx);
+      if (type === 'live') openLiveModal(live[idx]);
+      if (type === 'soon') openSoonModal(soon[idx]);
+    };
+    el.addEventListener('click', handler);
+    el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') handler(); });
+  });
+}
+
+// ── Модальное окно ───────────────────────────────────────────────────────────
+
+function ensureModal() {
+  if (document.getElementById('gc-modal')) return;
+  const overlay = document.createElement('div');
+  overlay.id = 'gc-modal';
+  overlay.className = 'modal-overlay';
+  overlay.setAttribute('aria-hidden', 'true');
+  overlay.innerHTML = `
+    <div class="modal-panel" role="dialog" aria-modal="true">
+      <button class="modal-close" aria-label="Закрыть">✕</button>
+      <div class="modal-content"></div>
+    </div>`;
+  document.body.appendChild(overlay);
+
+  const close = () => { overlay.classList.remove('open'); overlay.setAttribute('aria-hidden', 'true'); };
+  overlay.querySelector('.modal-close').addEventListener('click', close);
+  overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+}
+
+function showModal(html) {
+  const overlay = document.getElementById('gc-modal');
+  overlay.querySelector('.modal-content').innerHTML = html;
+  overlay.classList.add('open');
+  overlay.setAttribute('aria-hidden', 'false');
+  overlay.querySelector('.modal-panel').scrollTop = 0;
+}
+
+function openLiveModal(c) {
+  const m = c.modal || {};
+  const highlights = (m.highlights || [])
+    .map(h => `<li class="modal-hi">${h}</li>`).join('');
+
+  showModal(`
+    <div class="modal-tag">${c.tag}</div>
+    <h2 class="modal-title">${c.title}</h2>
+    ${m.tagline ? `<p class="modal-tagline">${m.tagline}</p>` : ''}
+    ${m.description ? `<p class="modal-desc">${m.description}</p>` : `<p class="modal-desc">${c.desc}</p>`}
+    ${highlights ? `
+      <div class="modal-section">
+        <div class="modal-section-label">ЧТО ИЗУЧИТЕ</div>
+        <ul class="modal-highlights">${highlights}</ul>
+      </div>` : ''}
+    ${(m.audience || m.duration || m.format) ? `
+      <div class="modal-meta-row">
+        ${m.audience ? `<div class="modal-meta-item"><div class="modal-meta-label">АУДИТОРИЯ</div><div class="modal-meta-val">${m.audience}</div></div>` : ''}
+        ${m.duration ? `<div class="modal-meta-item"><div class="modal-meta-label">ДЛИТЕЛЬНОСТЬ</div><div class="modal-meta-val">${m.duration}</div></div>` : ''}
+        ${m.format   ? `<div class="modal-meta-item"><div class="modal-meta-label">ФОРМАТ</div><div class="modal-meta-val">${m.format}</div></div>` : ''}
+      </div>` : ''}
+    <a href="${c.href}" class="modal-cta" target="_blank" rel="noopener">Записаться на курс →</a>
+  `);
+}
+
+function openSoonModal(c) {
+  showModal(`
+    <div class="modal-tag">${c.tag}</div>
+    <h2 class="modal-title">${c.title}</h2>
+    <p class="modal-desc">${c.desc || 'Подробная программа курса готовится.'}</p>
+    <div class="modal-soon-note">
+      <div class="modal-soon-icon">⏳</div>
+      <div>
+        <div class="modal-soon-label">ЗАПИСЬ ОТКРОЕТСЯ ПОЗЖЕ</div>
+        <div class="modal-soon-text">Курс находится в подготовке. Следите за обновлениями на платформе.</div>
+      </div>
+    </div>
+  `);
 }
 
 // ── API ──────────────────────────────────────────────────────────────────────
@@ -81,7 +151,7 @@ async function fetchCoursesFromAPI() {
   const resp = await fetch('https://api.geocore-academy.ru/api/courses');
   if (!resp.ok) throw new Error(`API ${resp.status}`);
   const { courses } = await resp.json();
-  return courses; // [{id, title, summary, href}, ...]
+  return courses;
 }
 
 function moodleToCourse(c, idx, total, meta = {}) {
@@ -93,6 +163,7 @@ function moodleToCourse(c, idx, total, meta = {}) {
     desc:  c.summary.replace(/<[^>]+>/g, '').slice(0, 120),
     meta:  meta.meta  || [],
     href:  c.href,
+    modal: meta.modal || null,
   };
 }
 
@@ -101,16 +172,13 @@ function moodleToCourse(c, idx, total, meta = {}) {
 export function renderFooter(data) {
   const fi = document.querySelector('.fi');
   if (!fi) return;
-
   const cols = data.footer.columns.map(col => `
     <div>
       <div class="fc-t">${col.title}</div>
       <ul class="fl">
         ${col.links.map(l => `<li><a href="${l.href}">${l.label}</a></li>`).join('')}
       </ul>
-    </div>
-  `).join('');
-
+    </div>`).join('');
   fi.innerHTML = `
     <div>
       <a href="#" class="nav-logo" style="text-decoration:none">
@@ -119,9 +187,7 @@ export function renderFooter(data) {
       </a>
       <p class="fb-d">${data.footer.description}</p>
     </div>
-    ${cols}
-  `;
-
+    ${cols}`;
   const fc = document.querySelector('.fc');
   if (fc) fc.textContent = data.footer.copyright;
 }
@@ -134,24 +200,20 @@ export async function initSite() {
     renderNav(data);
     renderFooter(data);
 
-    const order    = data.moodleCourseOrder || [];
-    const metaMap  = data.moodleMeta || {};
-    const planned  = (data.courses || []).filter(c => c.planned);
+    const order   = data.moodleCourseOrder || [];
+    const metaMap = data.moodleMeta || {};
+    const planned = (data.courses || []).filter(c => c.planned);
 
     try {
       const all = await fetchCoursesFromAPI();
 
-      // live — курсы из order, в порядке order
       const liveRaw = order.map(id => all.find(c => c.id === id)).filter(Boolean);
       const live = liveRaw.map((c, i) =>
-        moodleToCourse(c, i, liveRaw.length, metaMap[c.id] || {})
-      );
+        moodleToCourse(c, i, liveRaw.length, metaMap[c.id] || {}));
 
-      // soon — все Moodle курсы не в order
       const soonRaw = all.filter(c => !order.includes(c.id));
       const soon = soonRaw.map((c, i) =>
-        moodleToCourse(c, i, soonRaw.length, metaMap[c.id] || {})
-      );
+        moodleToCourse(c, i, soonRaw.length, metaMap[c.id] || {}));
 
       renderCourses(live, soon, planned);
       console.log(`[siteRenderer] live:${live.length} soon:${soon.length} planned:${planned.length}`);
