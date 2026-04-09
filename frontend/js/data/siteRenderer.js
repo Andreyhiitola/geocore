@@ -134,12 +134,19 @@ function openModal(idx, courses) {
 
 // ── API & Footer ───────────────────────────────────────────────────────────
 
-async function fetchCoursesFromAPI() {
+async function fetchCoursesFromAPI(order = []) {
   const resp = await fetch('https://api.geocore-academy.ru/api/courses');
   if (!resp.ok) throw new Error(`API ${resp.status}`);
   const { courses } = await resp.json();
-  return courses.map((c, i) => ({
-    num:      `${String(i+1).padStart(2,'0')} / ??`,
+
+  // Если задан порядок — фильтруем только нужные курсы и сортируем по списку
+  const filtered = order.length
+    ? order.map(id => courses.find(c => c.id === id)).filter(Boolean)
+    : courses;
+
+  const total = filtered.length;
+  return filtered.map((c, i) => ({
+    num:      `${String(i+1).padStart(2,'0')} / ${String(total).padStart(2,'0')}`,
     icon:     '📚',
     tag:      '',
     title:    c.title,
@@ -187,7 +194,7 @@ export async function initSite() {
     const upcomingCourses = data.courses.filter(c => c.upcoming);
 
     try {
-      const moodleCourses = await fetchCoursesFromAPI();
+      const moodleCourses = await fetchCoursesFromAPI(data.moodleCourseOrder || []);
       renderCourses({ courses: moodleCourses }, upcomingCourses);
       console.log('[siteRenderer] Курсы загружены из Moodle API');
     } catch (e) {

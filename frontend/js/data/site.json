@@ -1,4 +1,6 @@
 {
+  "moodleCourseOrder": [8],
+
   "nav": {
     "links": [
       { "label": "Курсы",         "href": "#courses" },
