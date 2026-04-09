@@ -43,7 +43,7 @@
   "nav": {
     "links": [
       { "label": "Курсы",         "href": "#courses" },
-      { "label": "Песочница",     "href": "#sandbox" },
+      { "label": "Песочница",     "href": "sandbox.html" },
       { "label": "Лаборатория",   "href": "lab.html" },
       { "label": "Проекты",       "href": "#projects" },
       { "label": "Консультации",  "href": "#consult" },
@@ -121,7 +121,7 @@
       {
         "title": "Платформа",
         "links": [
-          { "label": "Песочница",     "href": "#sandbox" },
+          { "label": "Песочница",     "href": "sandbox.html" },
           { "label": "Шаблоны",       "href": "#lab" },
           { "label": "Консультации",  "href": "#consult" },
           { "label": "Блог",          "href": "#blog" }

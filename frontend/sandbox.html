@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D-Песочница — GeoCore Academy</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --gold:#C9A84C; --gold-light:#E8C97A; --gold-dim:#7A6230;
+  --dark:#0A0A0B; --dark-2:#111114; --dark-3:#18181D; --dark-4:#1F1F26;
+  --surface:#252530; --text:#E8E6DE; --text-muted:#9A9890; --text-dim:#5C5B56;
+  --border:rgba(201,168,76,0.18); --border-dim:rgba(255,255,255,0.07);
+}
+body.light{
+  --dark:#F5F3EE; --dark-2:#EDE9E0; --dark-3:#E4DED2; --dark-4:#D9D2C5;
+  --surface:#FFFFFF; --text:#1A1916; --text-muted:#5A5650; --text-dim:#9A9080;
+  --border:rgba(139,105,27,0.2); --border-dim:rgba(0,0,0,0.06);
+}
+html{scroll-behavior:smooth;}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--dark);color:var(--text);transition:background .3s,color .3s;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.35;}
+body.light::before{display:none;}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:68px;background:rgba(10,10,11,.88);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+body.light nav{background:rgba(245,243,238,.92);}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.logo-hex{width:32px;height:32px;background:var(--gold);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);}
+.logo-text{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--text);}
+.logo-text span{color:var(--gold);}
+.nav-links{display:flex;gap:36px;list-style:none;}
+.nav-links a{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);text-decoration:none;transition:color .2s;}
+.nav-links a:hover{color:var(--gold);}
+.nav-right{display:flex;align-items:center;gap:12px;}
+.theme-btn{background:none;border:1px solid var(--border);color:var(--text-muted);width:34px;height:34px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.theme-btn:hover{border-color:var(--gold);color:var(--gold);}
+.nav-cta{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dark);background:var(--gold);padding:9px 22px;text-decoration:none;clip-path:polygon(7px 0%,100% 0%,calc(100% - 7px) 100%,0% 100%);}
+.nav-cta:hover{background:var(--gold-light);}
+.nav-back{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);text-decoration:none;display:flex;align-items:center;gap:8px;}
+.nav-back:hover{color:var(--gold);}
+
+.inner{max-width:1240px;margin:0 auto;padding:0 100px;}
+.sec-lbl{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+.sec-lbl::after{content:'';flex:1;max-width:50px;height:1px;background:var(--gold-dim);}
+h2.sec-t{font-family:'Playfair Display',serif;font-size:clamp(34px,3.2vw,50px);font-weight:700;line-height:1.1;margin-bottom:18px;}
+.sec-d{font-size:15px;font-weight:300;line-height:1.75;color:var(--text-muted);max-width:540px;}
+.btn-p{display:inline-flex;align-items:center;gap:9px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dark);background:var(--gold);padding:14px 30px;text-decoration:none;clip-path:polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%);transition:all .2s;}
+.btn-p:hover{background:var(--gold-light);transform:translateY(-2px);}
+.btn-s{display:inline-flex;align-items:center;gap:9px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);border:1px solid var(--border);padding:14px 30px;text-decoration:none;transition:all .2s;}
+.btn-s:hover{border-color:var(--gold);color:var(--gold);}
+
+/* ── REVEAL ── */
+.rv{opacity:0;transform:translateY(28px);transition:opacity .65s ease,transform .65s ease;}
+.rv.vis{opacity:1;transform:none;}
+.stg>*{opacity:0;transform:translateY(18px);transition:opacity .5s ease,transform .5s ease;}
+.stg.vis>*:nth-child(1){opacity:1;transform:none;transition-delay:.08s;}
+.stg.vis>*:nth-child(2){opacity:1;transform:none;transition-delay:.16s;}
+.stg.vis>*:nth-child(3){opacity:1;transform:none;transition-delay:.24s;}
+.stg.vis>*:nth-child(4){opacity:1;transform:none;transition-delay:.32s;}
+.stg.vis>*:nth-child(5){opacity:1;transform:none;transition-delay:.40s;}
+.stg.vis>*:nth-child(6){opacity:1;transform:none;transition-delay:.48s;}
+
+/* ── SANDBOX ── */
+.sb-page{padding:100px 0 80px;}
+.sb-sec{padding:110px 0;background:var(--dark);}
+.sb-grid{display:grid;grid-template-columns:400px 1fr;gap:28px;margin-top:72px;align-items:start;}
+.sb-panel{background:var(--dark-3);border:1px solid var(--border-dim);}
+.sb-ph{padding:16px 20px;border-bottom:1px solid var(--border-dim);background:var(--dark-4);}
+.sb-ph-t{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;}
+.sb-ph-d{font-size:12px;color:var(--text-muted);margin-top:2px;}
+.sb-body{padding:20px;display:flex;flex-direction:column;gap:16px;}
+.sb-feat{display:flex;gap:14px;align-items:flex-start;width:100%;}
+.sb-feat > div:last-child{flex:1;min-width:0;}
+.sb-fi{font-size:22px;min-width:36px;}
+.sb-ft{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;margin-bottom:5px;}
+.sb-fd{font-size:12px;font-weight:300;line-height:1.55;color:var(--text-muted);}
+.file-in{background:var(--dark-4);border:1px solid var(--border-dim);color:var(--text);padding:7px 10px;width:100%;font-size:11px;margin-top:6px;cursor:pointer;}
+.file-in::-webkit-file-upload-button{background:var(--gold);border:none;color:var(--dark);padding:4px 10px;font-family:'IBM Plex Mono',monospace;font-size:10px;cursor:pointer;}
+.status-line{font-size:10px;margin-top:5px;}
+.params-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
+.param-label{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--text-dim);margin-bottom:3px;}
+.param-input{width:100%;background:var(--dark-4);border:1px solid var(--border-dim);color:var(--text);padding:6px 8px;font-family:'IBM Plex Mono',monospace;font-size:12px;outline:none;}
+.param-input:focus{border-color:var(--gold);}
+.stats-out{font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.7;color:var(--text-muted);background:var(--dark-4);padding:10px 12px;border:1px solid var(--border-dim);min-height:70px;white-space:pre-wrap;}
+.script-out{font-family:'IBM Plex Mono',monospace;font-size:10.5px;line-height:1.65;color:#7ee787;background:#0D1117;padding:12px;border:1px solid rgba(255,255,255,0.06);max-height:180px;overflow:auto;white-space:pre-wrap;width:100%;box-sizing:border-box;word-break:break-word;}
+.copy-btn,.export-btn{display:block;width:100%;background:transparent;border:1px solid var(--border);color:var(--text-muted);padding:8px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;cursor:pointer;margin-top:8px;transition:all .2s;}
+.copy-btn:hover,.export-btn:hover{border-color:var(--gold);color:var(--gold);}
+.run-btn{width:100%;background:var(--dark-4);border:2px solid var(--border-dim);color:var(--text-dim);padding:15px;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;cursor:not-allowed;transition:all .3s;position:relative;overflow:hidden;}
+.run-btn.ready{background:var(--gold);border-color:var(--gold);color:var(--dark);cursor:pointer;clip-path:polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%);}
+.run-btn.ready:hover{background:var(--gold-light);transform:translateY(-2px);}
+.run-btn.running{background:#1a2a3a;border-color:#2a5a8a;color:#79C0FF;cursor:wait;}
+.run-btn.done{background:#0d1f0d;border-color:#2a5a2a;color:#7ee787;cursor:pointer;}
+.run-progress{position:absolute;bottom:0;left:0;height:3px;background:var(--gold-light);width:0%;transition:width .08s linear;}
+.canvas-wrap{background:#0a121c;border:1px solid rgba(255,255,255,.06);position:relative;}
+#c3d{width:100%;height:520px;display:block;}
+.canvas-hint{position:absolute;bottom:10px;left:0;right:0;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:rgba(255,255,255,.2);pointer-events:none;}
+.legend{display:flex;gap:20px;padding:10px 14px;border-top:1px solid rgba(255,255,255,.05);flex-wrap:wrap;}
+.leg-item{display:flex;align-items:center;gap:6px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:rgba(255,255,255,.35);}
+.leg-dot{width:10px;height:10px;border-radius:50%;}
+.vari-btn{background:var(--dark-4);border:1px solid var(--border);color:var(--gold);padding:8px 14px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;cursor:pointer;width:100%;margin-top:8px;transition:all .2s;}
+.vari-btn:hover{border-color:var(--gold);background:rgba(201,168,76,.08);}
+#variogramCanvas{display:none;margin-top:12px;background:#0D1117;padding:12px;}
+#variogramStats{font-family:'IBM Plex Mono',monospace;font-size:10px;margin-top:8px;color:#7ee787;}
+
+/* ── TEMPLATES ── */
+.template-card{background:var(--dark-3);padding:18px;border:1px solid transparent;transition:all .3s;cursor:pointer;position:relative;overflow:hidden;}
+.template-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:0;background:var(--gold);transition:height .4s;}
+.template-card:hover{background:var(--dark-4);border-color:var(--border);transform:translateY(-2px);}
+.template-card:hover::before{height:100%;}
+.template-name{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;margin-bottom:7px;}
+.template-desc{font-size:12px;font-weight:300;line-height:1.5;color:var(--text-muted);margin-bottom:8px;}
+.template-stats{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--text-dim);margin-bottom:7px;}
+.template-badge{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.08em;color:var(--gold);border:1px solid var(--gold-dim);padding:2px 6px;display:inline-block;}
+
+/* ── PROJECTS ── */
+.proj-sec{padding:80px 0;background:var(--dark-2);border-top:1px solid var(--border-dim);}
+.proj-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:32px;}
+.proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;}
+.proj-card{background:var(--dark-3);border:1px solid var(--border-dim);padding:20px 24px;position:relative;transition:all .25s;cursor:pointer;}
+.proj-card:hover{border-color:var(--border);transform:translateY(-2px);}
+.proj-name{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;margin-bottom:6px;}
+.proj-meta{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-dim);letter-spacing:.08em;}
+.proj-tag{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold-dim);padding:2px 7px;margin-top:10px;}
+.proj-del{position:absolute;top:12px;right:12px;background:none;border:1px solid var(--border-dim);color:var(--text-dim);width:26px;height:26px;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.proj-del:hover{border-color:#8B3A2A;color:#8B3A2A;}
+.no-proj{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-dim);text-align:center;padding:40px;border:1px dashed var(--border-dim);}
+.save-btn{background:var(--gold);border:none;color:var(--dark);padding:9px 20px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;clip-path:polygon(7px 0%,100% 0%,calc(100% - 7px) 100%,0% 100%);transition:background .2s;}
+.save-btn:hover{background:var(--gold-light);}
+
+footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:40px 48px;margin-top:0;display:flex;justify-content:space-between;align-items:center;}
+.f-copy{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.07em;color:var(--text-dim);}
+.f-back{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);text-decoration:none;}
+
+@media(max-width:1080px){
+  nav{padding:0 20px;}.nav-links{display:none;}
+  .inner{padding:0 24px;}
+  .sb-grid{grid-template-columns:1fr;}
+  .sb-panel{width:100% !important;min-width:0 !important;}
+  .sb-body{width:100% !important;min-width:0 !important;padding-left:20px;padding-right:20px;}
+  .sb-feat{width:100% !important;min-width:0 !important;}
+  .script-out{width:100% !important;max-width:100% !important;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div style="display:flex;align-items:center;gap:24px;">
+    <a href="index.html" class="nav-logo">
+      <div class="logo-hex"></div>
+      <span class="logo-text">Geo<span>Core</span></span>
+    </a>
+    <a href="index.html" class="nav-back">← На главную</a>
+  </div>
+  <ul class="nav-links">
+    <li><a href="index.html#courses">Курсы</a></li>
+    <li><a href="sandbox.html" style="color:var(--gold)">Песочница</a></li>
+    <li><a href="lab.html">Лаборатория</a></li>
+    <li><a href="index.html#blog">Блог</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="theme-btn" id="themeBtn">🌙</button>
+    <a href="index.html#pricing" class="nav-cta">Начать обучение</a>
+  </div>
+</nav>
+
+<main style="padding-top:68px;">
+
+  <!-- ЗАГОЛОВОК -->
+  <section style="padding:64px 0 40px;background:var(--dark);">
+    <div class="inner">
+      <div class="rv">
+        <div class="sec-lbl">3D-Песочница · Анализ данных</div>
+        <h2 class="sec-t">Анализируйте данные<br>в реальном времени</h2>
+        <p class="sec-d">Выберите шаблон ниже или загрузите свои файлы. Получите 3D-модель, оценку запасов и готовый скрипт Datamine.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- АРХИВ МЕСТОРОЖДЕНИЙ (7 типов) -->
+  <section style="padding:40px 0;background:var(--dark-2);border-top:1px solid var(--border-dim);">
+    <div class="inner">
+      <div class="rv">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+          <h3 style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;">🗂️ Архив месторождений</h3>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-dim);">7 типов · CSV + OBJ</span>
+        </div>
+        <div class="stg" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
+          <div class="template-card" data-template="gold">
+            <div class="template-name"><span>🥇</span> Золото эпитермальное</div>
+            <p class="template-desc">Малосульфидное Au. Жильно-прожилковая минерализация, сложная морфология.</p>
+            <div class="template-stats">12 скважин · до 14 г/т Au · JORC</div>
+            <div class="template-badge">gold_demo.csv + obj</div>
+          </div>
+          <div class="template-card" data-template="gold">
+            <div class="template-name"><span>🔶</span> Золото порфировое</div>
+            <p class="template-desc">Штокверковая минерализация, равномерное распределение.</p>
+            <div class="template-stats">15 скважин · 0.5–8 г/т Au · JORC</div>
+            <div class="template-badge">porphyry_gold.csv + obj</div>
+          </div>
+          <div class="template-card" data-template="copper">
+            <div class="template-name"><span>🔴</span> Медь порфировая</div>
+            <p class="template-desc">Вкрапленная Cu-Mo минерализация, крупный объём.</p>
+            <div class="template-stats">10 скважин · 0.2–2.5% Cu · JORC</div>
+            <div class="template-badge">copper_demo.csv + obj</div>
+          </div>
+          <div class="template-card" data-template="coal">
+            <div class="template-name"><span>⚫</span> Уголь пластовый</div>
+            <p class="template-desc">Два рабочих пласта мощностью 2–6 м.</p>
+            <div class="template-stats">13 скважин · мощность 3–5 м · ГКЗ</div>
+            <div class="template-badge">coal_demo.csv</div>
+          </div>
+          <div class="template-card" data-template="copper">
+            <div class="template-name"><span>🔵</span> Полиметаллы Pb-Zn-Ag</div>
+            <p class="template-desc">Стратиформная минерализация. Pb до 8%, Zn до 12%.</p>
+            <div class="template-stats">18 скважин · JORC</div>
+            <div class="template-badge">polymetallic_demo.csv + obj</div>
+          </div>
+          <div class="template-card" data-template="gold">
+            <div class="template-name"><span>🔩</span> Железо (МКЖ)</div>
+            <p class="template-desc">Магнетитовые кварциты, Fe 28–45%.</p>
+            <div class="template-stats">22 скважины · JORC / ГКЗ</div>
+            <div class="template-badge">iron_demo.csv + obj</div>
+          </div>
+          <div class="template-card" data-template="copper">
+            <div class="template-name"><span>🟣</span> VMS Cu-Zn</div>
+            <p class="template-desc">Колчеданно-полиметаллическое, высокая вариабельность.</p>
+            <div class="template-stats">20 скважин · Cu до 3%, Zn до 8%</div>
+            <div class="template-badge">vms_demo.csv + obj</div>
+          </div>
+          <div class="template-card" style="cursor:default;opacity:.6;">
+            <div class="template-name"><span>💎</span> Алмазы (кимберлит)</div>
+            <p class="template-desc">Трубкообразное тело, содержание карат/т.</p>
+            <div class="template-stats">в разработке · JORC</div>
+            <div class="template-badge">Скоро</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ОСНОВНОЙ БЛОК ПЕСОЧНИЦЫ -->
+  <section style="padding:60px 0;background:var(--dark);" id="sandbox">
+    <div class="inner">
+      <div class="sb-grid">
+
+        <!-- ЛЕВАЯ КОЛОНКА: панель управления -->
+        <div class="sb-panel">
+          <div class="sb-ph">
+            <div class="sb-ph-t">📂 Данные проекта</div>
+            <div class="sb-ph-d">CSV скважины · OBJ каркас · или выберите шаблон выше</div>
+          </div>
+          <div class="sb-body">
+            <div class="sb-feat"><div class="sb-fi">📋</div><div style="flex:1"><div class="sb-ft">1. CSV (скважины)</div><div class="sb-fd">Формат: HoleID, From, To, Au_gpt</div><input type="file" id="csvIn" accept=".csv,.txt" class="file-in"><div id="csvStatus" class="status-line" style="color:var(--text-dim)">Демо-данные загружены автоматически</div></div></div>
+            <div class="sb-feat"><div class="sb-fi">🔷</div><div style="flex:1"><div class="sb-ft">2. OBJ (каркас рудного тела)</div><div class="sb-fd">Wavefront OBJ — вершины и грани</div><input type="file" id="objIn" accept=".obj,.txt" class="file-in"><div id="objStatus" class="status-line" style="color:var(--text-dim)"></div></div></div>
+            <div class="sb-feat"><div class="sb-fi">⚙️</div><div style="flex:1"><div class="sb-ft">3. Параметры блочной модели</div><div class="params-grid"><div><div class="param-label">Размер блока (м)</div><input type="number" id="blockSize" class="param-input" value="5" min="1" max="20"></div><div><div class="param-label">Метод интерполяции</div><select id="methodSel" class="param-input"><option value="idw">IDW (расстояние)</option><option value="kriging">Кригинг (упрощ.)</option><option value="nn">Nearest Neighbour</option></select></div><div><div class="param-label">Cutoff (г/т или %)</div><input type="number" id="cutoff" class="param-input" value="2.0" step="0.5"></div><div><div class="param-label">Стандарт</div><select id="stdSel" class="param-input"><option value="JORC">JORC</option><option value="ГКЗ">ГКЗ</option><option value="NI 43-101">NI 43-101</option></select></div></div></div></div>
+            <div class="sb-feat"><div class="sb-fi">📈</div><div style="flex:1"><div class="sb-ft">Экспериментальная вариограмма</div><div class="sb-fd">Анализ пространственной корреляции по трём направлениям.</div><button id="calcVariogramBtn" class="vari-btn">📊 Построить вариограмму</button><div id="variogramCanvas"><canvas id="variogramPlot" width="500" height="260" style="width:100%;background:#0a121c;"></canvas><div id="variogramStats"></div></div></div></div>
+            <button class="run-btn" id="runBtn" disabled><span id="runBtnText">▶ Загрузите CSV для запуска</span></button>
+            <div class="sb-feat"><div class="sb-fi">📊</div><div style="flex:1"><div class="sb-ft">Статистика и оценка запасов</div><div class="stats-out" id="statsOut">Загрузите CSV или выберите шаблон…</div></div></div>
+            <div class="sb-feat">
+              <div class="sb-fi">👁️</div>
+              <div style="flex:1">
+                <div class="sb-ft">Визуализация</div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+                  <button id="toggleOreShell" class="btn-s" style="padding:6px 12px;background:var(--dark-4);">🔮 Каркас рудного тела</button>
+                  <button id="toggleHoles" class="btn-s" style="padding:6px 12px;background:var(--dark-4);">🕳️ Скважины</button>
+                </div>
+                <div class="sb-fd" style="margin-top:6px;">Включите/выключите отображение элементов</div>
+              </div>
+            </div>
+            <div class="sb-feat"><div class="sb-fi">📜</div><div style="flex:1"><div class="sb-ft">Шаблон скрипта Datamine</div><div class="script-out" id="scriptOut">Загрузите данные…</div><button class="copy-btn" id="copyBtn">📋 Копировать скрипт</button><button class="export-btn" id="exportBtn">📎 Экспорт отчёта (CSV + текст)</button></div></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="save-btn" id="resetDemoBtn" style="background:var(--dark-4);color:var(--gold);border:1px solid var(--border);flex:1">⟳ Сброс к золоту</button><button class="save-btn" id="saveProjectBtn" style="flex:2">💾 Сохранить проект</button></div>
+          </div>
+        </div>
+
+        <!-- ПРАВАЯ КОЛОНКА: 3D-визуализация -->
+        <div>
+          <div class="canvas-wrap"><canvas id="c3d"></canvas><div class="canvas-hint">🖱 Вращение · ПКМ панорама · Scroll масштаб</div></div>
+          <div class="legend">
+            <div class="leg-item"><div class="leg-dot" style="background:#3a6ea5"></div>Скважины</div>
+            <div class="leg-item"><div class="leg-dot" style="background:#ffaa33"></div>Высокое содержание (&gt;5 г/т)</div>
+            <div class="leg-item"><div class="leg-dot" style="background:linear-gradient(90deg,#0040ff,#00aaff,#ffdd00,#ff8800,#ff2200);width:40px;"></div>Блочная модель (цвет = содержание)</div>
+            <div class="leg-item"><div class="leg-dot" style="background:#c9a84c;opacity:.8;width:12px;height:12px;border-radius:1px;"></div>Каркас рудного тела (сетка)</div>
+          </div>
+          <div class="sb-feat" style="margin-top:16px;">
+            <div class="sb-fi">📥</div>
+            <div style="flex:1">
+              <div class="sb-ft">Экспорт для Datamine Viewer</div>
+              <div class="sb-fd" style="margin-bottom:8px;">Скачайте блочную модель и каркас, чтобы открыть их в бесплатном просмотрщике Datamine Studio Viewer.</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button id="exportBlockmodelBtn" class="btn-s" style="padding:6px 12px;background:var(--dark-4);">📦 Скачать .blockmodel</button>
+                <button id="exportWireframeBtn" class="btn-s" style="padding:6px 12px;background:var(--dark-4);">🔷 Скачать каркас (.wrl)</button>
+                <a href="https://www.dataminesoftware.com/products/studio-viewer" target="_blank" class="btn-s" style="padding:6px 12px;background:var(--dark-4);text-decoration:none;">🔗 Datamine Viewer (бесплатно)</a>
+              </div>
+              <div class="sb-fd" style="margin-top:6px;font-size:10px;">📌 Studio Viewer позволяет открывать блочные модели и каркасы без лицензии Datamine.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- МОИ ПРОЕКТЫ -->
+  <section class="proj-sec" id="projects">
+    <div class="inner">
+      <div class="proj-header rv"><div><div class="sec-lbl">Мои проекты</div><h2 style="font-family:'Playfair Display',serif;font-size:clamp(28px,2.8vw,40px);font-weight:700;">Сохранённые проекты</h2></div><button class="save-btn" id="clearAll">🗑 Очистить всё</button></div>
+      <div class="proj-grid" id="projGrid"><div class="no-proj">Нет сохранённых проектов.<br>Загрузите данные и нажмите «Сохранить проект».</div></div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Модальное окно для вариограммы -->
+<div id="variogramModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:1000;justify-content:center;align-items:center;">
+  <div style="background:var(--dark-3);border:1px solid var(--border);border-radius:12px;width:90%;max-width:900px;padding:20px;position:relative;">
+    <button id="closeVariogramModal" style="position:absolute;top:10px;right:20px;background:none;border:none;color:var(--text-muted);font-size:28px;cursor:pointer;">&times;</button>
+    <h3 style="font-family:'Playfair Display',serif;margin-bottom:16px;">📈 Экспериментальная вариограмма</h3>
+    <canvas id="variogramPlotLarge" width="800" height="500" style="width:100%;height:auto;background:#0a121c;border-radius:8px;"></canvas>
+    <div id="variogramStatsLarge" style="font-family:monospace;font-size:12px;margin-top:16px;color:#7ee787;text-align:center;"></div>
+  </div>
+</div>
+
+<footer>
+  <span class="f-copy">© 2025 GeoCore Academy</span>
+  <a href="index.html" class="f-back">← На главную</a>
+</footer>
+
+<script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.128.0/build/three.module.js"
+    }
+  }
+</script>
+<script type="module" src="js/main.js"></script>
+
+<!-- Читаем URL-параметр ?t= и загружаем нужный шаблон -->
+<script type="module">
+import { loadTemplate } from './js/data/templates.js';
+
+document.addEventListener('DOMContentLoaded', () => {
+  const t = new URLSearchParams(window.location.search).get('t');
+  if (t && ['gold', 'copper', 'coal'].includes(t)) {
+    // Небольшая задержка, чтобы main.js успел инициализировать 3D-сцену
+    setTimeout(() => loadTemplate(t), 400);
+  }
+
+  // Тема
+  const btn = document.getElementById('themeBtn');
+  const saved = localStorage.getItem('theme');
+  if (saved === 'light') { document.body.classList.add('light'); if (btn) btn.textContent = '☀️'; }
+  if (btn) btn.addEventListener('click', () => {
+    document.body.classList.toggle('light');
+    btn.textContent = document.body.classList.contains('light') ? '☀️' : '🌙';
+    localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
+  });
+
+  // Reveal анимации
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('vis'); observer.unobserve(e.target); }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.rv, .stg').forEach(el => observer.observe(el));
+});
+</script>
+
+</body>
+</html>

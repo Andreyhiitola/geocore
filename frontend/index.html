@@ -463,9 +463,8 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:5
   </a>
   <ul class="nav-links">
     <li><a href="#courses">Курсы</a></li>
-    <li><a href="#sandbox">Песочница</a></li>
+    <li><a href="sandbox.html">Песочница</a></li>
     <li><a href="lab.html">Лаборатория</a></li>
-    <li><a href="#projects">Проекты</a></li>
     <li><a href="#consult">Консультации</a></li>
     <li><a href="#blog">Блог</a></li>
     <li><a href="#pricing">Цены</a></li>
@@ -540,145 +539,49 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:5
 </section>
 
 
-<!-- ── SANDBOX ── -->
-<!-- ── SANDBOX ── -->
+<!-- ── SANDBOX TEASER ── -->
 <section class="sb-sec sec" id="sandbox">
   <div class="inner">
-    <div class="rv">
-      <div class="sec-lbl">3D-Песочница</div>
-      <h2 class="sec-t">Анализируйте данные<br>в реальном времени</h2>
-      <p class="sec-d">Выберите шаблон ниже или загрузите свои файлы. Получите 3D-модель, оценку запасов и готовый скрипт Datamine.</p>
+    <div class="rv" style="text-align:center;padding:60px 0 20px;">
+      <div class="sec-lbl" style="justify-content:center">3D-Песочница · Анализ данных</div>
+      <h2 class="sec-t" style="margin:0 auto 18px">Анализируйте геологические данные<br>в реальном времени</h2>
+      <p class="sec-d" style="margin:0 auto 36px;max-width:560px">3D-визуализация скважин, блочная модель, оценка запасов, скрипты Datamine. Загрузите CSV или выберите один из 7 демо-датасетов.</p>
+      <a href="sandbox.html" class="btn-p">⛏ Открыть 3D-Песочницу</a>
     </div>
 
-    <!-- АРХИВ МЕСТОРОЖДЕНИЙ (7 типов) -->
-    <div class="rv" style="margin-top: 48px;">
+    <!-- АРХИВ МЕСТОРОЖДЕНИЙ - ссылки на скачивание демо-данных -->
+    <div class="rv" style="margin-top: 48px; padding-bottom: 60px;">
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
-        <h3 style="font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700;">🗂️ Архив месторождений</h3>
+        <h3 style="font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700;">🗂️ Архив демо-датасетов</h3>
         <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text-dim);">7 типов · CSV + OBJ</span>
       </div>
       <div class="templates-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 48px;">
-        <!-- Золото эпитермальное -->
-        <div class="template-card" data-template="gold" style="cursor: pointer;">
+        <div class="template-card" onclick="window.location.href='sandbox.html?t=gold'" style="cursor:pointer">
           <div class="template-name"><span>🥇</span> Золото эпитермальное</div>
-          <p class="template-desc">Малосульфидное Au. Жильно-прожилковая минерализация, сложная морфология.</p>
+          <p class="template-desc">Малосульфидное Au. Жильно-прожилковая минерализация.</p>
           <div class="template-stats">12 скважин · до 14 г/т Au · JORC</div>
-          <div class="template-badge">gold_demo.csv + obj</div>
+          <div class="template-badge">Открыть в песочнице →</div>
         </div>
-        <!-- Золото порфировое -->
-        <div class="template-card" data-template="gold" style="cursor: pointer;">
-          <div class="template-name"><span>🔶</span> Золото порфировое</div>
-          <p class="template-desc">Штокверковая минерализация, равномерное распределение.</p>
-          <div class="template-stats">15 скважин · 0.5–8 г/т Au · JORC</div>
-          <div class="template-badge">porphyry_gold.csv + obj</div>
-        </div>
-        <!-- Медь порфировая -->
-        <div class="template-card" data-template="copper" style="cursor: pointer;">
+        <div class="template-card" onclick="window.location.href='sandbox.html?t=copper'" style="cursor:pointer">
           <div class="template-name"><span>🔴</span> Медь порфировая</div>
           <p class="template-desc">Вкрапленная Cu-Mo минерализация, крупный объём.</p>
           <div class="template-stats">10 скважин · 0.2–2.5% Cu · JORC</div>
-          <div class="template-badge">copper_demo.csv + obj</div>
+          <div class="template-badge">Открыть в песочнице →</div>
         </div>
-        <!-- Уголь пластовый -->
-        <div class="template-card" data-template="coal" style="cursor: pointer;">
+        <div class="template-card" onclick="window.location.href='sandbox.html?t=coal'" style="cursor:pointer">
           <div class="template-name"><span>⚫</span> Уголь пластовый</div>
           <p class="template-desc">Два рабочих пласта мощностью 2–6 м.</p>
           <div class="template-stats">13 скважин · мощность 3–5 м · ГКЗ</div>
-          <div class="template-badge">coal_demo.csv</div>
+          <div class="template-badge">Открыть в песочнице →</div>
         </div>
-        <!-- Полиметаллы Pb-Zn-Ag -->
-        <div class="template-card" data-template="copper" style="cursor: pointer;">
-          <div class="template-name"><span>🔵</span> Полиметаллы Pb-Zn-Ag</div>
-          <p class="template-desc">Стратиформная минерализация. Pb до 8%, Zn до 12%.</p>
-          <div class="template-stats">18 скважин · JORC</div>
-          <div class="template-badge">polymetallic_demo.csv + obj</div>
-        </div>
-        <!-- Железо (МКЖ) -->
-        <div class="template-card" data-template="gold" style="cursor: pointer;">
-          <div class="template-name"><span>🔩</span> Железо (МКЖ)</div>
-          <p class="template-desc">Магнетитовые кварциты, Fe 28–45%.</p>
-          <div class="template-stats">22 скважины · JORC / ГКЗ</div>
-          <div class="template-badge">iron_demo.csv + obj</div>
-        </div>
-        <!-- VMS Cu-Zn -->
-        <div class="template-card" data-template="copper" style="cursor: pointer;">
-          <div class="template-name"><span>🟣</span> VMS Cu-Zn</div>
-          <p class="template-desc">Колчеданно-полиметаллическое, высокая вариабельность.</p>
-          <div class="template-stats">20 скважин · Cu до 3%, Zn до 8%</div>
-          <div class="template-badge">vms_demo.csv + obj</div>
-        </div>
-        <!-- Алмазы (кимберлит) -->
-        <div class="template-card" style="cursor: pointer; opacity: 0.7;">
-          <div class="template-name"><span>💎</span> Алмазы (кимберлит)</div>
-          <p class="template-desc">Трубкообразное тело, содержание карат/т.</p>
-          <div class="template-stats">в разработке · JORC</div>
-          <div class="template-badge">Скоро</div>
+        <div class="template-card" style="cursor:default;opacity:.55">
+          <div class="template-name"><span>💎</span> Ещё 4 датасета</div>
+          <p class="template-desc">Полиметаллы, железо, VMS, алмазы. Доступны в песочнице.</p>
+          <div class="template-stats">Pb-Zn · Fe · Cu-Zn · кимберлит</div>
+          <div class="template-badge" onclick="window.location.href='sandbox.html'" style="cursor:pointer;opacity:1">Открыть песочницу →</div>
         </div>
       </div>
     </div>
-
-    <!-- ОСНОВНОЙ БЛОК ПЕСОЧНИЦЫ (2 колонки) -->
-    <div class="sb-grid" style="display: grid; grid-template-columns: 400px 1fr; gap: 28px; align-items: start;">
-      
-      <!-- ЛЕВАЯ КОЛОНКА: панель управления -->
-      <div class="sb-panel">
-        <div class="sb-ph">
-          <div class="sb-ph-t">📂 Данные проекта</div>
-          <div class="sb-ph-d">CSV скважины · OBJ каркас · или выберите шаблон выше</div>
-        </div>
-        <div class="sb-body">
-          <div class="sb-feat"><div class="sb-fi">📋</div><div style="flex:1"><div class="sb-ft">1. CSV (скважины)</div><div class="sb-fd">Формат: HoleID, From, To, Au_gpt</div><input type="file" id="csvIn" accept=".csv,.txt" class="file-in"><div id="csvStatus" class="status-line" style="color:var(--text-dim)">Демо-данные загружены автоматически</div></div></div>
-          <div class="sb-feat"><div class="sb-fi">🔷</div><div style="flex:1"><div class="sb-ft">2. OBJ (каркас рудного тела)</div><div class="sb-fd">Wavefront OBJ — вершины и грани</div><input type="file" id="objIn" accept=".obj,.txt" class="file-in"><div id="objStatus" class="status-line" style="color:var(--text-dim)"></div></div></div>
-          <div class="sb-feat"><div class="sb-fi">⚙️</div><div style="flex:1"><div class="sb-ft">3. Параметры блочной модели</div><div class="params-grid"><div><div class="param-label">Размер блока (м)</div><input type="number" id="blockSize" class="param-input" value="5" min="1" max="20"></div><div><div class="param-label">Метод интерполяции</div><select id="methodSel" class="param-input"><option value="idw">IDW (расстояние)</option><option value="kriging">Кригинг (упрощ.)</option><option value="nn">Nearest Neighbour</option></select></div><div><div class="param-label">Cutoff (г/т или %)</div><input type="number" id="cutoff" class="param-input" value="2.0" step="0.5"></div><div><div class="param-label">Стандарт</div><select id="stdSel" class="param-input"><option value="JORC">JORC</option><option value="ГКЗ">ГКЗ</option><option value="NI 43-101">NI 43-101</option></select></div></div></div></div>
-          <div class="sb-feat"><div class="sb-fi">📈</div><div style="flex:1"><div class="sb-ft">Экспериментальная вариограмма</div><div class="sb-fd">Анализ пространственной корреляции по трём направлениям.</div><button id="calcVariogramBtn" class="vari-btn">📊 Построить вариограмму</button><div id="variogramCanvas"><canvas id="variogramPlot" width="500" height="260" style="width:100%;background:#0a121c;"></canvas><div id="variogramStats"></div></div></div></div>
-          <button class="run-btn" id="runBtn" disabled><span id="runBtnText">▶ Загрузите CSV для запуска</span></button>
-          <div class="sb-feat"><div class="sb-fi">📊</div><div style="flex:1"><div class="sb-ft">Статистика и оценка запасов</div><div class="stats-out" id="statsOut">Загрузите CSV или выберите шаблон…</div></div></div>
-          <div class="sb-feat">
-            <div class="sb-fi">👁️</div>
-            <div style="flex:1">
-              <div class="sb-ft">Визуализация</div>
-              <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;">
-                <button id="toggleOreShell" class="btn-s" style="padding: 6px 12px; background: var(--dark-4);">🔮 Каркас рудного тела</button>
-                <button id="toggleHoles" class="btn-s" style="padding: 6px 12px; background: var(--dark-4);">🕳️ Скважины</button>
-               </div>
-              <div class="sb-fd" style="margin-top: 6px;">Включите/выключите отображение элементов</div>
-            </div>
-          </div>
-          <div class="sb-feat"><div class="sb-fi">📜</div><div style="flex:1"><div class="sb-ft">Шаблон скрипта Datamine</div><div class="script-out" id="scriptOut">Загрузите данные…</div><button class="copy-btn" id="copyBtn">📋 Копировать скрипт</button><button class="export-btn" id="exportBtn">📎 Экспорт отчёта (CSV + текст)</button></div></div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="save-btn" id="resetDemoBtn" style="background:var(--dark-4);color:var(--gold);border:1px solid var(--border);flex:1">⟳ Сброс к золоту</button><button class="save-btn" id="saveProjectBtn" style="flex:2">💾 Сохранить проект</button></div>
-        </div>
-      </div>
-
-      <!-- ПРАВАЯ КОЛОНКА: 3D-визуализация -->
-      <div>
-        <div class="canvas-wrap"><canvas id="c3d"></canvas><div class="canvas-hint">🖱 Вращение · ПКМ панорама · Scroll масштаб</div></div>
-        <div class="legend">
-          <div class="leg-item"><div class="leg-dot" style="background:#3a6ea5"></div>Скважины</div>
-          <div class="leg-item"><div class="leg-dot" style="background:#ffaa33"></div>Высокое содержание (>5 г/т)</div>
-          <div class="leg-item"><div class="leg-dot" style="background: linear-gradient(90deg, #0040ff, #00aaff, #ffdd00, #ff8800, #ff2200); width: 40px;"></div>Блочная модель (цвет = содержание)</div>
-          <div class="leg-item"><div class="leg-dot" style="background:#c9a84c; opacity:0.8; width: 12px; height: 12px; border-radius: 1px;"></div>Каркас рудного тела (сетка)</div>
-        </div>
-        <div class="sb-feat" style="margin-top: 16px;">
-          <div class="sb-fi">📥</div>
-          <div style="flex:1">
-            <div class="sb-ft">Экспорт для Datamine Viewer</div>
-            <div class="sb-fd" style="margin-bottom: 8px;">Скачайте блочную модель и каркас, чтобы открыть их в бесплатном просмотрщике Datamine Studio Viewer.</div>
-            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-              <button id="exportBlockmodelBtn" class="btn-s" style="padding: 6px 12px; background: var(--dark-4);">📦 Скачать .blockmodel</button>
-              <button id="exportWireframeBtn" class="btn-s" style="padding: 6px 12px; background: var(--dark-4);">🔷 Скачать каркас (.wrl)</button>
-              <a href="https://www.dataminesoftware.com/products/studio-viewer" target="_blank" class="btn-s" style="padding: 6px 12px; background: var(--dark-4); text-decoration: none;">🔗 Datamine Viewer (бесплатно)</a>
-            </div>
-            <div class="sb-fd" style="margin-top: 6px; font-size: 10px;">📌 Studio Viewer позволяет открывать блочные модели и каркасы без лицензии Datamine.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-<!-- ── PROJECTS ── -->
-<section class="proj-sec sec" id="projects">
-  <div class="inner">
-    <div class="proj-header rv"><div><div class="sec-lbl">Мои проекты</div><h2 class="sec-t" style="font-size:clamp(28px,2.8vw,40px)">Сохранённые проекты</h2></div><button class="save-btn" id="clearAll">🗑 Очистить всё</button></div>
-    <div class="proj-grid" id="projGrid"><div class="no-proj">Нет сохранённых проектов.<br>Загрузите данные и нажмите «Сохранить проект».</div></div>
   </div>
 </section>
 
@@ -700,14 +603,14 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:5
 
     <!-- Заголовок + описание -->
     <div class="rv">
-      <div class="sec-lbl">Лаборатория · Данные и инструменты</div>
-      <h2 class="sec-t">Подготовка данных<br>для Datamine Studio RM</h2>
+      <div class="sec-lbl">Лаборатория · Демо-датасеты</div>
+      <h2 class="sec-t">Архив геологических<br>данных</h2>
     </div>
 
     <div class="lab-intro rv">
       <div>
-        <p class="lab-desc">Загрузите свои данные опробования — система автоматически проверит формат, выполнит композитирование, декластеризацию и построит каркас рудного тела. На выходе — файлы готовые для импорта в Datamine и готовый макрос <code style="font-family:'IBM Plex Mono',monospace;color:var(--gold)">.mac</code>.</p>
-        <p class="lab-desc" style="margin-top:16px">Или скачайте демонстрационные данные из архива — 7 типов месторождений с реалистичными параметрами для практики.</p>
+        <p class="lab-desc">7 типов месторождений с реалистичными параметрами. Скачайте CSV и OBJ или откройте датасет в <a href="sandbox.html" style="color:var(--gold)">3D-Песочнице</a> для анализа прямо в браузере.</p>
+        <p class="lab-desc" style="margin-top:16px">Полный инструментарий для подготовки данных — <a href="lab.html" style="color:var(--gold)">Лаборатория данных →</a></p>
       </div>
       <div class="lab-steps">
         <div class="lab-step"><div class="lab-step-num">01</div><div class="lab-step-text"><strong>Загрузить CSV</strong> — данные опробования скважин</div></div>
@@ -726,7 +629,7 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:5
 
     <div class="archive-grid stg">
 
-      <div class="archive-card au" onclick="loadLabTemplate('epithermal_gold')">
+      <div class="archive-card au" onclick="window.location.href='sandbox.html?t=gold'">
         <div class="ac-badge">CSV + OBJ</div>
         <span class="ac-icon">🥇</span>
         <div class="ac-type">Золото · Эпитермальное</div>
@@ -739,7 +642,7 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:5
         </div>
       </div>
 
-      <div class="archive-card au" onclick="loadLabTemplate('porphyry_gold')">
+      <div class="archive-card au" onclick="window.location.href='sandbox.html?t=gold'">
         <span class="ac-icon">🔶</span>
         <div class="ac-type">Золото · Порфировое</div>
         <div class="ac-name">Золото-порфировое месторождение</div>
@@ -750,7 +653,7 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:5
         </div>
       </div>
 
-      <div class="archive-card cu" onclick="loadLabTemplate('porphyry_copper')">
+      <div class="archive-card cu" onclick="window.location.href='sandbox.html?t=copper'">
         <span class="ac-icon">🔴</span>
         <div class="ac-type">Медь · Порфировое</div>
         <div class="ac-name">Медно-порфировое месторождение</div>
@@ -761,7 +664,7 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:5
         </div>
       </div>
 
-      <div class="archive-card coal" onclick="loadLabTemplate('coal')">
+      <div class="archive-card coal" onclick="window.location.href='sandbox.html?t=coal'">
         <span class="ac-icon">⚫</span>
         <div class="ac-type">Уголь · Пластовый</div>
         <div class="ac-name">Каменноугольный пласт</div>
@@ -771,7 +674,7 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:5
         </div>
       </div>
 
-      <div class="archive-card poly" onclick="loadLabTemplate('polymetallic')">
+      <div class="archive-card poly" onclick="window.location.href='sandbox.html?t=copper'">
         <span class="ac-icon">🔵</span>
         <div class="ac-type">Полиметаллы · Pb-Zn-Ag</div>
         <div class="ac-name">Свинцово-цинковое месторождение</div>
@@ -783,7 +686,7 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:5
         </div>
       </div>
 
-      <div class="archive-card fe" onclick="loadLabTemplate('iron')">
+      <div class="archive-card fe" onclick="window.location.href='sandbox.html?t=gold'">
         <span class="ac-icon">🔩</span>
         <div class="ac-type">Железо · МКЖ</div>
         <div class="ac-name">Магнетитовые кварциты</div>
@@ -804,124 +707,6 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:5
         </div>
       </div>
 
-    </div>
-
-    <!-- Инструмент подготовки -->
-    <div class="rv">
-      <div class="sec-lbl">Инструмент · Подготовка данных</div>
-      <h3 style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin-bottom:32px;">Обработка перед Datamine</h3>
-    </div>
-
-    <div class="prep-tool rv">
-      <div class="prep-header">
-        <div class="prep-title">⚗️ Подготовка данных к импорту в Datamine Studio RM</div>
-        <div class="prep-badge">Python · Open Source</div>
-      </div>
-      <div class="prep-body">
-
-        <!-- Левая панель: загрузка + операции -->
-        <div class="prep-left">
-          <div class="prep-upload" id="prepUploadZone" onclick="document.getElementById('prepCsvIn').click()">
-            <div class="prep-upload-icon">📂</div>
-            <div class="prep-upload-text">Загрузить CSV с данными опробования</div>
-            <div class="prep-upload-sub">HoleID, From, To, Au_gpt (или Cu_pct, Coal_m, Fe_pct)</div>
-            <input type="file" id="prepCsvIn" accept=".csv,.txt" style="display:none">
-          </div>
-          <div id="prepFileStatus" style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-dim);margin-bottom:16px;min-height:16px;"></div>
-
-          <div class="prep-ops">
-            <label class="prep-op">
-              <input type="checkbox" id="opValidate" checked>
-              <span class="prep-op-label"><strong>Валидация</strong> — формат, пропуски, выбросы (IQR)</span>
-              <span class="prep-op-tag">шаг 1</span>
-            </label>
-            <label class="prep-op">
-              <input type="checkbox" id="opComposite" checked>
-              <span class="prep-op-label"><strong>Композитирование</strong> — приведение к единой длине интервала</span>
-              <span class="prep-op-tag">шаг 2</span>
-            </label>
-            <label class="prep-op">
-              <input type="checkbox" id="opDecluster">
-              <span class="prep-op-label"><strong>Декластеризация</strong> — сотовый метод (ячейка = блок)</span>
-              <span class="prep-op-tag">шаг 3</span>
-            </label>
-            <label class="prep-op">
-              <input type="checkbox" id="opWireframe" checked>
-              <span class="prep-op-label"><strong>Каркас OBJ</strong> — convex hull по скважинам</span>
-              <span class="prep-op-tag">шаг 4</span>
-            </label>
-            <label class="prep-op">
-              <input type="checkbox" id="opScript" checked>
-              <span class="prep-op-label"><strong>Скрипт .mac</strong> — макрос для Datamine Studio RM</span>
-              <span class="prep-op-tag">шаг 5</span>
-            </label>
-          </div>
-
-          <div style="display:flex;gap:8px;margin-top:16px;align-items:center">
-            <div style="flex:1">
-              <div class="param-label">Длина композита (м)</div>
-              <input type="number" id="prepCompLen" class="param-input" value="2" min="0.5" max="10" step="0.5">
-            </div>
-            <div style="flex:1">
-              <div class="param-label">Cutoff (г/т или %)</div>
-              <input type="number" id="prepCutoff" class="param-input" value="1.0" min="0" step="0.5">
-            </div>
-          </div>
-
-          <button class="prep-run" id="prepRunBtn" disabled>
-            <span id="prepRunText">▶ Загрузите CSV для запуска</span>
-          </button>
-        </div>
-
-        <!-- Правая панель: результаты -->
-        <div class="prep-right">
-          <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:700;margin-bottom:20px;color:var(--text-muted);">Результаты обработки</div>
-
-          <div class="prep-result" id="prepResult">
-            <div class="prep-result-item">
-              <div class="pri-label">📊 Валидация CSV</div>
-              <div style="display:flex;align-items:center;gap:10px">
-                <span class="pri-status" id="resValidate">—</span>
-              </div>
-            </div>
-            <div class="prep-result-item">
-              <div class="pri-label">🔗 Композиты</div>
-              <div style="display:flex;align-items:center;gap:10px">
-                <span class="pri-status" id="resComposite">—</span>
-                <button class="pri-download" id="dlComposite" style="display:none" onclick="downloadPrepResult('composite')">↓ CSV</button>
-              </div>
-            </div>
-            <div class="prep-result-item">
-              <div class="pri-label">🔷 Каркас рудного тела</div>
-              <div style="display:flex;align-items:center;gap:10px">
-                <span class="pri-status" id="resWireframe">—</span>
-                <button class="pri-download" id="dlWireframe" style="display:none" onclick="downloadPrepResult('wireframe')">↓ OBJ</button>
-              </div>
-            </div>
-            <div class="prep-result-item">
-              <div class="pri-label">📜 Скрипт Datamine</div>
-              <div style="display:flex;align-items:center;gap:10px">
-                <span class="pri-status" id="resScript">—</span>
-                <button class="pri-download" id="dlScript" style="display:none" onclick="downloadPrepResult('script')">↓ .mac</button>
-              </div>
-            </div>
-            <div class="prep-result-item" id="resStatsRow" style="flex-direction:column;gap:8px;align-items:flex-start">
-              <div class="pri-label">📈 Статистика</div>
-              <div id="resStats" style="font-family:'IBM Plex Mono',monospace;font-size:10px;line-height:1.8;color:var(--text-muted);white-space:pre;"></div>
-            </div>
-          </div>
-
-          <div id="prepPlaceholder" style="display:flex;align-items:center;justify-content:center;height:200px;border:1px dashed var(--border-dim);font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-dim);letter-spacing:.08em;text-align:center;">
-            Загрузите CSV<br>или выберите датасет из архива
-          </div>
-
-          <div style="margin-top:20px;padding:16px;background:var(--dark-4);border:1px solid var(--border-dim);">
-            <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;">ℹ Примечание</div>
-            <div style="font-size:12px;font-weight:300;line-height:1.65;color:var(--text-muted);">Предварительная обработка на open-source алгоритмах (Python/NumPy). Для официального подсчёта запасов по JORC/ГКЗ — используйте результаты в Datamine Studio RM с верификацией Competent Person.</div>
-          </div>
-        </div>
-
-      </div>
     </div>
 
   </div>
@@ -1067,255 +852,13 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:5
 
 </div>
 
-<!-- ── ЛАБОРАТОРИЯ JS ── -->
+<!-- ── ЛАБ JS ── -->
 <script type="module">
-import { loadTemplate } from './js/data/templates.js';
-import { parseCSV } from './js/data/csvParser.js';
-
-// ── Загрузка шаблона из архива в песочницу ─────────────────
-window.loadLabTemplate = function(type) {
-  // Маппинг на существующие шаблоны
-  const map = {
-    epithermal_gold:  'gold',
-    porphyry_gold:    'gold',
-    porphyry_copper:  'copper',
-    coal:             'coal',
-    polymetallic:     'copper', // временно
-    iron:             'gold',   // временно
-  };
-  const tmpl = map[type] || 'gold';
-  loadTemplate(tmpl);
-  document.getElementById('sandbox')?.scrollIntoView({ behavior: 'smooth' });
-};
-
 // ── Скачать файл из data/ ──────────────────────────────────
 window.dlLabFile = function(filename) {
   const a = document.createElement('a');
   a.href = `data/${filename}`;
   a.download = filename;
-  a.click();
-};
-
-// ── Инструмент подготовки данных ──────────────────────────
-let prepHoles = [];
-let prepResults = {};
-
-// Drag & drop зона
-const zone = document.getElementById('prepUploadZone');
-if (zone) {
-  zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = 'var(--gold)'; });
-  zone.addEventListener('dragleave', () => { zone.style.borderColor = ''; });
-  zone.addEventListener('drop', e => {
-    e.preventDefault(); zone.style.borderColor = '';
-    const f = e.dataTransfer.files[0];
-    if (f) handlePrepFile(f);
-  });
-}
-
-document.getElementById('prepCsvIn')?.addEventListener('change', e => {
-  const f = e.target.files[0];
-  if (f) handlePrepFile(f);
-});
-
-function handlePrepFile(file) {
-  const reader = new FileReader();
-  reader.onload = ev => {
-    prepHoles = parseCSV(ev.target.result);
-    if (!prepHoles.length) {
-      document.getElementById('prepFileStatus').textContent = '❌ Ошибка формата CSV';
-      document.getElementById('prepFileStatus').style.color = '#E87070';
-      return;
-    }
-    const n = prepHoles.length;
-    const ti = prepHoles.reduce((s, h) => s + h.intervals.length, 0);
-    document.getElementById('prepFileStatus').textContent = `✓ ${file.name} — ${n} скважин, ${ti} интервалов`;
-    document.getElementById('prepFileStatus').style.color = '#7ee787';
-
-    const btn = document.getElementById('prepRunBtn');
-    btn.className = 'prep-run ready';
-    btn.disabled = false;
-    document.getElementById('prepRunText').textContent = '▶ Запустить подготовку данных';
-  };
-  reader.readAsText(file);
-}
-
-document.getElementById('prepRunBtn')?.addEventListener('click', runPrep);
-
-function runPrep() {
-  if (!prepHoles.length) return;
-  const btn = document.getElementById('prepRunBtn');
-  btn.className = 'prep-run';
-  btn.disabled = true;
-  document.getElementById('prepRunText').textContent = '⚙ Обработка…';
-
-  // Показываем панель результатов
-  document.getElementById('prepResult').classList.add('visible');
-  document.getElementById('prepPlaceholder').style.display = 'none';
-
-  setTimeout(() => {
-    const ops = {
-      validate:   document.getElementById('opValidate')?.checked,
-      composite:  document.getElementById('opComposite')?.checked,
-      decluster:  document.getElementById('opDecluster')?.checked,
-      wireframe:  document.getElementById('opWireframe')?.checked,
-      script:     document.getElementById('opScript')?.checked,
-    };
-    const compLen = +document.getElementById('prepCompLen')?.value || 2;
-    const cutoff  = +document.getElementById('prepCutoff')?.value || 1.0;
-
-    // 1. Валидация
-    if (ops.validate) {
-      const res = validateCSV(prepHoles);
-      const el = document.getElementById('resValidate');
-      if (res.errors.length) {
-        el.className = 'pri-status warn';
-        el.textContent = `⚠ ${res.errors.length} предупреждений`;
-      } else {
-        el.className = 'pri-status';
-        el.textContent = `✓ Ошибок не найдено`;
-      }
-    }
-
-    // 2. Композитирование
-    if (ops.composite) {
-      const composites = compositeIntervals(prepHoles, compLen);
-      prepResults.composite = composites;
-      const total = composites.reduce((s, h) => s + h.intervals.length, 0);
-      document.getElementById('resComposite').textContent = `✓ ${total} композитов по ${compLen} м`;
-      document.getElementById('dlComposite').style.display = 'block';
-    }
-
-    // 3. Каркас OBJ
-    if (ops.wireframe) {
-      const obj = buildConvexHullOBJ(prepHoles);
-      prepResults.wireframe = obj;
-      document.getElementById('resWireframe').textContent = '✓ Каркас построен (convex hull)';
-      document.getElementById('dlWireframe').style.display = 'block';
-    }
-
-    // 4. Скрипт .mac
-    if (ops.script) {
-      const mac = generateMac(prepHoles, compLen, cutoff);
-      prepResults.script = mac;
-      document.getElementById('resScript').textContent = '✓ Макрос сгенерирован';
-      document.getElementById('dlScript').style.display = 'block';
-    }
-
-    // 5. Статистика
-    const statsEl = document.getElementById('resStats');
-    if (statsEl) {
-      let ti = 0, tg = 0, hi = 0, maxV = 0;
-      prepHoles.forEach(h => h.intervals.forEach(([,,v]) => {
-        ti++; tg += v; if (v > 5) hi++; if (v > maxV) maxV = v;
-      }));
-      const avg = ti ? (tg / ti).toFixed(3) : 0;
-      statsEl.textContent =
-`Скважин:       ${prepHoles.length}
-Интервалов:    ${ti}
-Среднее:       ${avg} г/т
-Макс:          ${maxV.toFixed(2)} г/т
-Высокое >5:    ${hi} интервалов`;
-    }
-
-    btn.className = 'prep-run ready';
-    btn.disabled = false;
-    document.getElementById('prepRunText').textContent = '✓ Готово · Запустить снова';
-  }, 800);
-}
-
-// ── Валидация CSV ──────────────────────────────────────────
-function validateCSV(holes) {
-  const errors = [];
-  const vals = [];
-  holes.forEach(h => h.intervals.forEach(([f, t, v]) => {
-    if (t <= f) errors.push(`${h.id}: to(${t}) <= from(${f})`);
-    if (isNaN(v)) errors.push(`${h.id}: значение не число`);
-    if (v < 0) errors.push(`${h.id}: отрицательное значение ${v}`);
-    vals.push(v);
-  }));
-  // IQR выбросы
-  const sorted = [...vals].sort((a, b) => a - b);
-  const q1 = sorted[Math.floor(sorted.length * 0.25)];
-  const q3 = sorted[Math.floor(sorted.length * 0.75)];
-  const iqr = q3 - q1;
-  const upper = q3 + 3 * iqr;
-  vals.forEach((v, i) => { if (v > upper) errors.push(`Возможный выброс: ${v.toFixed(2)} (>${upper.toFixed(2)})`); });
-  return { errors };
-}
-
-// ── Композитирование ───────────────────────────────────────
-function compositeIntervals(holes, length) {
-  return holes.map(h => {
-    const comps = [];
-    let cur = 0;
-    while (cur < h.depth) {
-      const to = Math.min(cur + length, h.depth);
-      let wSum = 0, vSum = 0;
-      h.intervals.forEach(([f, t, v]) => {
-        const overlap = Math.max(0, Math.min(t, to) - Math.max(f, cur));
-        if (overlap > 0) { wSum += overlap; vSum += v * overlap; }
-      });
-      if (wSum > 0) comps.push([cur, to, vSum / wSum]);
-      cur = to;
-    }
-    return { ...h, intervals: comps };
-  });
-}
-
-// ── Convex Hull OBJ ────────────────────────────────────────
-function buildConvexHullOBJ(holes) {
-  // Упрощённый выпуклый каркас по позициям скважин
-  const pts = holes.map(h => [h.x, 0, h.z]);
-  // Добавляем глубинные точки
-  holes.forEach(h => pts.push([h.x, -h.depth * 0.5, h.z]));
-
-  let obj = '# GeoCore Academy — Wireframe (Convex Hull)\n# Скважин: ' + holes.length + '\n\n';
-  pts.forEach(p => { obj += `v ${p[0].toFixed(2)} ${p[1].toFixed(2)} ${p[2].toFixed(2)}\n`; });
-
-  // Простые треугольные грани между соседними точками
-  const n = holes.length;
-  for (let i = 0; i < n - 1; i++) {
-    obj += `f ${i+1} ${i+2} ${i+n+2}\n`;
-    obj += `f ${i+1} ${i+n+2} ${i+n+1}\n`;
-  }
-  obj += `f ${n} 1 ${n+1}\nf ${n} ${n+1} ${n*2}\n`;
-  return obj;
-}
-
-// ── Генерация .mac ─────────────────────────────────────────
-function generateMac(holes, compLen, cutoff) {
-  return `! GeoCore Academy — Datamine Macro
-! Скважин: ${holes.length} | Композит: ${compLen}м | Cutoff: ${cutoff}
-! Дата: ${new Date().toLocaleString('ru')}
-
-!READ assay.csv /CREATE=assay /FIELD=1:HOLEID,2:FROM,3:TO,4:AU
-!COMP assay /LENGTH=${compLen} /FIELD=AU /CREATE=comp_assay
-!BLKMOD /CREATE=bm /ORIGIN=(-50,-25,-25) /SIZE=(5,5,5) /BLOCKS=(20,10,10)
-!ESTIMA /DATA=comp_assay /FIELD=AU /METHOD=IDW /POWER=2 /MAX=12 /MIN=3 /SEARCH=40 /MODEL=bm /CREATE=bm_est
-!FILTER bm_est /CONDITION="AU >= ${cutoff}" /CREATE=bm_cut
-!REPORT bm_cut /FIELDS=AU,TONNES /DENSITY=2.7 /OUT=report.txt
-!WRITE bm_est /FILE=result.blockmodel /FORMAT=BINARY
-!PRINT "Done!"`;
-}
-
-// ── Скачивание результатов ─────────────────────────────────
-window.downloadPrepResult = function(type) {
-  const map = {
-    composite: { data: () => {
-      let csv = 'HoleID,From,To,Value\n';
-      (prepResults.composite || []).forEach(h => h.intervals.forEach(([f, t, v]) => {
-        csv += `${h.id},${f.toFixed(2)},${t.toFixed(2)},${v.toFixed(4)}\n`;
-      }));
-      return csv;
-    }, name: 'composites.csv', type: 'text/csv' },
-    wireframe: { data: () => prepResults.wireframe || '', name: 'wireframe.obj', type: 'text/plain' },
-    script:    { data: () => prepResults.script || '', name: 'datamine_script.mac', type: 'text/plain' },
-  };
-  const m = map[type];
-  if (!m) return;
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([m.data()], { type: m.type }));
-  a.download = m.name;
   a.click();
 };
 </script>
