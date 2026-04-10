@@ -479,15 +479,15 @@ function renderAllForms() {
 
 // ── КОНТАКТЫ ───────────────────────────────────────────────
 function renderContacts() {
-  const c = siteData.contacts || {};
+  if (!siteData.contacts) siteData.contacts = {};
+  const c = siteData.contacts;
   ['phone','email','corp_email','telegram','linkedin'].forEach(k => {
     const el = document.getElementById(`c-${k}`);
     if (!el) return;
     el.value = c[k] || '';
-    el.oninput = e => {
-      if (!siteData.contacts) siteData.contacts = {};
-      siteData.contacts[k] = e.target.value;
-    };
+    // Инициализируем поле в siteData чтобы не потерять при сохранении
+    if (!(k in c)) c[k] = '';
+    el.oninput = e => { c[k] = e.target.value; };
   });
 }
 
