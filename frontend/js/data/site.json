@@ -1,11 +1,22 @@
 {
-  "moodleCourseOrder": [11, 10],
-
+  "moodleCourseOrder": [
+    11,
+    10
+  ],
   "moodleMeta": {
     "10": {
       "icon": "📋",
       "tag": "Методика · Базовый",
-      "meta": [{ "icon": "🕐", "text": "~3 часа" }, { "icon": "🎯", "text": "SCORM" }],
+      "meta": [
+        {
+          "icon": "🕐",
+          "text": "~3 часа"
+        },
+        {
+          "icon": "🎯",
+          "text": "SCORM"
+        }
+      ],
       "modal": {
         "tagline": "Профессиональная паспортизация геологоразведочных проектов",
         "description": "Практический курс по оформлению геологической документации. Научитесь правильно составлять паспорта скважин, документировать керн и вести первичную геологическую отчётность.",
@@ -23,7 +34,16 @@
     "11": {
       "icon": "👁️",
       "tag": "Leapfrog · Для руководителей",
-      "meta": [{ "icon": "🕐", "text": "~2 часа · 16 уроков" }, { "icon": "🎯", "text": "SCORM" }],
+      "meta": [
+        {
+          "icon": "🕐",
+          "text": "~2 часа · 16 уроков"
+        },
+        {
+          "icon": "🎯",
+          "text": "SCORM"
+        }
+      ],
       "modal": {
         "tagline": "Управляйте геологическими данными без опыта моделирования",
         "description": "Практический курс для руководителей геологоразведочных проектов. Научитесь читать 3D-модели месторождений, анализировать данные и принимать обоснованные решения — не будучи геологом-моделировщиком.",
@@ -39,27 +59,58 @@
       }
     }
   },
-
   "nav": {
     "links": [
-      { "label": "Курсы",         "href": "#courses" },
-      { "label": "Песочница",     "href": "sandbox.html" },
-      { "label": "Лаборатория",   "href": "lab.html" },
-      { "label": "Проекты",       "href": "#projects" },
-      { "label": "Консультации",  "href": "#consult" },
-      { "label": "Блог",          "href": "#blog" },
-      { "label": "Цены",          "href": "#pricing" }
+      {
+        "label": "Курсы",
+        "href": "#courses"
+      },
+      {
+        "label": "Песочница",
+        "href": "sandbox.html"
+      },
+      {
+        "label": "Лаборатория",
+        "href": "lab.html"
+      },
+      {
+        "label": "Проекты",
+        "href": "#projects"
+      },
+      {
+        "label": "Консультации",
+        "href": "#consult"
+      },
+      {
+        "label": "Блог",
+        "href": "#blog"
+      },
+      {
+        "label": "Цены",
+        "href": "#pricing"
+      }
     ],
-    "cta": { "label": "Начать обучение", "href": "#pricing" }
+    "cta": {
+      "label": "Начать обучение",
+      "href": "#pricing"
+    }
   },
-
   "courses": [
     {
       "icon": "⛏️",
       "tag": "Datamine · Базовый → Продвинутый",
       "title": "Datamine Studio RM: полный курс",
       "desc": "От импорта скважин до подсчёта запасов. Блочное моделирование, геостатистика, отчёты.",
-      "meta": [{ "icon": "🕐", "text": "48 уроков" }, { "icon": "📁", "text": "Шаблоны" }],
+      "meta": [
+        {
+          "icon": "🕐",
+          "text": "48 уроков"
+        },
+        {
+          "icon": "📁",
+          "text": "Шаблоны"
+        }
+      ],
       "planned": true
     },
     {
@@ -67,7 +118,16 @@
       "tag": "Leapfrog · Средний",
       "title": "Leapfrog Geo: неявное моделирование",
       "desc": "Implicit modelling для рудных тел. Быстрое обновление при новых данных бурения.",
-      "meta": [{ "icon": "🕐", "text": "32 урока" }, { "icon": "🎯", "text": "Практика" }],
+      "meta": [
+        {
+          "icon": "🕐",
+          "text": "32 урока"
+        },
+        {
+          "icon": "🎯",
+          "text": "Практика"
+        }
+      ],
       "planned": true
     },
     {
@@ -75,7 +135,16 @@
       "tag": "Методика · JORC / ГКЗ",
       "title": "Подсчёт запасов: международные стандарты",
       "desc": "JORC, ГКЗ, NI 43-101, NAEN. Категории, CPR, отчётность для инвесторов.",
-      "meta": [{ "icon": "🕐", "text": "24 урока" }, { "icon": "📄", "text": "Шаблоны CPR" }],
+      "meta": [
+        {
+          "icon": "🕐",
+          "text": "24 урока"
+        },
+        {
+          "icon": "📄",
+          "text": "Шаблоны CPR"
+        }
+      ],
       "planned": true
     },
     {
@@ -83,7 +152,16 @@
       "tag": "Геостатистика",
       "title": "Геостатистика и кригинг: от основ",
       "desc": "Вариография, ординарный кригинг, условная симуляция. Python + горное ПО.",
-      "meta": [{ "icon": "🕐", "text": "28 уроков" }, { "icon": "🐍", "text": "Python" }],
+      "meta": [
+        {
+          "icon": "🕐",
+          "text": "28 уроков"
+        },
+        {
+          "icon": "🐍",
+          "text": "Python"
+        }
+      ],
       "planned": true
     },
     {
@@ -91,7 +169,16 @@
       "tag": "Для инвесторов",
       "title": "Читаем геологические отчёты",
       "desc": "Как оценивать JORC-отчёты, понимать категории запасов, выявлять риски.",
-      "meta": [{ "icon": "🕐", "text": "12 уроков" }, { "icon": "📈", "text": "Кейсы" }],
+      "meta": [
+        {
+          "icon": "🕐",
+          "text": "12 уроков"
+        },
+        {
+          "icon": "📈",
+          "text": "Кейсы"
+        }
+      ],
       "planned": true
     },
     {
@@ -99,7 +186,16 @@
       "tag": "Surpac · Средний",
       "title": "Surpac: маркшейдерия и горное планирование",
       "desc": "3D-моделирование рудных тел, маркшейдерские расчёты, планирование.",
-      "meta": [{ "icon": "🕐", "text": "36 уроков" }, { "icon": "🔧", "text": "Практика" }],
+      "meta": [
+        {
+          "icon": "🕐",
+          "text": "36 уроков"
+        },
+        {
+          "icon": "🔧",
+          "text": "Практика"
+        }
+      ],
       "planned": true
     },
     {
@@ -107,11 +203,19 @@
       "tag": "Python · Геостатистика",
       "title": "Python для геологических расчётов",
       "desc": "NumPy, pandas, matplotlib, scikit-learn — автоматизация обработки данных скважин и геостатистических расчётов.",
-      "meta": [{ "icon": "🕐", "text": "20 уроков" }, { "icon": "🐍", "text": "Jupyter" }],
+      "meta": [
+        {
+          "icon": "🕐",
+          "text": "20 уроков"
+        },
+        {
+          "icon": "🐍",
+          "text": "Jupyter"
+        }
+      ],
       "planned": true
     }
   ],
-
   "footer": {
     "description": "Профессиональное обучение оценке месторождений. Россия, СНГ и международный рынок.",
     "copyright": "© 2025 GeoCore Academy · Все права защищены",
@@ -119,30 +223,72 @@
       {
         "title": "Курсы",
         "links": [
-          { "label": "Datamine Studio",  "href": "https://courses.geocore-academy.ru" },
-          { "label": "Leapfrog Geo",     "href": "https://courses.geocore-academy.ru" },
-          { "label": "Surpac",           "href": "https://courses.geocore-academy.ru" },
-          { "label": "Методика JORC",    "href": "https://courses.geocore-academy.ru" },
-          { "label": "Геостатистика",    "href": "https://courses.geocore-academy.ru" }
+          {
+            "label": "Datamine Studio",
+            "href": "https://courses.geocore-academy.ru"
+          },
+          {
+            "label": "Leapfrog Geo",
+            "href": "https://courses.geocore-academy.ru"
+          },
+          {
+            "label": "Surpac",
+            "href": "https://courses.geocore-academy.ru"
+          },
+          {
+            "label": "Методика JORC",
+            "href": "https://courses.geocore-academy.ru"
+          },
+          {
+            "label": "Геостатистика",
+            "href": "https://courses.geocore-academy.ru"
+          }
         ]
       },
       {
         "title": "Платформа",
         "links": [
-          { "label": "Песочница",     "href": "sandbox.html" },
-          { "label": "Шаблоны",       "href": "#lab" },
-          { "label": "Консультации",  "href": "#consult" },
-          { "label": "Блог",          "href": "#blog" }
+          {
+            "label": "Песочница",
+            "href": "sandbox.html"
+          },
+          {
+            "label": "Шаблоны",
+            "href": "#lab"
+          },
+          {
+            "label": "Консультации",
+            "href": "#consult"
+          },
+          {
+            "label": "Блог",
+            "href": "#blog"
+          }
         ]
       },
       {
         "title": "Контакты",
         "links": [
-          { "label": "+7 (___) ___-__-__",       "href": "tel:+70000000000" },
-          { "label": "info@geocore-academy.ru",   "href": "mailto:info@geocore-academy.ru" },
-          { "label": "Telegram",                  "href": "https://t.me/geocore_academy" },
-          { "label": "LinkedIn",                  "href": "https://linkedin.com/company/geocore-academy" },
-          { "label": "Корпоративные запросы",     "href": "mailto:corp@geocore-academy.ru" }
+          {
+            "label": "+7 (___) ___-__-__",
+            "href": "tel:+70000000000"
+          },
+          {
+            "label": "info@geocore-academy.ru",
+            "href": "mailto:info@geocore-academy.ru"
+          },
+          {
+            "label": "Telegram",
+            "href": "https://t.me/geocore_academy"
+          },
+          {
+            "label": "LinkedIn",
+            "href": "https://linkedin.com/company/geocore-academy"
+          },
+          {
+            "label": "Корпоративные запросы",
+            "href": "info@geocore-academy.ru"
+          }
         ]
       }
     ]
