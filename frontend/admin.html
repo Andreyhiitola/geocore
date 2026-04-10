@@ -13,7 +13,16 @@
   --border:rgba(201,168,76,0.18);--border-dim:rgba(255,255,255,0.07);
   --green:#4CAF82;--red:#E57373;--blue:#5B9BD5;
 }
-body{font-family:'IBM Plex Sans',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;}
+[data-theme="light"]{
+  --dark:#F5F4F0;--dark-2:#ECEAE3;--dark-3:#E4E2D9;--dark-4:#D9D7CE;
+  --surface:#DEDAD0;--text:#1A1916;--text-muted:#4A4840;--text-dim:#8A8880;
+  --border:rgba(201,168,76,0.30);--border-dim:rgba(0,0,0,0.10);
+}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;transition:background .25s,color .25s;}
+
+/* ── THEME TOGGLE ── */
+.h-theme{background:none;border:1px solid var(--border-dim);color:var(--text-dim);width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .2s;flex-shrink:0;}
+.h-theme:hover{border-color:var(--gold);color:var(--gold);}
 
 /* ── LOGIN ── */
 #loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;}
@@ -156,7 +165,10 @@ tr:hover td{background:var(--dark-3);}
       <span>Geo<em style="font-style:normal;color:var(--gold)">Core</em></span>
       <div class="h-badge">Admin</div>
     </div>
-    <button class="h-logout" id="logoutBtn">Выйти</button>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button class="h-theme" id="themeBtn" title="Сменить тему">🌙</button>
+      <button class="h-logout" id="logoutBtn">Выйти</button>
+    </div>
   </header>
 
   <div class="tabs">
@@ -686,6 +698,18 @@ document.getElementById('tokenInput').addEventListener('keydown', e => { if (e.k
 document.getElementById('logoutBtn').addEventListener('click', logout);
 document.getElementById('saveBtn').addEventListener('click', saveSiteJson);
 document.getElementById('reloadBtn').addEventListener('click', () => { siteData=null; loadSiteJson(); });
+
+// ── Тема ───────────────────────────────────────────────────
+function applyTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  document.getElementById('themeBtn').textContent = theme === 'light' ? '☀️' : '🌙';
+}
+document.getElementById('themeBtn').addEventListener('click', () => {
+  const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+  localStorage.setItem('gc_admin_theme', next);
+  applyTheme(next);
+});
+applyTheme(localStorage.getItem('gc_admin_theme') || 'dark');
 
 if (token) showAdmin();
 </script>
