@@ -125,12 +125,34 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:5
 .fb{max-width:1240px;margin:0 auto;padding:22px 100px 0;border-top:1px solid var(--border-dim);display:flex;justify-content:space-between;align-items:center;}
 .fc{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.07em;color:var(--text-dim);}
 
+.nav-burger{display:none;background:none;border:1px solid var(--border);color:var(--text-muted);width:36px;height:36px;font-size:16px;cursor:pointer;align-items:center;justify-content:center;transition:all .2s;}
+.nav-burger:hover{border-color:var(--gold);color:var(--gold);}
+.nav-mobile{display:none;position:fixed;top:68px;left:0;right:0;background:rgba(10,10,11,.97);backdrop-filter:blur(20px);z-index:190;flex-direction:column;padding:24px 24px 32px;border-bottom:1px solid var(--border);gap:0;}
+.nav-mobile.open{display:flex;}
+body.light .nav-mobile{background:rgba(245,243,238,.97);}
+.nav-mobile a{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);text-decoration:none;padding:14px 0;border-bottom:1px solid var(--border-dim);transition:color .2s;}
+.nav-mobile a:hover{color:var(--gold);}
+.nav-mobile-cta{color:var(--gold) !important;border-bottom:none !important;margin-top:8px;}
+
 @media(max-width:1080px){
-  nav{padding:0 24px;}.nav-links{display:none;}
+  nav{padding:0 24px;}.nav-links{display:none;}.nav-burger{display:flex;}
   .courses-page{padding:100px 24px 60px;}
   .cg{grid-template-columns:1fr;}
   .fi,.fb{padding-left:24px;padding-right:24px;}
   .fi{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:640px){
+  .nav-cta{display:none;}
+  .courses-page{padding:88px 16px 48px;}
+  h1.page-title{font-size:32px;}
+  .filters{gap:8px;}
+  .filter-btn{padding:6px 14px;font-size:9px;}
+  .modal-panel{padding:40px 20px 32px;width:95%;}
+  .modal-meta-row{grid-template-columns:1fr;}
+  .req-form-btns{flex-direction:column;}
+  .req-form-btns button{width:100%;}
+  .fi{grid-template-columns:1fr;}
+  .fb{flex-direction:column;gap:12px;text-align:center;}
 }
 </style>
 </head>
@@ -148,8 +170,16 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:5
   <div class="nav-right">
     <button class="theme-btn" id="themeBtn" title="Сменить тему">🌙</button>
     <a href="index.html#pricing" class="nav-cta">Начать обучение</a>
+    <button class="nav-burger" id="navBurger" aria-label="Меню">☰</button>
   </div>
 </nav>
+<div class="nav-mobile" id="navMobile">
+  <a href="index.html">Главная</a>
+  <a href="index.html#courses">Курсы</a>
+  <a href="sandbox.html">Песочница</a>
+  <a href="lab.html">Лаборатория</a>
+  <a href="index.html#pricing" class="nav-mobile-cta">Начать обучение</a>
+</div>
 
 <main class="courses-page">
   <div class="page-eyebrow">Полный каталог</div>
@@ -180,6 +210,19 @@ themeBtn.addEventListener('click', () => {
   document.body.classList.toggle('light');
   localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
   themeBtn.textContent = document.body.classList.contains('light') ? '🌙' : '☀️';
+});
+
+const burger = document.getElementById('navBurger');
+const mobileNav = document.getElementById('navMobile');
+burger?.addEventListener('click', () => {
+  mobileNav.classList.toggle('open');
+  burger.textContent = mobileNav.classList.contains('open') ? '✕' : '☰';
+});
+mobileNav?.querySelectorAll('a').forEach(a => {
+  a.addEventListener('click', () => {
+    mobileNav.classList.remove('open');
+    burger.textContent = '☰';
+  });
 });
 </script>
 

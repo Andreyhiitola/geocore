@@ -422,9 +422,19 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:5
 .stg.vis>*:nth-child(8){opacity:1;transform:none;transition-delay:.64s;}
 .stg.vis>*:nth-child(9){opacity:1;transform:none;transition-delay:.72s;}
 
+/* ── HAMBURGER ── */
+.nav-burger{display:none;background:none;border:1px solid var(--border);color:var(--text-muted);width:36px;height:36px;font-size:16px;cursor:pointer;align-items:center;justify-content:center;transition:all .2s;}
+.nav-burger:hover{border-color:var(--gold);color:var(--gold);}
+.nav-mobile{display:none;position:fixed;top:68px;left:0;right:0;background:rgba(10,10,11,.97);backdrop-filter:blur(20px);z-index:190;flex-direction:column;padding:24px 24px 32px;border-bottom:1px solid var(--border);gap:0;}
+.nav-mobile.open{display:flex;}
+body.light .nav-mobile{background:rgba(245,243,238,.97);}
+.nav-mobile a{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);text-decoration:none;padding:14px 0;border-bottom:1px solid var(--border-dim);transition:color .2s;}
+.nav-mobile a:hover{color:var(--gold);}
+.nav-mobile-cta{color:var(--gold) !important;border-bottom:none !important;margin-top:8px;}
+
 /* ── RESPONSIVE ── */
 @media(max-width:1080px){
-  nav{padding:0 24px;}.nav-links{display:none;}
+  nav{padding:0 24px;}.nav-links{display:none;}.nav-burger{display:flex;}
   .inner,.fi,.fb{padding-left:24px;padding-right:24px;}
   .hero-left{padding:80px 24px 60px;}
   .cg,.pg,.blog-grid{grid-template-columns:1fr;}
@@ -469,6 +479,32 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:5
 
   @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
+@media(max-width:640px){
+  .nav-cta{display:none;}
+  .hero-left{padding:72px 20px 48px;}
+  h1.h-title{font-size:36px;}
+  .h-sub{font-size:14px;}
+  .btn-row{flex-direction:column;}
+  .btn-p,.btn-s{justify-content:center;}
+  .h-stats{gap:20px;}
+  .stat-n{font-size:28px;}
+  .stats-strip .inner{flex-direction:column;gap:16px;text-align:center;}
+  .stat-divider{display:none;}
+  .stat-num{font-size:32px;}
+  .ch{flex-direction:column;gap:16px;margin-bottom:32px;}
+  .modal-panel{padding:40px 20px 32px;width:95%;}
+  .modal-meta-row{grid-template-columns:1fr;}
+  .req-form-btns{flex-direction:column;}
+  .req-form-btns button{width:100%;}
+  .fi{grid-template-columns:1fr;}
+  .fb{flex-direction:column;gap:12px;text-align:center;}
+  .who-diag{display:none;}
+  .pg{grid-template-columns:1fr;}
+  .blog-grid{grid-template-columns:1fr;}
+  .cta-in{padding:0 20px;}
+  h2.cta-t{font-size:32px;}
+  h2.sec-t{font-size:28px;}
+}
 </style>
 </head>
 <body>
@@ -491,8 +527,18 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:5
   <div class="nav-right">
     <button class="theme-btn" id="themeBtn" title="Сменить тему">🌙</button>
     <a href="#pricing" class="nav-cta">Начать обучение</a>
+    <button class="nav-burger" id="navBurger" aria-label="Меню">☰</button>
   </div>
 </nav>
+<div class="nav-mobile" id="navMobile">
+  <a href="#courses">Курсы</a>
+  <a href="sandbox.html">Песочница</a>
+  <a href="lab.html">Лаборатория</a>
+  <a href="#consult">Консультации</a>
+  <a href="#blog">Блог</a>
+  <a href="#pricing">Цены</a>
+  <a href="#pricing" class="nav-mobile-cta">Начать обучение</a>
+</div>
 <!-- ── HERO ── -->
 <section class="hero">
   <div class="hero-left">
@@ -750,6 +796,20 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => addChatMsg('bot', botReply(q)), 500);
   });
   chatInput?.addEventListener('keypress', e => { if (e.key === 'Enter') chatSend?.click(); });
+
+  // ── Hamburger меню ───────────────────────────────────────
+  const burger = document.getElementById('navBurger');
+  const mobileNav = document.getElementById('navMobile');
+  burger?.addEventListener('click', () => {
+    mobileNav.classList.toggle('open');
+    burger.textContent = mobileNav.classList.contains('open') ? '✕' : '☰';
+  });
+  mobileNav?.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      mobileNav.classList.remove('open');
+      burger.textContent = '☰';
+    });
+  });
 });
 </script>
 
