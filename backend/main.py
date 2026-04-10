@@ -10,6 +10,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import httpx
+import aiomysql
 from typing import Optional
 
 # Импортируем наши модули
@@ -36,6 +37,49 @@ app = FastAPI(
     description="API для подготовки данных к импорту в Datamine Studio RM",
     version="1.0.0"
 )
+
+# ── База данных ───────────────────────────────────────────────────────────────
+
+DB_HOST     = os.getenv("DB_HOST", "mariadb")
+DB_NAME     = os.getenv("DB_NAME", "moodle")
+DB_USER     = os.getenv("DB_USER", "moodle")
+DB_PASSWORD = os.getenv("DB_PASSWORD", "")
+
+db_pool = None
+
+async def get_pool():
+    global db_pool
+    if db_pool is None:
+        db_pool = await aiomysql.create_pool(
+            host=DB_HOST, port=3306,
+            user=DB_USER, password=DB_PASSWORD,
+            db=DB_NAME, autocommit=True, minsize=1, maxsize=5
+        )
+    return db_pool
+
+@app.on_event("startup")
+async def startup():
+    try:
+        pool = await get_pool()
+        async with pool.acquire() as conn:
+            async with conn.cursor() as cur:
+                await cur.execute("""
+                    CREATE TABLE IF NOT EXISTS requests (
+                        id           INT AUTO_INCREMENT PRIMARY KEY,
+                        course_name  VARCHAR(255) NOT NULL,
+                        company_name VARCHAR(255) NOT NULL,
+                        inn          VARCHAR(12)  NOT NULL,
+                        contact_email VARCHAR(255) NOT NULL,
+                        employee_name VARCHAR(255) NOT NULL,
+                        employee_email VARCHAR(255) NOT NULL,
+                        comment      TEXT,
+                        status       VARCHAR(50)  DEFAULT 'new',
+                        created_at   TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+                """)
+        print("[DB] Таблица requests готова")
+    except Exception as e:
+        print(f"[DB] Ошибка подключения: {e}")
 
 app.add_middleware(
     CORSMiddleware,
@@ -151,6 +195,25 @@ def _send_request_email(req: CourseRequest) -> None:
 async def create_request(request: CourseRequest, background_tasks: BackgroundTasks):
     """Приём заявки на корпоративное обучение"""
     print(f"[REQUEST] {request.model_dump()}")
+
+    try:
+        pool = await get_pool()
+        async with pool.acquire() as conn:
+            async with conn.cursor() as cur:
+                await cur.execute("""
+                    INSERT INTO requests
+                        (course_name, company_name, inn, contact_email,
+                         employee_name, employee_email, comment)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """, (
+                    request.course_name, request.company_name, request.inn,
+                    request.contact_email, request.employee_name,
+                    request.employee_email, request.comment
+                ))
+        print("[DB] Заявка сохранена")
+    except Exception as e:
+        print(f"[DB] Ошибка сохранения: {e}")
+
     background_tasks.add_task(_send_request_email, request)
     return {"success": True, "message": "Request received"}
 

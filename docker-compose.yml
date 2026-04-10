@@ -63,6 +63,10 @@ services:
     environment:
       MOODLE_URL: ${MOODLE_WWWROOT:-https://courses.geocore-academy.ru}
       MOODLE_TOKEN: ${MOODLE_TOKEN}
+      DB_HOST: mariadb
+      DB_NAME: ${MOODLE_DB_NAME}
+      DB_USER: ${MOODLE_DB_USER}
+      DB_PASSWORD: ${MOODLE_DB_PASSWORD}
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USER: ${SMTP_USER:-}
