@@ -1,0 +1,397 @@
+<!DOCTYPE html><html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GeoCore Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --gold:#C9A84C;--gold-light:#E8C97A;--gold-dim:#7A6230;
+  --dark:#0A0A0B;--dark-2:#111114;--dark-3:#18181D;--dark-4:#1F1F26;
+  --surface:#252530;--text:#E8E6DE;--text-muted:#9A9890;--text-dim:#5C5B56;
+  --border:rgba(201,168,76,0.18);--border-dim:rgba(255,255,255,0.07);
+  --green:#4CAF82;--red:#E57373;--blue:#5B9BD5;
+}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;}
+
+/* ── LOGIN ── */
+#loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;}
+.login-box{background:var(--dark-3);border:1px solid var(--border);padding:48px 40px;width:100%;max-width:400px;}
+.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:32px;}
+.logo-hex{width:28px;height:28px;background:var(--gold);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);}
+.login-logo span{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--text);}
+.login-logo span em{font-style:normal;color:var(--gold);}
+.login-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px;display:block;}
+.login-input{width:100%;background:var(--dark-2);border:1px solid var(--border-dim);color:var(--text);padding:12px 14px;font-family:'IBM Plex Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s;}
+.login-input:focus{border-color:var(--gold);}
+.login-btn{width:100%;margin-top:16px;background:var(--gold);color:var(--dark);border:none;padding:13px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);transition:background .2s;}
+.login-btn:hover{background:var(--gold-light);}
+.login-err{margin-top:12px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--red);display:none;}
+
+/* ── LAYOUT ── */
+#adminApp{display:none;}
+header{background:var(--dark-2);border-bottom:1px solid var(--border);padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;}
+.h-logo{display:flex;align-items:center;gap:10px;}
+.h-logo span{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;}
+.h-logo span em{font-style:normal;color:var(--gold);}
+.h-badge{font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--dark);background:var(--gold);padding:2px 8px;}
+.h-logout{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);background:none;border:1px solid var(--border-dim);padding:6px 14px;cursor:pointer;transition:all .2s;}
+.h-logout:hover{border-color:var(--red);color:var(--red);}
+
+/* ── TABS ── */
+.tabs{display:flex;border-bottom:1px solid var(--border-dim);padding:0 32px;background:var(--dark-2);}
+.tab{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);padding:14px 20px;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;}
+.tab:hover{color:var(--text-muted);}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+
+/* ── CONTENT ── */
+.tab-panel{display:none;padding:32px;}
+.tab-panel.active{display:block;}
+
+/* ── REQUESTS TABLE ── */
+.panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+.panel-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;}
+.panel-count{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--text-dim);}
+.filter-row{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+.f-btn{background:transparent;border:1px solid var(--border-dim);color:var(--text-muted);padding:6px 16px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.08em;cursor:pointer;transition:all .2s;}
+.f-btn:hover{border-color:var(--gold);color:var(--gold);}
+.f-btn.active{background:var(--gold);border-color:var(--gold);color:var(--dark);}
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+thead tr{border-bottom:1px solid var(--border);}
+th{font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim);padding:10px 12px;text-align:left;white-space:nowrap;}
+td{font-size:13px;font-weight:300;color:var(--text-muted);padding:12px 12px;border-bottom:1px solid var(--border-dim);vertical-align:top;}
+tr:hover td{background:var(--dark-3);}
+.td-main{color:var(--text);font-weight:400;}
+.badge{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;padding:3px 8px;clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);}
+.badge-new{background:var(--gold);color:var(--dark);}
+.badge-confirmed{background:var(--blue);color:#fff;}
+.badge-paid{background:var(--green);color:#fff;}
+.badge-cancelled{background:var(--dark-4);color:var(--text-dim);border:1px solid var(--border-dim);}
+.status-sel{background:var(--dark-3);border:1px solid var(--border-dim);color:var(--text);padding:5px 8px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;cursor:pointer;outline:none;transition:border-color .2s;}
+.status-sel:focus{border-color:var(--gold);}
+.empty-state{text-align:center;padding:60px;color:var(--text-dim);font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em;}
+
+/* ── SITE.JSON EDITOR ── */
+.editor-note{font-size:13px;font-weight:300;color:var(--text-muted);line-height:1.65;margin-bottom:20px;padding:16px 20px;background:var(--dark-3);border-left:3px solid var(--gold);}
+.editor-note strong{color:var(--gold);}
+.json-editor{width:100%;height:60vh;background:var(--dark-2);border:1px solid var(--border-dim);color:var(--text);padding:16px;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.6;outline:none;resize:vertical;transition:border-color .2s;}
+.json-editor:focus{border-color:var(--gold);}
+.editor-actions{display:flex;gap:12px;margin-top:14px;align-items:center;}
+.btn-save{background:var(--gold);color:var(--dark);border:none;padding:12px 28px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;clip-path:polygon(7px 0%,100% 0%,calc(100% - 7px) 100%,0% 100%);transition:background .2s;}
+.btn-save:hover{background:var(--gold-light);}
+.btn-save:disabled{opacity:.5;cursor:default;}
+.btn-reload{background:none;border:1px solid var(--border-dim);color:var(--text-muted);padding:12px 22px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;cursor:pointer;transition:all .2s;}
+.btn-reload:hover{border-color:var(--gold);color:var(--gold);}
+.editor-status{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--dark-4);border:1px solid var(--border);padding:12px 20px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;z-index:999;}
+.toast.show{opacity:1;transform:none;}
+.toast.ok{border-color:var(--green);color:var(--green);}
+.toast.err{border-color:var(--red);color:var(--red);}
+
+@media(max-width:768px){
+  .tab-panel{padding:16px;}
+  header{padding:0 16px;}
+  .tabs{padding:0 16px;}
+  th:nth-child(4),td:nth-child(4),th:nth-child(5),td:nth-child(5){display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="logo-hex"></div>
+      <span>Geo<em>Core</em> Admin</span>
+    </div>
+    <label class="login-label">Токен доступа</label>
+    <input type="password" class="login-input" id="tokenInput" placeholder="••••••••••••••••">
+    <button class="login-btn" id="loginBtn">Войти →</button>
+    <div class="login-err" id="loginErr">Неверный токен</div>
+  </div>
+</div>
+
+<!-- ADMIN APP -->
+<div id="adminApp">
+  <header>
+    <div class="h-logo">
+      <div class="logo-hex" style="width:24px;height:24px;background:var(--gold);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%)"></div>
+      <span>Geo<em style="font-style:normal;color:var(--gold)">Core</em></span>
+      <div class="h-badge">Admin</div>
+    </div>
+    <button class="h-logout" id="logoutBtn">Выйти</button>
+  </header>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="requests">Заявки</div>
+    <div class="tab" data-tab="content">Контент (site.json)</div>
+  </div>
+
+  <!-- TAB: ЗАЯВКИ -->
+  <div class="tab-panel active" id="tab-requests">
+    <div class="panel-header">
+      <div class="panel-title">Заявки на обучение</div>
+      <div class="panel-count" id="reqCount"></div>
+    </div>
+    <div class="filter-row">
+      <button class="f-btn active" data-status="all">Все</button>
+      <button class="f-btn" data-status="new">Новые</button>
+      <button class="f-btn" data-status="confirmed">Подтверждены</button>
+      <button class="f-btn" data-status="paid">Оплачены</button>
+      <button class="f-btn" data-status="cancelled">Отменены</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Курс</th>
+            <th>Компания / ИНН</th>
+            <th>Контакт</th>
+            <th>Сотрудник</th>
+            <th>Статус</th>
+            <th>Дата</th>
+          </tr>
+        </thead>
+        <tbody id="reqTable"></tbody>
+      </table>
+      <div class="empty-state" id="reqEmpty" style="display:none">Заявок нет</div>
+    </div>
+  </div>
+
+  <!-- TAB: КОНТЕНТ -->
+  <div class="tab-panel" id="tab-content">
+    <div class="panel-header">
+      <div class="panel-title">Редактор site.json</div>
+    </div>
+    <div class="editor-note">
+      <strong>Как работает:</strong> изменения сохраняются напрямую в GitHub репозиторий.
+      CI/CD автоматически задеплоит обновлённый файл на сайт (~2 мин).
+    </div>
+    <textarea class="json-editor" id="jsonEditor" spellcheck="false"></textarea>
+    <div class="editor-actions">
+      <button class="btn-save" id="saveJsonBtn">Сохранить и задеплоить →</button>
+      <button class="btn-reload" id="reloadJsonBtn">Перезагрузить</button>
+      <span class="editor-status" id="editorStatus"></span>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = 'https://api.geocore-academy.ru';
+let token = localStorage.getItem('gc_admin_token') || '';
+let currentFilter = 'all';
+let allRequests = [];
+let siteJsonSha = '';
+
+// ── Утилиты ─────────────────────────────────────────────────
+function showToast(msg, type = 'ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast show ${type}`;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function headers() {
+  return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+}
+
+// ── Авторизация ─────────────────────────────────────────────
+async function tryLogin() {
+  const t = document.getElementById('tokenInput').value.trim();
+  if (!t) return;
+  const err = document.getElementById('loginErr');
+  err.style.display = 'none';
+  try {
+    const resp = await fetch(`${API}/api/admin/requests`, {
+      headers: { 'Authorization': `Bearer ${t}` }
+    });
+    if (!resp.ok) throw new Error();
+    token = t;
+    localStorage.setItem('gc_admin_token', token);
+    showAdmin();
+  } catch {
+    err.style.display = 'block';
+  }
+}
+
+function showAdmin() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('adminApp').style.display = 'block';
+  loadRequests();
+}
+
+function logout() {
+  localStorage.removeItem('gc_admin_token');
+  token = '';
+  document.getElementById('adminApp').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('tokenInput').value = '';
+}
+
+// ── Заявки ──────────────────────────────────────────────────
+async function loadRequests() {
+  try {
+    const resp = await fetch(`${API}/api/admin/requests`, { headers: headers() });
+    if (resp.status === 401) { logout(); return; }
+    const data = await resp.json();
+    allRequests = data.requests || [];
+    renderRequests();
+  } catch {
+    showToast('Ошибка загрузки заявок', 'err');
+  }
+}
+
+function renderRequests() {
+  const tbody = document.getElementById('reqTable');
+  const empty = document.getElementById('reqEmpty');
+  const filtered = currentFilter === 'all'
+    ? allRequests
+    : allRequests.filter(r => r.status === currentFilter);
+
+  document.getElementById('reqCount').textContent =
+    `${filtered.length} из ${allRequests.length}`;
+
+  if (!filtered.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = filtered.map(r => `
+    <tr>
+      <td style="color:var(--text-dim);font-family:'IBM Plex Mono',monospace;font-size:11px">${r.id}</td>
+      <td class="td-main">${esc(r.course_name)}</td>
+      <td>${esc(r.company_name)}<br><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-dim)">${esc(r.inn)}</span></td>
+      <td>${esc(r.contact_email)}</td>
+      <td>${esc(r.employee_name)}<br><span style="font-size:11px;color:var(--text-dim)">${esc(r.employee_email)}</span></td>
+      <td>
+        <select class="status-sel" data-id="${r.id}" onchange="updateStatus(this)">
+          <option value="new"       ${r.status==='new'?'selected':''}>Новая</option>
+          <option value="confirmed" ${r.status==='confirmed'?'selected':''}>Подтверждена</option>
+          <option value="paid"      ${r.status==='paid'?'selected':''}>Оплачена</option>
+          <option value="cancelled" ${r.status==='cancelled'?'selected':''}>Отменена</option>
+        </select>
+      </td>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:10px;white-space:nowrap">${r.created_at?.slice(0,16) || '—'}</td>
+    </tr>
+  `).join('');
+}
+
+async function updateStatus(sel) {
+  const id = sel.dataset.id;
+  const status = sel.value;
+  try {
+    const resp = await fetch(`${API}/api/admin/requests/${id}`, {
+      method: 'PATCH',
+      headers: headers(),
+      body: JSON.stringify({ status })
+    });
+    if (!resp.ok) throw new Error();
+    const req = allRequests.find(r => r.id == id);
+    if (req) req.status = status;
+    showToast('Статус обновлён');
+  } catch {
+    showToast('Ошибка обновления статуса', 'err');
+    loadRequests();
+  }
+}
+
+function esc(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── Фильтры ─────────────────────────────────────────────────
+document.querySelectorAll('.f-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.status;
+    renderRequests();
+  });
+});
+
+// ── Табы ────────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
+    if (tab.dataset.tab === 'content') loadSiteJson();
+  });
+});
+
+// ── site.json ────────────────────────────────────────────────
+async function loadSiteJson() {
+  const editor = document.getElementById('jsonEditor');
+  const status = document.getElementById('editorStatus');
+  editor.value = 'Загрузка...';
+  status.style.color = 'var(--text-dim)';
+  status.textContent = '';
+  try {
+    const resp = await fetch(`${API}/api/admin/site-json`, { headers: headers() });
+    if (resp.status === 401) { logout(); return; }
+    const data = await resp.json();
+    siteJsonSha = data.sha;
+    editor.value = JSON.stringify(JSON.parse(data.content), null, 2);
+    status.style.color = 'var(--text-dim)';
+    status.textContent = `sha: ${siteJsonSha.slice(0,8)}`;
+  } catch {
+    editor.value = '';
+    showToast('Ошибка загрузки site.json', 'err');
+  }
+}
+
+async function saveSiteJson() {
+  const editor = document.getElementById('jsonEditor');
+  const btn = document.getElementById('saveJsonBtn');
+  const status = document.getElementById('editorStatus');
+  try {
+    JSON.parse(editor.value);
+  } catch {
+    showToast('Невалидный JSON — проверьте синтаксис', 'err');
+    return;
+  }
+  btn.disabled = true;
+  status.style.color = 'var(--text-muted)';
+  status.textContent = 'Сохранение...';
+  try {
+    const resp = await fetch(`${API}/api/admin/site-json`, {
+      method: 'PUT',
+      headers: headers(),
+      body: JSON.stringify({ content: editor.value, sha: siteJsonSha })
+    });
+    if (!resp.ok) throw new Error();
+    showToast('Сохранено! CI/CD запущен (~2 мин до деплоя)');
+    status.textContent = 'Сохранено';
+    status.style.color = 'var(--green)';
+    await loadSiteJson();
+  } catch {
+    showToast('Ошибка сохранения', 'err');
+    status.textContent = '';
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ── Events ───────────────────────────────────────────────────
+document.getElementById('loginBtn').addEventListener('click', tryLogin);
+document.getElementById('tokenInput').addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
+document.getElementById('logoutBtn').addEventListener('click', logout);
+document.getElementById('saveJsonBtn').addEventListener('click', saveSiteJson);
+document.getElementById('reloadJsonBtn').addEventListener('click', loadSiteJson);
+
+// ── Автологин если токен сохранён ───────────────────────────
+if (token) showAdmin();
+</script>
+</body>
+</html>

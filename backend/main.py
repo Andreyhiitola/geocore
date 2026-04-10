@@ -1,11 +1,13 @@
 # backend/main.py
-from fastapi import FastAPI, UploadFile, File, HTTPException, Form, BackgroundTasks
+from fastapi import FastAPI, UploadFile, File, HTTPException, Form, BackgroundTasks, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, PlainTextResponse
 from pydantic import BaseModel
 import pandas as pd
 import io
 import os
+import json
+import base64
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -106,6 +108,10 @@ async def root():
 
 MOODLE_URL   = os.getenv("MOODLE_URL",   "https://courses.geocore-academy.ru")
 MOODLE_TOKEN = os.getenv("MOODLE_TOKEN", "")
+
+ADMIN_TOKEN  = os.getenv("ADMIN_TOKEN", "")
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "")
+GITHUB_REPO  = os.getenv("GITHUB_REPO", "Andreyhiitola/geocore")
 
 SMTP_HOST    = os.getenv("SMTP_HOST", "smtp.yandex.ru")
 SMTP_PORT    = int(os.getenv("SMTP_PORT", "587"))
@@ -216,6 +222,96 @@ async def create_request(request: CourseRequest, background_tasks: BackgroundTas
 
     background_tasks.add_task(_send_request_email, request)
     return {"success": True, "message": "Request received"}
+
+
+# ── Admin auth ───────────────────────────────────────────────────────────────
+
+async def require_admin(authorization: str = Header(...)):
+    if not ADMIN_TOKEN:
+        raise HTTPException(500, "ADMIN_TOKEN не задан на сервере")
+    if authorization != f"Bearer {ADMIN_TOKEN}":
+        raise HTTPException(401, "Неверный токен")
+
+
+# ── Admin: заявки ────────────────────────────────────────────────────────────
+
+@app.get("/api/admin/requests")
+async def admin_get_requests(_=Depends(require_admin)):
+    """Список всех заявок"""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        async with conn.cursor(aiomysql.DictCursor) as cur:
+            await cur.execute("SELECT * FROM requests ORDER BY created_at DESC")
+            rows = await cur.fetchall()
+    for row in rows:
+        if row.get("created_at"):
+            row["created_at"] = str(row["created_at"])
+    return {"requests": rows}
+
+
+class StatusUpdate(BaseModel):
+    status: str
+
+
+@app.patch("/api/admin/requests/{request_id}")
+async def admin_update_request(request_id: int, body: StatusUpdate, _=Depends(require_admin)):
+    """Изменить статус заявки"""
+    if body.status not in ("new", "confirmed", "paid", "cancelled"):
+        raise HTTPException(400, "Допустимые статусы: new, confirmed, paid, cancelled")
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                "UPDATE requests SET status=%s WHERE id=%s",
+                (body.status, request_id)
+            )
+    return {"success": True}
+
+
+# ── Admin: site.json через GitHub API ────────────────────────────────────────
+
+@app.get("/api/admin/site-json")
+async def admin_get_site_json(_=Depends(require_admin)):
+    """Получить содержимое site.json из GitHub"""
+    if not GITHUB_TOKEN:
+        raise HTTPException(500, "GITHUB_TOKEN не задан на сервере")
+    async with httpx.AsyncClient(timeout=10) as client:
+        resp = await client.get(
+            f"https://api.github.com/repos/{GITHUB_REPO}/contents/frontend/js/data/site.json",
+            headers={"Authorization": f"Bearer {GITHUB_TOKEN}",
+                     "Accept": "application/vnd.github.v3+json"}
+        )
+        resp.raise_for_status()
+        data = resp.json()
+    content = base64.b64decode(data["content"]).decode("utf-8")
+    return {"content": content, "sha": data["sha"]}
+
+
+class SiteJsonUpdate(BaseModel):
+    content: str
+    sha: str
+
+
+@app.put("/api/admin/site-json")
+async def admin_put_site_json(body: SiteJsonUpdate, _=Depends(require_admin)):
+    """Сохранить site.json через GitHub API (запускает CI/CD деплой)"""
+    if not GITHUB_TOKEN:
+        raise HTTPException(500, "GITHUB_TOKEN не задан на сервере")
+    try:
+        json.loads(body.content)
+    except ValueError:
+        raise HTTPException(400, "Невалидный JSON")
+    encoded = base64.b64encode(body.content.encode("utf-8")).decode("utf-8")
+    async with httpx.AsyncClient(timeout=10) as client:
+        resp = await client.put(
+            f"https://api.github.com/repos/{GITHUB_REPO}/contents/frontend/js/data/site.json",
+            headers={"Authorization": f"Bearer {GITHUB_TOKEN}",
+                     "Accept": "application/vnd.github.v3+json"},
+            json={"message": "admin: update site.json",
+                  "content": encoded, "sha": body.sha}
+        )
+        resp.raise_for_status()
+    return {"success": True}
 
 
 @app.get("/api/health")

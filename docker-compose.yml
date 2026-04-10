@@ -72,6 +72,9 @@ services:
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASS: ${SMTP_PASS:-}
       NOTIFY_EMAIL: ${NOTIFY_EMAIL:-}
+      ADMIN_TOKEN: ${ADMIN_TOKEN:-}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      GITHUB_REPO: ${GITHUB_REPO:-Andreyhiitola/geocore}
     networks:
       - geocore_net
     labels:
