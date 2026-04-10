@@ -226,7 +226,7 @@ async def create_request(request: CourseRequest, background_tasks: BackgroundTas
 
 # ── Admin auth ───────────────────────────────────────────────────────────────
 
-async def require_admin(authorization: str = Header(...)):
+async def require_admin(authorization: Optional[str] = Header(None)):
     if not ADMIN_TOKEN:
         raise HTTPException(500, "ADMIN_TOKEN не задан на сервере")
     if authorization != f"Bearer {ADMIN_TOKEN}":
