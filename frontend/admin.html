@@ -20,7 +20,7 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--dark);color:var(--t
 .login-box{background:var(--dark-3);border:1px solid var(--border);padding:48px 40px;width:100%;max-width:400px;}
 .login-logo{display:flex;align-items:center;gap:10px;margin-bottom:32px;}
 .logo-hex{width:28px;height:28px;background:var(--gold);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);}
-.login-logo span{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--text);}
+.login-logo span{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;}
 .login-logo span em{font-style:normal;color:var(--gold);}
 .login-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px;display:block;}
 .login-input{width:100%;background:var(--dark-2);border:1px solid var(--border-dim);color:var(--text);padding:12px 14px;font-family:'IBM Plex Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s;}
@@ -34,7 +34,6 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--dark);color:var(--t
 header{background:var(--dark-2);border-bottom:1px solid var(--border);padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;}
 .h-logo{display:flex;align-items:center;gap:10px;}
 .h-logo span{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;}
-.h-logo span em{font-style:normal;color:var(--gold);}
 .h-badge{font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--dark);background:var(--gold);padding:2px 8px;}
 .h-logout{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);background:none;border:1px solid var(--border-dim);padding:6px 14px;cursor:pointer;transition:all .2s;}
 .h-logout:hover{border-color:var(--red);color:var(--red);}
@@ -48,11 +47,11 @@ header{background:var(--dark-2);border-bottom:1px solid var(--border);padding:0 
 /* ── CONTENT ── */
 .tab-panel{display:none;padding:32px;}
 .tab-panel.active{display:block;}
-
-/* ── REQUESTS TABLE ── */
-.panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+.panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
 .panel-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;}
 .panel-count{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--text-dim);}
+
+/* ── REQUESTS TABLE ── */
 .filter-row{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
 .f-btn{background:transparent;border:1px solid var(--border-dim);color:var(--text-muted);padding:6px 16px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.08em;cursor:pointer;transition:all .2s;}
 .f-btn:hover{border-color:var(--gold);color:var(--gold);}
@@ -61,30 +60,62 @@ header{background:var(--dark-2);border-bottom:1px solid var(--border);padding:0 
 table{width:100%;border-collapse:collapse;}
 thead tr{border-bottom:1px solid var(--border);}
 th{font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim);padding:10px 12px;text-align:left;white-space:nowrap;}
-td{font-size:13px;font-weight:300;color:var(--text-muted);padding:12px 12px;border-bottom:1px solid var(--border-dim);vertical-align:top;}
+td{font-size:13px;font-weight:300;color:var(--text-muted);padding:10px 12px;border-bottom:1px solid var(--border-dim);vertical-align:middle;}
 tr:hover td{background:var(--dark-3);}
 .td-main{color:var(--text);font-weight:400;}
-.badge{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;padding:3px 8px;clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);}
-.badge-new{background:var(--gold);color:var(--dark);}
-.badge-confirmed{background:var(--blue);color:#fff;}
-.badge-paid{background:var(--green);color:#fff;}
-.badge-cancelled{background:var(--dark-4);color:var(--text-dim);border:1px solid var(--border-dim);}
 .status-sel{background:var(--dark-3);border:1px solid var(--border-dim);color:var(--text);padding:5px 8px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;cursor:pointer;outline:none;transition:border-color .2s;}
 .status-sel:focus{border-color:var(--gold);}
 .empty-state{text-align:center;padding:60px;color:var(--text-dim);font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em;}
 
-/* ── SITE.JSON EDITOR ── */
-.editor-note{font-size:13px;font-weight:300;color:var(--text-muted);line-height:1.65;margin-bottom:20px;padding:16px 20px;background:var(--dark-3);border-left:3px solid var(--gold);}
-.editor-note strong{color:var(--gold);}
-.json-editor{width:100%;height:60vh;background:var(--dark-2);border:1px solid var(--border-dim);color:var(--text);padding:16px;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.6;outline:none;resize:vertical;transition:border-color .2s;}
-.json-editor:focus{border-color:var(--gold);}
-.editor-actions{display:flex;gap:12px;margin-top:14px;align-items:center;}
+/* ── CELL INPUT (inline editing) ── */
+.ci{width:100%;background:transparent;border:1px solid transparent;color:var(--text);padding:5px 7px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;outline:none;transition:all .15s;min-width:80px;}
+.ci:focus{border-color:var(--gold);background:var(--dark-2);}
+.ci.wide{min-width:160px;}
+.ci.sm{max-width:80px;}
+
+/* ── SUBTABS (внутри Content) ── */
+.subtabs{display:flex;gap:0;margin-bottom:24px;border-bottom:1px solid var(--border-dim);}
+.stab{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);padding:10px 18px;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;}
+.stab:hover{color:var(--text-muted);}
+.stab.active{color:var(--gold);border-bottom-color:var(--gold);}
+.sp{display:none;}
+.sp.active{display:block;}
+
+/* ── SECTION ── */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.sec-title{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-dim);}
+.btn-add{background:none;border:1px solid var(--gold-dim);color:var(--gold);padding:6px 14px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.08em;cursor:pointer;transition:all .2s;}
+.btn-add:hover{background:var(--gold);color:var(--dark);}
+.btn-del{background:none;border:1px solid var(--border-dim);color:var(--text-dim);width:28px;height:28px;cursor:pointer;font-size:13px;display:inline-flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;}
+.btn-del:hover{border-color:var(--red);color:var(--red);}
+
+/* ── SAVE BAR ── */
+.save-bar{position:sticky;bottom:0;background:var(--dark-2);border-top:1px solid var(--border);padding:14px 32px;display:flex;align-items:center;gap:14px;margin:32px -32px -32px;}
 .btn-save{background:var(--gold);color:var(--dark);border:none;padding:12px 28px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;clip-path:polygon(7px 0%,100% 0%,calc(100% - 7px) 100%,0% 100%);transition:background .2s;}
 .btn-save:hover{background:var(--gold-light);}
 .btn-save:disabled{opacity:.5;cursor:default;}
 .btn-reload{background:none;border:1px solid var(--border-dim);color:var(--text-muted);padding:12px 22px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;cursor:pointer;transition:all .2s;}
 .btn-reload:hover{border-color:var(--gold);color:var(--gold);}
-.editor-status{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;}
+.save-note{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em;color:var(--text-dim);}
+.save-status{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;}
+
+/* ── COURSE CARD ── */
+.course-card{background:var(--dark-3);border:1px solid var(--border-dim);padding:20px;margin-bottom:12px;position:relative;}
+.course-card-hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.card-num{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-dim);min-width:24px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.form-row.full{grid-template-columns:1fr;}
+.form-lbl{font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim);margin-bottom:4px;}
+.form-inp{width:100%;background:var(--dark-2);border:1px solid var(--border-dim);color:var(--text);padding:8px 10px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;outline:none;transition:border-color .2s;}
+.form-inp:focus{border-color:var(--gold);}
+.form-ta{width:100%;background:var(--dark-2);border:1px solid var(--border-dim);color:var(--text);padding:8px 10px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;outline:none;resize:vertical;transition:border-color .2s;min-height:60px;}
+.form-ta:focus{border-color:var(--gold);}
+.card-del{position:absolute;top:14px;right:14px;}
+
+/* ── FOOTER COLS ── */
+.footer-meta{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+.footer-col{background:var(--dark-3);border:1px solid var(--border-dim);padding:16px;}
+.footer-col-title{font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim);margin-bottom:12px;}
 
 /* ── TOAST ── */
 .toast{position:fixed;bottom:24px;right:24px;background:var(--dark-4);border:1px solid var(--border);padding:12px 20px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;z-index:999;}
@@ -94,8 +125,9 @@ tr:hover td{background:var(--dark-3);}
 
 @media(max-width:768px){
   .tab-panel{padding:16px;}
-  header{padding:0 16px;}
-  .tabs{padding:0 16px;}
+  header,.tabs{padding:0 16px;}
+  .form-row{grid-template-columns:1fr;}
+  .footer-meta{grid-template-columns:1fr;}
   th:nth-child(4),td:nth-child(4),th:nth-child(5),td:nth-child(5){display:none;}
 }
 </style>
@@ -129,10 +161,10 @@ tr:hover td{background:var(--dark-3);}
 
   <div class="tabs">
     <div class="tab active" data-tab="requests">Заявки</div>
-    <div class="tab" data-tab="content">Контент (site.json)</div>
+    <div class="tab" data-tab="content">Контент сайта</div>
   </div>
 
-  <!-- TAB: ЗАЯВКИ -->
+  <!-- ══ TAB: ЗАЯВКИ ══ -->
   <div class="tab-panel active" id="tab-requests">
     <div class="panel-header">
       <div class="panel-title">Заявки на обучение</div>
@@ -164,20 +196,112 @@ tr:hover td{background:var(--dark-3);}
     </div>
   </div>
 
-  <!-- TAB: КОНТЕНТ -->
+  <!-- ══ TAB: КОНТЕНТ ══ -->
   <div class="tab-panel" id="tab-content">
     <div class="panel-header">
-      <div class="panel-title">Редактор site.json</div>
+      <div class="panel-title">Контент сайта</div>
     </div>
-    <div class="editor-note">
-      <strong>Как работает:</strong> изменения сохраняются напрямую в GitHub репозиторий.
-      CI/CD автоматически задеплоит обновлённый файл на сайт (~2 мин).
+
+    <div class="subtabs">
+      <div class="stab active" data-sp="nav">Навигация</div>
+      <div class="stab" data-sp="courses">Курсы в разработке</div>
+      <div class="stab" data-sp="moodle">Курсы Moodle</div>
+      <div class="stab" data-sp="contacts">Контакты</div>
+      <div class="stab" data-sp="footer">Футер</div>
     </div>
-    <textarea class="json-editor" id="jsonEditor" spellcheck="false"></textarea>
-    <div class="editor-actions">
-      <button class="btn-save" id="saveJsonBtn">Сохранить и задеплоить →</button>
-      <button class="btn-reload" id="reloadJsonBtn">Перезагрузить</button>
-      <span class="editor-status" id="editorStatus"></span>
+
+    <!-- ─ Навигация ─ -->
+    <div class="sp active" id="sp-nav">
+      <div class="sec-hdr">
+        <div class="sec-title">Ссылки в шапке</div>
+        <button class="btn-add" onclick="addNavLink()">+ Добавить</button>
+      </div>
+      <table>
+        <thead><tr><th>Текст</th><th>Ссылка (href)</th><th></th></tr></thead>
+        <tbody id="nav-tbody"></tbody>
+      </table>
+      <div style="margin-top:20px;">
+        <div class="sec-title" style="margin-bottom:10px">Кнопка CTA</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <div>
+            <div class="form-lbl">Текст кнопки</div>
+            <input class="form-inp" id="cta-label" style="width:200px">
+          </div>
+          <div>
+            <div class="form-lbl">Ссылка</div>
+            <input class="form-inp" id="cta-href" style="width:200px">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─ Курсы в разработке ─ -->
+    <div class="sp" id="sp-courses">
+      <div class="sec-hdr">
+        <div class="sec-title">Плановые курсы (В разработке)</div>
+        <button class="btn-add" onclick="addCourse()">+ Добавить курс</button>
+      </div>
+      <div id="courses-list"></div>
+    </div>
+
+    <!-- ─ Курсы Moodle ─ -->
+    <div class="sp" id="sp-moodle">
+      <div class="sec-hdr">
+        <div class="sec-title">Мета-данные курсов Moodle (иконки, теги, описания)</div>
+      </div>
+      <div id="moodle-list"></div>
+    </div>
+
+    <!-- ─ Контакты ─ -->
+    <div class="sp" id="sp-contacts">
+      <div class="sec-hdr" style="margin-bottom:20px">
+        <div class="sec-title">Контактная информация</div>
+      </div>
+      <div style="max-width:600px;display:flex;flex-direction:column;gap:14px;">
+        <div>
+          <div class="form-lbl">Телефон</div>
+          <input class="form-inp" id="c-phone" placeholder="+7 (___) ___-__-__">
+        </div>
+        <div>
+          <div class="form-lbl">Email (основной)</div>
+          <input class="form-inp" id="c-email" placeholder="info@geocore-academy.ru">
+        </div>
+        <div>
+          <div class="form-lbl">Email (корпоративные запросы)</div>
+          <input class="form-inp" id="c-corp_email" placeholder="corp@geocore-academy.ru">
+        </div>
+        <div>
+          <div class="form-lbl">Telegram (ссылка)</div>
+          <input class="form-inp" id="c-telegram" placeholder="https://t.me/geocore_academy">
+        </div>
+        <div>
+          <div class="form-lbl">LinkedIn (ссылка)</div>
+          <input class="form-inp" id="c-linkedin" placeholder="https://linkedin.com/company/geocore-academy">
+        </div>
+      </div>
+    </div>
+
+    <!-- ─ Футер ─ -->
+    <div class="sp" id="sp-footer">
+      <div class="footer-meta">
+        <div>
+          <div class="form-lbl">Описание</div>
+          <input class="form-inp" id="footer-desc" style="width:100%">
+        </div>
+        <div>
+          <div class="form-lbl">Copyright</div>
+          <input class="form-inp" id="footer-copy" style="width:100%">
+        </div>
+      </div>
+      <div id="footer-cols"></div>
+    </div>
+
+    <!-- Сохранить -->
+    <div class="save-bar">
+      <button class="btn-save" id="saveBtn">Сохранить и задеплоить →</button>
+      <button class="btn-reload" id="reloadBtn">Перезагрузить</button>
+      <span class="save-note">CI/CD задеплоит изменения автоматически (~2 мин)</span>
+      <span class="save-status" id="saveStatus"></span>
     </div>
   </div>
 </div>
@@ -189,36 +313,36 @@ const API = 'https://api.geocore-academy.ru';
 let token = localStorage.getItem('gc_admin_token') || '';
 let currentFilter = 'all';
 let allRequests = [];
+let siteData = null;
 let siteJsonSha = '';
 
-// ── Утилиты ─────────────────────────────────────────────────
+// ── Утилиты ────────────────────────────────────────────────
 function showToast(msg, type = 'ok') {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.className = `toast show ${type}`;
   setTimeout(() => t.classList.remove('show'), 3000);
 }
-
-function headers() {
+function h() {
   return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
 }
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
 
-// ── Авторизация ─────────────────────────────────────────────
+// ── Авторизация ────────────────────────────────────────────
 async function tryLogin() {
   const t = document.getElementById('tokenInput').value.trim();
   if (!t) return;
-  const err = document.getElementById('loginErr');
-  err.style.display = 'none';
+  document.getElementById('loginErr').style.display = 'none';
   try {
-    const resp = await fetch(`${API}/api/admin/requests`, {
-      headers: { 'Authorization': `Bearer ${t}` }
-    });
-    if (!resp.ok) throw new Error();
+    const r = await fetch(`${API}/api/admin/requests`, { headers: { 'Authorization': `Bearer ${t}` } });
+    if (!r.ok) throw new Error();
     token = t;
     localStorage.setItem('gc_admin_token', token);
     showAdmin();
   } catch {
-    err.style.display = 'block';
+    document.getElementById('loginErr').style.display = 'block';
   }
 }
 
@@ -236,37 +360,25 @@ function logout() {
   document.getElementById('tokenInput').value = '';
 }
 
-// ── Заявки ──────────────────────────────────────────────────
+// ── Заявки ─────────────────────────────────────────────────
 async function loadRequests() {
   try {
-    const resp = await fetch(`${API}/api/admin/requests`, { headers: headers() });
-    if (resp.status === 401) { logout(); return; }
-    const data = await resp.json();
+    const r = await fetch(`${API}/api/admin/requests`, { headers: h() });
+    if (r.status === 401) { logout(); return; }
+    const data = await r.json();
     allRequests = data.requests || [];
     renderRequests();
-  } catch {
-    showToast('Ошибка загрузки заявок', 'err');
-  }
+  } catch { showToast('Ошибка загрузки заявок', 'err'); }
 }
 
 function renderRequests() {
   const tbody = document.getElementById('reqTable');
   const empty = document.getElementById('reqEmpty');
-  const filtered = currentFilter === 'all'
-    ? allRequests
-    : allRequests.filter(r => r.status === currentFilter);
-
-  document.getElementById('reqCount').textContent =
-    `${filtered.length} из ${allRequests.length}`;
-
-  if (!filtered.length) {
-    tbody.innerHTML = '';
-    empty.style.display = 'block';
-    return;
-  }
+  const list = currentFilter === 'all' ? allRequests : allRequests.filter(r => r.status === currentFilter);
+  document.getElementById('reqCount').textContent = `${list.length} из ${allRequests.length}`;
+  if (!list.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
   empty.style.display = 'none';
-
-  tbody.innerHTML = filtered.map(r => `
+  tbody.innerHTML = list.map(r => `
     <tr>
       <td style="color:var(--text-dim);font-family:'IBM Plex Mono',monospace;font-size:11px">${r.id}</td>
       <td class="td-main">${esc(r.course_name)}</td>
@@ -281,35 +393,23 @@ function renderRequests() {
           <option value="cancelled" ${r.status==='cancelled'?'selected':''}>Отменена</option>
         </select>
       </td>
-      <td style="font-family:'IBM Plex Mono',monospace;font-size:10px;white-space:nowrap">${r.created_at?.slice(0,16) || '—'}</td>
-    </tr>
-  `).join('');
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:10px;white-space:nowrap">${(r.created_at||'').slice(0,16)}</td>
+    </tr>`).join('');
 }
 
 async function updateStatus(sel) {
   const id = sel.dataset.id;
-  const status = sel.value;
   try {
-    const resp = await fetch(`${API}/api/admin/requests/${id}`, {
-      method: 'PATCH',
-      headers: headers(),
-      body: JSON.stringify({ status })
+    const r = await fetch(`${API}/api/admin/requests/${id}`, {
+      method: 'PATCH', headers: h(), body: JSON.stringify({ status: sel.value })
     });
-    if (!resp.ok) throw new Error();
-    const req = allRequests.find(r => r.id == id);
-    if (req) req.status = status;
+    if (!r.ok) throw new Error();
+    const req = allRequests.find(x => x.id == id);
+    if (req) req.status = sel.value;
     showToast('Статус обновлён');
-  } catch {
-    showToast('Ошибка обновления статуса', 'err');
-    loadRequests();
-  }
+  } catch { showToast('Ошибка', 'err'); loadRequests(); }
 }
 
-function esc(str) {
-  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-// ── Фильтры ─────────────────────────────────────────────────
 document.querySelectorAll('.f-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
@@ -319,78 +419,274 @@ document.querySelectorAll('.f-btn').forEach(btn => {
   });
 });
 
-// ── Табы ────────────────────────────────────────────────────
+// ── Табы ───────────────────────────────────────────────────
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     tab.classList.add('active');
     document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
-    if (tab.dataset.tab === 'content') loadSiteJson();
+    if (tab.dataset.tab === 'content' && !siteData) loadSiteJson();
   });
 });
 
-// ── site.json ────────────────────────────────────────────────
+document.querySelectorAll('.stab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.stab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.sp').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById(`sp-${t.dataset.sp}`).classList.add('active');
+  });
+});
+
+// ── Загрузка site.json ─────────────────────────────────────
 async function loadSiteJson() {
-  const editor = document.getElementById('jsonEditor');
-  const status = document.getElementById('editorStatus');
-  editor.value = 'Загрузка...';
-  status.style.color = 'var(--text-dim)';
-  status.textContent = '';
+  document.getElementById('saveStatus').textContent = 'Загрузка...';
   try {
-    const resp = await fetch(`${API}/api/admin/site-json`, { headers: headers() });
-    if (resp.status === 401) { logout(); return; }
-    const data = await resp.json();
+    const r = await fetch(`${API}/api/admin/site-json`, { headers: h() });
+    if (r.status === 401) { logout(); return; }
+    const data = await r.json();
     siteJsonSha = data.sha;
-    editor.value = JSON.stringify(JSON.parse(data.content), null, 2);
-    status.style.color = 'var(--text-dim)';
-    status.textContent = `sha: ${siteJsonSha.slice(0,8)}`;
-  } catch {
-    editor.value = '';
-    showToast('Ошибка загрузки site.json', 'err');
-  }
+    siteData = JSON.parse(data.content);
+    renderAllForms();
+    document.getElementById('saveStatus').style.color = 'var(--text-dim)';
+    document.getElementById('saveStatus').textContent = '';
+  } catch { showToast('Ошибка загрузки site.json', 'err'); }
 }
 
+// ── Рендер всех форм ───────────────────────────────────────
+function renderAllForms() {
+  renderNav();
+  renderCourses();
+  renderMoodle();
+  renderContacts();
+  renderFooter();
+}
+
+// ── КОНТАКТЫ ───────────────────────────────────────────────
+function renderContacts() {
+  const c = siteData.contacts || {};
+  ['phone','email','corp_email','telegram','linkedin'].forEach(k => {
+    const el = document.getElementById(`c-${k}`);
+    if (!el) return;
+    el.value = c[k] || '';
+    el.oninput = e => {
+      if (!siteData.contacts) siteData.contacts = {};
+      siteData.contacts[k] = e.target.value;
+    };
+  });
+}
+
+// ── НАВИГАЦИЯ ──────────────────────────────────────────────
+function renderNav() {
+  const links = siteData.nav?.links || [];
+  document.getElementById('nav-tbody').innerHTML = links.map((l, i) => `
+    <tr>
+      <td><input class="ci wide" value="${esc(l.label)}" oninput="siteData.nav.links[${i}].label=this.value"></td>
+      <td><input class="ci wide" value="${esc(l.href)}"  oninput="siteData.nav.links[${i}].href=this.value"></td>
+      <td><button class="btn-del" onclick="delNavLink(${i})">✕</button></td>
+    </tr>`).join('');
+  document.getElementById('cta-label').value = siteData.nav?.cta?.label || '';
+  document.getElementById('cta-href').value  = siteData.nav?.cta?.href  || '';
+  document.getElementById('cta-label').oninput = e => siteData.nav.cta.label = e.target.value;
+  document.getElementById('cta-href').oninput  = e => siteData.nav.cta.href  = e.target.value;
+}
+
+function addNavLink() {
+  siteData.nav.links.push({ label: '', href: '#' });
+  renderNav();
+}
+function delNavLink(i) {
+  siteData.nav.links.splice(i, 1);
+  renderNav();
+}
+
+// ── КУРСЫ В РАЗРАБОТКЕ ─────────────────────────────────────
+function renderCourses() {
+  const courses = (siteData.courses || []).filter(c => c.planned);
+  document.getElementById('courses-list').innerHTML = courses.map((c, i) => `
+    <div class="course-card">
+      <button class="btn-del card-del" onclick="delCourse(${i})">✕</button>
+      <div class="course-card-hdr">
+        <span class="card-num">${String(i+1).padStart(2,'0')}</span>
+        <input class="ci sm" value="${esc(c.icon||'')}" oninput="setCourse(${i},'icon',this.value)" placeholder="🔬" style="max-width:60px;font-size:18px;">
+      </div>
+      <div class="form-row">
+        <div>
+          <div class="form-lbl">Название</div>
+          <input class="form-inp" value="${esc(c.title||'')}" oninput="setCourse(${i},'title',this.value)">
+        </div>
+        <div>
+          <div class="form-lbl">Тег</div>
+          <input class="form-inp" value="${esc(c.tag||'')}" oninput="setCourse(${i},'tag',this.value)">
+        </div>
+      </div>
+      <div class="form-row full">
+        <div>
+          <div class="form-lbl">Описание</div>
+          <textarea class="form-ta" oninput="setCourse(${i},'desc',this.value)">${esc(c.desc||'')}</textarea>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function setCourse(i, field, val) {
+  const planned = siteData.courses.filter(c => c.planned);
+  const realIdx = siteData.courses.indexOf(planned[i]);
+  if (realIdx >= 0) siteData.courses[realIdx][field] = val;
+}
+function addCourse() {
+  siteData.courses = siteData.courses || [];
+  siteData.courses.push({ icon: '📚', tag: '', title: '', desc: '', meta: [], planned: true });
+  renderCourses();
+}
+function delCourse(i) {
+  if (!confirm('Удалить курс?')) return;
+  const planned = siteData.courses.filter(c => c.planned);
+  const realIdx = siteData.courses.indexOf(planned[i]);
+  if (realIdx >= 0) siteData.courses.splice(realIdx, 1);
+  renderCourses();
+}
+
+// ── КУРСЫ MOODLE ───────────────────────────────────────────
+function renderMoodle() {
+  const meta = siteData.moodleMeta || {};
+  const order = siteData.moodleCourseOrder || [];
+  document.getElementById('moodle-list').innerHTML = order.map(id => {
+    const m = meta[id] || {};
+    const modal = m.modal || {};
+    return `
+      <div class="course-card">
+        <div class="form-row">
+          <div>
+            <div class="form-lbl">Иконка (эмодзи)</div>
+            <input class="form-inp" value="${esc(m.icon||'')}" oninput="setMoodle(${id},'icon',this.value)" style="font-size:18px;max-width:80px">
+          </div>
+          <div>
+            <div class="form-lbl">Тег</div>
+            <input class="form-inp" value="${esc(m.tag||'')}" oninput="setMoodle(${id},'tag',this.value)">
+          </div>
+        </div>
+        <div class="form-row">
+          <div>
+            <div class="form-lbl">Подзаголовок модалки (tagline)</div>
+            <input class="form-inp" value="${esc(modal.tagline||'')}" oninput="setMoodleModal(${id},'tagline',this.value)">
+          </div>
+          <div>
+            <div class="form-lbl">Аудитория</div>
+            <input class="form-inp" value="${esc(modal.audience||'')}" oninput="setMoodleModal(${id},'audience',this.value)">
+          </div>
+        </div>
+        <div class="form-row">
+          <div>
+            <div class="form-lbl">Длительность</div>
+            <input class="form-inp" value="${esc(modal.duration||'')}" oninput="setMoodleModal(${id},'duration',this.value)">
+          </div>
+          <div>
+            <div class="form-lbl">Формат</div>
+            <input class="form-inp" value="${esc(modal.format||'')}" oninput="setMoodleModal(${id},'format',this.value)">
+          </div>
+        </div>
+        <div class="form-row full">
+          <div>
+            <div class="form-lbl">Описание в модалке</div>
+            <textarea class="form-ta" oninput="setMoodleModal(${id},'description',this.value)">${esc(modal.description||'')}</textarea>
+          </div>
+        </div>
+        <div style="margin-top:4px">
+          <div class="form-lbl" style="margin-bottom:6px">Что изучите (каждый пункт с новой строки)</div>
+          <textarea class="form-ta" style="min-height:80px" oninput="setMoodleHighlights(${id},this.value)">${(modal.highlights||[]).join('\n')}</textarea>
+        </div>
+        <div style="margin-top:6px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--gold)">ID: ${id}</div>
+      </div>`;
+  }).join('');
+}
+
+function setMoodle(id, field, val) {
+  if (!siteData.moodleMeta[id]) siteData.moodleMeta[id] = {};
+  siteData.moodleMeta[id][field] = val;
+}
+function setMoodleModal(id, field, val) {
+  if (!siteData.moodleMeta[id]) siteData.moodleMeta[id] = {};
+  if (!siteData.moodleMeta[id].modal) siteData.moodleMeta[id].modal = {};
+  siteData.moodleMeta[id].modal[field] = val;
+}
+function setMoodleHighlights(id, val) {
+  if (!siteData.moodleMeta[id]) siteData.moodleMeta[id] = {};
+  if (!siteData.moodleMeta[id].modal) siteData.moodleMeta[id].modal = {};
+  siteData.moodleMeta[id].modal.highlights = val.split('\n').map(s=>s.trim()).filter(Boolean);
+}
+
+// ── ФУТЕР ──────────────────────────────────────────────────
+function renderFooter() {
+  const f = siteData.footer || {};
+  document.getElementById('footer-desc').value = f.description || '';
+  document.getElementById('footer-copy').value = f.copyright || '';
+  document.getElementById('footer-desc').oninput = e => siteData.footer.description = e.target.value;
+  document.getElementById('footer-copy').oninput = e => siteData.footer.copyright = e.target.value;
+
+  document.getElementById('footer-cols').innerHTML = (f.columns || []).map((col, ci) => `
+    <div class="footer-col" style="margin-bottom:12px">
+      <div class="sec-hdr">
+        <div>
+          <div class="form-lbl">Заголовок колонки</div>
+          <input class="form-inp" value="${esc(col.title||'')}" oninput="siteData.footer.columns[${ci}].title=this.value" style="width:200px">
+        </div>
+        <button class="btn-add" onclick="addFooterLink(${ci})">+ Ссылка</button>
+      </div>
+      <table style="margin-top:10px">
+        <thead><tr><th>Текст</th><th>Ссылка (href)</th><th></th></tr></thead>
+        <tbody>${(col.links||[]).map((l,li) => `
+          <tr>
+            <td><input class="ci wide" value="${esc(l.label)}" oninput="siteData.footer.columns[${ci}].links[${li}].label=this.value"></td>
+            <td><input class="ci wide" value="${esc(l.href)}"  oninput="siteData.footer.columns[${ci}].links[${li}].href=this.value"></td>
+            <td><button class="btn-del" onclick="delFooterLink(${ci},${li})">✕</button></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`).join('');
+}
+
+function addFooterLink(ci) {
+  siteData.footer.columns[ci].links.push({ label: '', href: '#' });
+  renderFooter();
+}
+function delFooterLink(ci, li) {
+  siteData.footer.columns[ci].links.splice(li, 1);
+  renderFooter();
+}
+
+// ── Сохранить site.json ────────────────────────────────────
 async function saveSiteJson() {
-  const editor = document.getElementById('jsonEditor');
-  const btn = document.getElementById('saveJsonBtn');
-  const status = document.getElementById('editorStatus');
-  try {
-    JSON.parse(editor.value);
-  } catch {
-    showToast('Невалидный JSON — проверьте синтаксис', 'err');
-    return;
-  }
+  const btn = document.getElementById('saveBtn');
+  const status = document.getElementById('saveStatus');
   btn.disabled = true;
   status.style.color = 'var(--text-muted)';
   status.textContent = 'Сохранение...';
   try {
-    const resp = await fetch(`${API}/api/admin/site-json`, {
-      method: 'PUT',
-      headers: headers(),
-      body: JSON.stringify({ content: editor.value, sha: siteJsonSha })
+    const content = JSON.stringify(siteData, null, 2);
+    const r = await fetch(`${API}/api/admin/site-json`, {
+      method: 'PUT', headers: h(),
+      body: JSON.stringify({ content, sha: siteJsonSha })
     });
-    if (!resp.ok) throw new Error();
+    if (!r.ok) throw new Error();
     showToast('Сохранено! CI/CD запущен (~2 мин до деплоя)');
-    status.textContent = 'Сохранено';
     status.style.color = 'var(--green)';
+    status.textContent = 'Сохранено ✓';
     await loadSiteJson();
   } catch {
     showToast('Ошибка сохранения', 'err');
     status.textContent = '';
-  } finally {
-    btn.disabled = false;
-  }
+  } finally { btn.disabled = false; }
 }
 
-// ── Events ───────────────────────────────────────────────────
+// ── Events ─────────────────────────────────────────────────
 document.getElementById('loginBtn').addEventListener('click', tryLogin);
-document.getElementById('tokenInput').addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
+document.getElementById('tokenInput').addEventListener('keydown', e => { if (e.key==='Enter') tryLogin(); });
 document.getElementById('logoutBtn').addEventListener('click', logout);
-document.getElementById('saveJsonBtn').addEventListener('click', saveSiteJson);
-document.getElementById('reloadJsonBtn').addEventListener('click', loadSiteJson);
+document.getElementById('saveBtn').addEventListener('click', saveSiteJson);
+document.getElementById('reloadBtn').addEventListener('click', () => { siteData=null; loadSiteJson(); });
 
-// ── Автологин если токен сохранён ───────────────────────────
 if (token) showAdmin();
 </script>
 </body>

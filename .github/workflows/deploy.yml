@@ -14,6 +14,24 @@ env:
   MOODLE_VERSION: '5.1.3'   # ← менять здесь при обновлении версии Moodle
 
 jobs:
+  # Валидация JSON-файлов перед сборкой
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Валидация site.json
+        run: |
+          python3 -c "
+          import json, sys
+          try:
+              with open('frontend/js/data/site.json') as f:
+                  json.load(f)
+              print('✓ site.json валидный')
+          except json.JSONDecodeError as e:
+              print(f'✗ site.json невалидный: {e}', file=sys.stderr)
+              sys.exit(1)
+          "
+
   # Определяем какие папки изменились чтобы не собирать лишнее
   changes:
     runs-on: ubuntu-latest
@@ -39,7 +57,7 @@ jobs:
   # Запускается только если изменились файлы в backend/
   build-backend:
     runs-on: ubuntu-latest
-    needs: changes
+    needs: [validate, changes]
     if: needs.changes.outputs.backend == 'true' || github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v4
@@ -62,7 +80,7 @@ jobs:
   # Сборка и push frontend-образа на Docker Hub
   build-frontend:
     runs-on: ubuntu-latest
-    needs: changes
+    needs: [validate, changes]
     if: needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v4
@@ -87,7 +105,7 @@ jobs:
   # Внимание: git clone Moodle занимает ~5 мин в CI
   build-moodle:
     runs-on: ubuntu-latest
-    needs: changes
+    needs: [validate, changes]
     if: needs.changes.outputs.moodle == 'true' || github.event.inputs.force_moodle_rebuild == 'true'
     steps:
       - uses: actions/checkout@v4

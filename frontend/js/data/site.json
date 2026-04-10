@@ -216,6 +216,15 @@
       "planned": true
     }
   ],
+
+  "contacts": {
+    "phone": "+7 (___) ___-__-__",
+    "email": "info@geocore-academy.ru",
+    "corp_email": "corp@geocore-academy.ru",
+    "telegram": "https://t.me/geocore_academy",
+    "linkedin": "https://linkedin.com/company/geocore-academy"
+  },
+
   "footer": {
     "description": "Профессиональное обучение оценке месторождений. Россия, СНГ и международный рынок.",
     "copyright": "© 2025 GeoCore Academy · Все права защищены",
