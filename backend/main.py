@@ -67,17 +67,23 @@ async def startup():
             async with conn.cursor() as cur:
                 await cur.execute("""
                     CREATE TABLE IF NOT EXISTS requests (
-                        id           INT AUTO_INCREMENT PRIMARY KEY,
-                        course_name  VARCHAR(255) NOT NULL,
-                        company_name VARCHAR(255) NOT NULL,
-                        inn          VARCHAR(12)  NOT NULL,
-                        contact_email VARCHAR(255) NOT NULL,
-                        employee_name VARCHAR(255) NOT NULL,
+                        id             INT AUTO_INCREMENT PRIMARY KEY,
+                        course_name    VARCHAR(255) NOT NULL,
+                        company_name   VARCHAR(255) NOT NULL,
+                        inn            VARCHAR(12)  NOT NULL,
+                        contact_email  VARCHAR(255) NOT NULL,
+                        headcount      INT          DEFAULT 1,
+                        employee_name  VARCHAR(255) NOT NULL,
                         employee_email VARCHAR(255) NOT NULL,
-                        comment      TEXT,
-                        status       VARCHAR(50)  DEFAULT 'new',
-                        created_at   TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
+                        comment        TEXT,
+                        status         VARCHAR(50)  DEFAULT 'new',
+                        created_at     TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+                """)
+                # Добавляем поле если таблица уже существовала без него
+                await cur.execute("""
+                    ALTER TABLE requests
+                    ADD COLUMN IF NOT EXISTS headcount INT DEFAULT 1
                 """)
         print("[DB] Таблица requests готова")
     except Exception as e:
@@ -159,42 +165,78 @@ class CourseRequest(BaseModel):
     company_name: str
     inn: str
     contact_email: str
+    headcount: int = 1
     employee_name: str
     employee_email: str
     comment: str = ""
 
 
-def _send_request_email(req: CourseRequest) -> None:
-    if not all([SMTP_HOST, SMTP_USER, SMTP_PASS, NOTIFY_EMAIL]):
-        print("[email] SMTP не настроен — письмо не отправлено")
+def _smtp_send(msg: MIMEMultipart) -> None:
+    """Отправить письмо через SMTP. Бросает исключение при ошибке."""
+    with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=15) as server:
+        server.ehlo()
+        server.starttls()
+        server.ehlo()
+        server.login(SMTP_USER, SMTP_PASS)
+        server.send_message(msg)
+
+
+def _send_request_emails(req: CourseRequest) -> None:
+    """Отправляет два письма: уведомление администратору + авто-ответ клиенту."""
+    if not all([SMTP_HOST, SMTP_USER, SMTP_PASS]):
+        print("[email] SMTP не настроен (SMTP_HOST/USER/PASS) — письма не отправлены")
         return
 
-    body = (
-        f"Новая заявка на корпоративное обучение\n"
-        f"{'─' * 40}\n"
-        f"Курс:           {req.course_name}\n"
-        f"Компания:       {req.company_name}\n"
-        f"ИНН:            {req.inn}\n"
-        f"Email договора: {req.contact_email}\n"
-        f"Сотрудник:      {req.employee_name}\n"
-        f"Email:          {req.employee_email}\n"
-        f"Комментарий:    {req.comment or '—'}\n"
+    # ── 1. Уведомление администратору ──────────────────────────────────────
+    if NOTIFY_EMAIL:
+        admin_body = (
+            f"Новая заявка на корпоративное обучение\n"
+            f"{'─' * 44}\n"
+            f"Курс:                {req.course_name}\n"
+            f"Компания:            {req.company_name}\n"
+            f"ИНН:                 {req.inn}\n"
+            f"Email для договора:  {req.contact_email}\n"
+            f"Кол-во сотрудников:  {req.headcount}\n"
+            f"Сотрудник:           {req.employee_name}\n"
+            f"Email сотрудника:    {req.employee_email}\n"
+            f"Комментарий:         {req.comment or '—'}\n"
+        )
+        msg_admin = MIMEMultipart()
+        msg_admin["From"]    = SMTP_USER
+        msg_admin["To"]      = NOTIFY_EMAIL
+        msg_admin["Subject"] = f"[GeoCore] Заявка: {req.course_name} — {req.company_name}"
+        msg_admin.attach(MIMEText(admin_body, "plain", "utf-8"))
+        try:
+            _smtp_send(msg_admin)
+            print(f"[email] Уведомление → {NOTIFY_EMAIL}")
+        except Exception as e:
+            print(f"[email] Ошибка уведомления: {e}")
+
+    # ── 2. Авто-ответ клиенту ──────────────────────────────────────────────
+    client_body = (
+        f"Здравствуйте!\n\n"
+        f"Мы получили вашу заявку на корпоративное обучение.\n\n"
+        f"{'─' * 44}\n"
+        f"Курс:               {req.course_name}\n"
+        f"Компания:           {req.company_name}\n"
+        f"Кол-во сотрудников: {req.headcount}\n"
+        f"{'─' * 44}\n\n"
+        f"Наш менеджер свяжется с вами в течение 1 рабочего дня.\n\n"
+        f"С уважением,\n"
+        f"GeoCore Academy\n"
+        f"info@geocore-academy.ru\n"
+        f"geocore-academy.ru\n"
     )
-
-    msg = MIMEMultipart()
-    msg["From"]    = SMTP_USER
-    msg["To"]      = NOTIFY_EMAIL
-    msg["Subject"] = f"Заявка на курс: {req.course_name}"
-    msg.attach(MIMEText(body, "plain", "utf-8"))
-
+    msg_client = MIMEMultipart()
+    msg_client["From"]    = SMTP_USER
+    msg_client["To"]      = req.contact_email
+    msg_client["Subject"] = f"Заявка на обучение принята — {req.course_name}"
+    msg_client.attach(MIMEText(client_body, "plain", "utf-8"))
     try:
-        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=10) as server:
-            server.starttls()
-            server.login(SMTP_USER, SMTP_PASS)
-            server.send_message(msg)
-        print(f"[email] Письмо отправлено → {NOTIFY_EMAIL}")
+        _smtp_send(msg_client)
+        print(f"[email] Авто-ответ → {req.contact_email}")
     except Exception as e:
-        print(f"[email] Ошибка отправки: {e}")
+        print(f"[email] Ошибка авто-ответа: {e}")
 
 
 @app.post("/api/requests")
@@ -209,18 +251,18 @@ async def create_request(request: CourseRequest, background_tasks: BackgroundTas
                 await cur.execute("""
                     INSERT INTO requests
                         (course_name, company_name, inn, contact_email,
-                         employee_name, employee_email, comment)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                         headcount, employee_name, employee_email, comment)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                 """, (
                     request.course_name, request.company_name, request.inn,
-                    request.contact_email, request.employee_name,
-                    request.employee_email, request.comment
+                    request.contact_email, request.headcount,
+                    request.employee_name, request.employee_email, request.comment
                 ))
         print("[DB] Заявка сохранена")
     except Exception as e:
         print(f"[DB] Ошибка сохранения: {e}")
 
-    background_tasks.add_task(_send_request_email, request)
+    background_tasks.add_task(_send_request_emails, request)
     return {"success": True, "message": "Request received"}
 
 

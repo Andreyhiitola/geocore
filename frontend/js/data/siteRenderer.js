@@ -147,12 +147,14 @@ function openRequestForm(courseTitle) {
       <input type="text" name="inn" pattern="[0-9]{10,12}" required placeholder="7700000000">
       <label>Email для договора *</label>
       <input type="email" name="contact_email" required placeholder="buh@company.ru">
+      <label>Количество сотрудников *</label>
+      <input type="number" name="headcount" min="1" max="1000" required placeholder="1" style="max-width:120px">
       <label>ФИО сотрудника (ученика) *</label>
       <input type="text" name="employee_name" required placeholder="Иванов Иван Иванович">
       <label>Email сотрудника *</label>
       <input type="email" name="employee_email" required placeholder="ivanov@company.ru">
       <label>Комментарий</label>
-      <textarea name="comment" rows="3" placeholder="Количество учеников, пожелания..."></textarea>
+      <textarea name="comment" rows="3" placeholder="Пожелания, вопросы..."></textarea>
       <div class="req-form-btns">
         <button type="button" class="req-form-cancel" id="gc-req-cancel">Отмена</button>
         <button type="submit" class="modal-cta" style="margin-top:0;border:none;cursor:pointer">Отправить заявку</button>
@@ -179,6 +181,7 @@ function openRequestForm(courseTitle) {
       company_name:   form.company_name.value,
       inn:            form.inn.value,
       contact_email:  form.contact_email.value,
+      headcount:      parseInt(form.headcount.value) || 1,
       employee_name:  form.employee_name.value,
       employee_email: form.employee_email.value,
       comment:        form.comment.value,

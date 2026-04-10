@@ -197,6 +197,7 @@ tr:hover td{background:var(--dark-3);}
             <th>Курс</th>
             <th>Компания / ИНН</th>
             <th>Контакт</th>
+            <th>Чел.</th>
             <th>Сотрудник</th>
             <th>Статус</th>
             <th>Дата</th>
@@ -396,6 +397,7 @@ function renderRequests() {
       <td class="td-main">${esc(r.course_name)}</td>
       <td>${esc(r.company_name)}<br><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-dim)">${esc(r.inn)}</span></td>
       <td>${esc(r.contact_email)}</td>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:13px;text-align:center">${r.headcount || 1}</td>
       <td>${esc(r.employee_name)}<br><span style="font-size:11px;color:var(--text-dim)">${esc(r.employee_email)}</span></td>
       <td>
         <select class="status-sel" data-id="${r.id}" onchange="updateStatus(this)">
