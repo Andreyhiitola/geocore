@@ -63,6 +63,11 @@ services:
     environment:
       MOODLE_URL: ${MOODLE_WWWROOT:-https://courses.geocore-academy.ru}
       MOODLE_TOKEN: ${MOODLE_TOKEN}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      NOTIFY_EMAIL: ${NOTIFY_EMAIL:-}
     networks:
       - geocore_net
     labels:

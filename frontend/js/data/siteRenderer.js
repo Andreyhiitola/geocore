@@ -126,8 +126,88 @@ function openLiveModal(c) {
         ${m.duration ? `<div class="modal-meta-item"><div class="modal-meta-label">ДЛИТЕЛЬНОСТЬ</div><div class="modal-meta-val">${m.duration}</div></div>` : ''}
         ${m.format   ? `<div class="modal-meta-item"><div class="modal-meta-label">ФОРМАТ</div><div class="modal-meta-val">${m.format}</div></div>` : ''}
       </div>` : ''}
-    <a href="${c.href}" class="modal-cta" target="_blank" rel="noopener">Записаться на курс →</a>
+    <button class="modal-cta" id="gc-enroll-btn" style="border:none;cursor:pointer">Записаться на курс →</button>
   `);
+
+  document.getElementById('gc-enroll-btn')
+    .addEventListener('click', () => openRequestForm(c.title));
+}
+
+function openRequestForm(courseTitle) {
+  const safeTitle = courseTitle.replace(/"/g, '&quot;');
+  showModal(`
+    <div class="modal-tag">КОРПОРАТИВНОЕ ОБУЧЕНИЕ</div>
+    <h2 class="modal-title">Заявка на курс</h2>
+    <p class="modal-desc" style="margin-bottom:8px">${courseTitle}</p>
+    <form class="req-form" id="gc-req-form" novalidate>
+      <input type="hidden" name="course_name" value="${safeTitle}">
+      <label>Название компании *</label>
+      <input type="text" name="company_name" required placeholder="ООО Геология Северо-Запада">
+      <label>ИНН компании *</label>
+      <input type="text" name="inn" pattern="[0-9]{10,12}" required placeholder="7700000000">
+      <label>Email для договора *</label>
+      <input type="email" name="contact_email" required placeholder="buh@company.ru">
+      <label>ФИО сотрудника (ученика) *</label>
+      <input type="text" name="employee_name" required placeholder="Иванов Иван Иванович">
+      <label>Email сотрудника *</label>
+      <input type="email" name="employee_email" required placeholder="ivanov@company.ru">
+      <label>Комментарий</label>
+      <textarea name="comment" rows="3" placeholder="Количество учеников, пожелания..."></textarea>
+      <div class="req-form-btns">
+        <button type="button" class="req-form-cancel" id="gc-req-cancel">Отмена</button>
+        <button type="submit" class="modal-cta" style="margin-top:0;border:none;cursor:pointer">Отправить заявку</button>
+      </div>
+    </form>
+    <div class="req-status" id="gc-req-status"></div>
+  `);
+
+  document.getElementById('gc-req-cancel').addEventListener('click', () => {
+    const overlay = document.getElementById('gc-modal');
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden', 'true');
+  });
+
+  document.getElementById('gc-req-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const statusEl = document.getElementById('gc-req-status');
+    statusEl.style.color = 'var(--text-muted)';
+    statusEl.textContent = 'Отправка...';
+
+    const payload = {
+      course_name:    form.course_name.value,
+      company_name:   form.company_name.value,
+      inn:            form.inn.value,
+      contact_email:  form.contact_email.value,
+      employee_name:  form.employee_name.value,
+      employee_email: form.employee_email.value,
+      comment:        form.comment.value,
+    };
+
+    try {
+      const resp = await fetch('https://api.geocore-academy.ru/api/requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const result = await resp.json();
+      if (resp.ok && result.success) {
+        statusEl.style.color = 'var(--gold)';
+        statusEl.textContent = 'Заявка принята! Мы свяжемся с вами в ближайшее время.';
+        setTimeout(() => {
+          const overlay = document.getElementById('gc-modal');
+          overlay.classList.remove('open');
+          overlay.setAttribute('aria-hidden', 'true');
+        }, 3000);
+      } else {
+        throw new Error(result.message || 'Ошибка сервера');
+      }
+    } catch (err) {
+      statusEl.style.color = '#e57373';
+      statusEl.textContent = 'Ошибка отправки. Напишите нам на почту.';
+      console.error('[request form]', err);
+    }
+  });
 }
 
 function openSoonModal(c) {

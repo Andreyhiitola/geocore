@@ -1,10 +1,14 @@
 # backend/main.py
-from fastapi import FastAPI, UploadFile, File, HTTPException, Form
+from fastapi import FastAPI, UploadFile, File, HTTPException, Form, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, PlainTextResponse
+from pydantic import BaseModel
 import pandas as pd
 import io
 import os
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 import httpx
 from typing import Optional
 
@@ -59,6 +63,12 @@ async def root():
 MOODLE_URL   = os.getenv("MOODLE_URL",   "https://courses.geocore-academy.ru")
 MOODLE_TOKEN = os.getenv("MOODLE_TOKEN", "")
 
+SMTP_HOST    = os.getenv("SMTP_HOST", "smtp.yandex.ru")
+SMTP_PORT    = int(os.getenv("SMTP_PORT", "587"))
+SMTP_USER    = os.getenv("SMTP_USER", "")   # noreply@geocore-academy.ru
+SMTP_PASS    = os.getenv("SMTP_PASS", "")   # пароль приложения Яндекс 360
+NOTIFY_EMAIL = os.getenv("NOTIFY_EMAIL", "9624294@gmail.com")
+
 
 @app.get("/api/courses")
 async def get_courses():
@@ -92,6 +102,57 @@ async def get_courses():
         if c["id"] != 1
     ]
     return {"courses": courses}
+
+
+class CourseRequest(BaseModel):
+    course_name: str
+    company_name: str
+    inn: str
+    contact_email: str
+    employee_name: str
+    employee_email: str
+    comment: str = ""
+
+
+def _send_request_email(req: CourseRequest) -> None:
+    if not all([SMTP_HOST, SMTP_USER, SMTP_PASS, NOTIFY_EMAIL]):
+        print("[email] SMTP не настроен — письмо не отправлено")
+        return
+
+    body = (
+        f"Новая заявка на корпоративное обучение\n"
+        f"{'─' * 40}\n"
+        f"Курс:           {req.course_name}\n"
+        f"Компания:       {req.company_name}\n"
+        f"ИНН:            {req.inn}\n"
+        f"Email договора: {req.contact_email}\n"
+        f"Сотрудник:      {req.employee_name}\n"
+        f"Email:          {req.employee_email}\n"
+        f"Комментарий:    {req.comment or '—'}\n"
+    )
+
+    msg = MIMEMultipart()
+    msg["From"]    = SMTP_USER
+    msg["To"]      = NOTIFY_EMAIL
+    msg["Subject"] = f"Заявка на курс: {req.course_name}"
+    msg.attach(MIMEText(body, "plain", "utf-8"))
+
+    try:
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=10) as server:
+            server.starttls()
+            server.login(SMTP_USER, SMTP_PASS)
+            server.send_message(msg)
+        print(f"[email] Письмо отправлено → {NOTIFY_EMAIL}")
+    except Exception as e:
+        print(f"[email] Ошибка отправки: {e}")
+
+
+@app.post("/api/requests")
+async def create_request(request: CourseRequest, background_tasks: BackgroundTasks):
+    """Приём заявки на корпоративное обучение"""
+    print(f"[REQUEST] {request.model_dump()}")
+    background_tasks.add_task(_send_request_email, request)
+    return {"success": True, "message": "Request received"}
 
 
 @app.get("/api/health")
