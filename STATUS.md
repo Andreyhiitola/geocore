@@ -1,6 +1,6 @@
 # GeoCore Academy — Статус проекта
 
-> Последнее обновление: апрель 2026  
+> Последнее обновление: 11 апреля 2026  
 > Репозиторий: https://github.com/Andreyhiitola/geocore  
 > Домен: geocore-academy.ru
 
@@ -33,6 +33,10 @@ nginx (на VPS, хост)
 | FastAPI контейнер | ✅ работает |
 | api.geocore-academy.ru | ✅ отвечает |
 | Фронтенд (index/courses/lab/sandbox) | ✅ работает — geocore-academy.ru |
+| Форма заявки на корпоративное обучение | ✅ работает — БД + email полностью |
+| Email (транзакционный) | ✅ Gmail SMTP, уведомления → info@geocore-academy.ru |
+| Zoho Mail (info@geocore-academy.ru) | ✅ настроен, MX/SPF/DKIM зелёные |
+| Мобильная версия сайта | ✅ работает без доработок |
 
 ---
 
@@ -58,14 +62,20 @@ nginx (на VPS, хост)
 
 ## Что осталось сделать
 
-### 1. Адаптация под мобильные и планшеты
-Сделать index.html, courses.html, lab.html, sandbox.html responsive.
-Приоритет: index.html (главная) и courses.html.
+### 1. SCORM редизайн (CourseLab)
+`scorm-tools/Leapfrog_geocore_v3.zip` готов — нужно протестировать в Moodle.
+Когда будет доступ к CourseLab — применить редизайн напрямую в .clf и переопубликовать.
+Скрипт переупаковки: `scorm-tools/repack.sh`
 
 ### 2. Саморегистрация студентов в Moodle
-Настроить самостоятельную запись на курсы.
+Настроить самостоятельную запись на курсы. Не приоритет.
 
-### 3. www.geocore-academy.ru
+### 3. Email — переход на платный Zoho
+Сейчас транспорт Gmail SMTP. При переходе на платный Zoho:
+- Поменять SMTP_HOST=smtp.zoho.eu, SMTP_USER=info@geocore-academy.ru, SMTP_PASS=<zoho>
+- docker compose up -d --force-recreate backend
+
+### 4. www.geocore-academy.ru
 Нет DNS записи — не приоритет.
 
 ---

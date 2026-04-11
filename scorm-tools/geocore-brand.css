@@ -1,0 +1,162 @@
+/* ============================================================
+   GeoCore Academy — брендинг SCORM-оболочки CourseLab 3
+   Подключается последним в start.html → переопределяет всё.
+   Версия: 2.0 (полный редизайн, апрель 2026)
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;600&family=IBM+Plex+Mono:wght@400;600&family=Playfair+Display:wght@700&display=swap');
+
+/* ── Переменные ─────────────────────────────────────────────── */
+:root {
+  --gc-dark:       #0A0A0B;
+  --gc-dark-3:     #18181D;
+  --gc-dark-4:     #1F1F26;
+  --gc-gold:       #C9A84C;
+  --gc-gold-light: #E8C97A;
+  --gc-gold-dim:   #7A6230;
+  --gc-text:       #E8E6DE;
+  --gc-muted:      #9A9890;
+  --gc-border:     rgba(201,168,76,0.18);
+}
+
+/* ── Фон страницы ───────────────────────────────────────────── */
+html, body {
+  background: var(--gc-dark) !important;
+}
+
+/* ── Контейнер курса ────────────────────────────────────────── */
+body > .cl-container,
+body > .pinch-zoom-container > .cl-container {
+  box-shadow:
+    0 0 0 1px rgba(201,168,76,0.35),
+    0 20px 60px rgba(0,0,0,0.8) !important;
+}
+
+/* ── Шрифт по умолчанию ─────────────────────────────────────── */
+.cl-default-font,
+.cl-obj-text,
+.cl-obj-text * {
+  font-family: 'IBM Plex Sans', sans-serif !important;
+  color: var(--gc-text) !important;
+}
+
+/* ── Навигационная панель (нижняя полоса) ───────────────────── */
+.cl-nav-panel,
+.cl-nav-bar {
+  background: var(--gc-dark-3) !important;
+  border-top: 1px solid var(--gc-border) !important;
+}
+
+/* ── Кнопки Далее / Назад / Начать ─────────────────────────── */
+.cl-theme-simple .cl-btn-html,
+.cl-theme-light .cl-btn-html,
+.cl-theme-standard .cl-btn-html,
+.cl-theme-curve .cl-btn-html,
+.cl-theme-gradient .cl-btn-html,
+.cl-theme-relief .cl-btn-html,
+.cl-theme-text .cl-btn-html,
+.cl-btn-html {
+  font-family: 'IBM Plex Mono', monospace !important;
+  font-size: 11px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+  background: var(--gc-gold) !important;
+  color: var(--gc-dark) !important;
+  border: none !important;
+  border-radius: 2px !important;
+  padding: 7px 16px !important;
+  transition: background 150ms ease !important;
+}
+
+.cl-theme-simple .cl-btn-html:hover,
+.cl-theme-light .cl-btn-html:hover,
+.cl-theme-standard .cl-btn-html:hover,
+.cl-theme-curve .cl-btn-html:hover,
+.cl-theme-gradient .cl-btn-html:hover,
+.cl-theme-relief .cl-btn-html:hover,
+.cl-theme-text .cl-btn-html:hover,
+.cl-btn-html:hover {
+  background: var(--gc-gold-light) !important;
+}
+
+/* Неактивная кнопка */
+.cl-btn-html.cl-disabled,
+.cl-btn-html[disabled] {
+  background: var(--gc-dark-4) !important;
+  color: var(--gc-muted) !important;
+  border: 1px solid var(--gc-border) !important;
+  cursor: default !important;
+}
+
+/* ── Прогресс-бар / индикатор шагов ────────────────────────── */
+.clo-nav_040_frameprogress .cl-btn-html-symbol {
+  border-color: var(--gc-border) !important;
+  background: transparent !important;
+}
+
+/* Пройденный шаг */
+.clo-nav_040_frameprogress .cl-btn-html-symbol.cl-passed,
+.clo-nav_040_frameprogress .cl-btn-html.cl-passed .cl-btn-html-symbol {
+  background: var(--gc-gold) !important;
+  border-color: var(--gc-gold) !important;
+}
+
+/* Текущий шаг */
+.clo-nav_040_frameprogress .cl-btn-html-symbol.cl-current,
+.clo-nav_040_frameprogress .cl-btn-html.cl-current .cl-btn-html-symbol {
+  background: var(--gc-dark-4) !important;
+  border-color: var(--gc-gold) !important;
+}
+
+/* Линия между шагами */
+.clo-nav_040_frameprogress .cl-progress-line {
+  background: var(--gc-border) !important;
+}
+
+/* ── Модальный оверлей ──────────────────────────────────────── */
+.cl-modal-mask {
+  background-color: var(--gc-dark) !important;
+  opacity: 0.82 !important;
+}
+
+/* ── Заголовок попапов / объектов ───────────────────────────── */
+.cl-theme-simple .cl-header-close-btn,
+.cl-theme-light .cl-header-close-btn,
+.cl-theme-standard .cl-header-close-btn,
+.cl-theme-curve .cl-header-close-btn,
+.cl-theme-gradient .cl-header-close-btn,
+.cl-theme-relief .cl-header-close-btn,
+.cl-theme-text .cl-header-close-btn {
+  font-family: 'IBM Plex Mono', monospace !important;
+  color: var(--gc-gold) !important;
+}
+
+/* ── Логотип GeoCore Academy (правый верхний угол) ──────────── */
+/* Добавляется через JS в repack.sh — см. inject-logo блок */
+#gc-logo {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+#gc-logo svg {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+#gc-logo span {
+  font-family: 'Playfair Display', serif !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: var(--gc-gold) !important;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1;
+}

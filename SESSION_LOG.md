@@ -2,6 +2,48 @@
 
 ---
 
+## 2026-04-11 (сессия 6)
+
+### Что сделали
+- Email полностью настроен и протестирован:
+  - SMTP: Gmail (smtp.gmail.com, App Password) как транспорт
+  - `From: GeoCore Academy <9624294@gmail.com>`, `Reply-To: info@geocore-academy.ru`
+  - `NOTIFY_EMAIL=info@geocore-academy.ru` — уведомления о заявках приходят в Zoho
+  - Авто-ответ клиенту работает
+  - Zoho Free не поддерживает внешний SMTP → при переходе на платный Zoho просто меняем переменные в .env
+- Проверили мобильную версию сайта — всё работает, доработок не нужно
+- SCORM редизайн подготовлен без CourseLab:
+  - `scorm-tools/geocore-brand.css` — полная тёмная тема, золотые кнопки, IBM Plex
+  - `scorm-tools/repack.sh` — скрипт переупаковки ZIP (заменяет CSS + добавляет логотип через JS)
+  - `~/Downloads/Leapfrog_geocore_v3.zip` — готов к тестированию в Moodle
+
+### Отложено
+- Протестировать Leapfrog_geocore_v3.zip в локальном Moodle (localhost:8081)
+- Когда будет CourseLab — применить редизайн напрямую в .clf
+- Саморегистрация студентов в Moodle
+- Переход на платный Zoho SMTP (при готовности)
+
+---
+
+## 2026-04-10 (сессия 5)
+
+### Что сделали
+- Форма заявки на корпоративное обучение: кнопка "Записаться" → форма внутри существующего модального окна
+- `POST /api/requests` в FastAPI — принимает заявку, фоном шлёт email через smtplib (BackgroundTasks)
+- CSS формы добавлен в index.html и courses.html в стиле сайта
+- Zoho Mail Free — зарегистрирован ящик info@geocore-academy.ru
+- DNS в FirstVDS: MX, SPF, DKIM — все настроены и подтверждены
+- Gmail настроен на отправку от имени info@geocore-academy.ru через Zoho SMTP
+- SMTP_USER/SMTP_PASS/NOTIFY_EMAIL добавлены в docker-compose.yml и .env.example
+
+### Отложено
+- Прописать SMTP_USER и SMTP_PASS в .env на VPS и перезапустить бэкенд
+- Мобильная адаптация (index.html, courses.html) — приоритет следующей сессии
+- Саморегистрация студентов в Moodle
+- Большая архитектура: платежи, AI-координатор, ЭДО-заглушка — обсуждение начато
+
+---
+
 ## 2026-04-09 (сессия 4)
 
 ### Что сделали
