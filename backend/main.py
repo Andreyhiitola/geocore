@@ -187,7 +187,7 @@ def _send_request_emails(req: CourseRequest) -> None:
         print("[email] SMTP не настроен (SMTP_HOST/USER/PASS) — письма не отправлены")
         return
 
-    SENDER = f"GeoCore Academy <info@geocore-academy.ru>"
+    SENDER = f"GeoCore Academy <{SMTP_USER}>"
 
     # ── 1. Уведомление администратору ──────────────────────────────────────
     if NOTIFY_EMAIL:
