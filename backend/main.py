@@ -187,6 +187,8 @@ def _send_request_emails(req: CourseRequest) -> None:
         print("[email] SMTP не настроен (SMTP_HOST/USER/PASS) — письма не отправлены")
         return
 
+    SENDER = f"GeoCore Academy <info@geocore-academy.ru>"
+
     # ── 1. Уведомление администратору ──────────────────────────────────────
     if NOTIFY_EMAIL:
         admin_body = (
@@ -202,9 +204,10 @@ def _send_request_emails(req: CourseRequest) -> None:
             f"Комментарий:         {req.comment or '—'}\n"
         )
         msg_admin = MIMEMultipart()
-        msg_admin["From"]    = SMTP_USER
-        msg_admin["To"]      = NOTIFY_EMAIL
-        msg_admin["Subject"] = f"[GeoCore] Заявка: {req.course_name} — {req.company_name}"
+        msg_admin["From"]     = SENDER
+        msg_admin["To"]       = NOTIFY_EMAIL
+        msg_admin["Reply-To"] = "info@geocore-academy.ru"
+        msg_admin["Subject"]  = f"[GeoCore] Заявка: {req.course_name} — {req.company_name}"
         msg_admin.attach(MIMEText(admin_body, "plain", "utf-8"))
         try:
             _smtp_send(msg_admin)
@@ -228,9 +231,10 @@ def _send_request_emails(req: CourseRequest) -> None:
         f"geocore-academy.ru\n"
     )
     msg_client = MIMEMultipart()
-    msg_client["From"]    = SMTP_USER
-    msg_client["To"]      = req.contact_email
-    msg_client["Subject"] = f"Заявка на обучение принята — {req.course_name}"
+    msg_client["From"]     = SENDER
+    msg_client["To"]       = req.contact_email
+    msg_client["Reply-To"] = "info@geocore-academy.ru"
+    msg_client["Subject"]  = f"Заявка на обучение принята — {req.course_name}"
     msg_client.attach(MIMEText(client_body, "plain", "utf-8"))
     try:
         _smtp_send(msg_client)
