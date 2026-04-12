@@ -1,6 +1,6 @@
 # GeoCore Academy — Статус проекта
 
-> Последнее обновление: 11 апреля 2026  
+> Последнее обновление: 12 апреля 2026  
 > Репозиторий: https://github.com/Andreyhiitola/geocore  
 > Домен: geocore-academy.ru
 
@@ -37,6 +37,8 @@ nginx (на VPS, хост)
 | Email (транзакционный) | ✅ Gmail SMTP, уведомления → info@geocore-academy.ru |
 | Zoho Mail (info@geocore-academy.ru) | ✅ настроен, MX/SPF/DKIM зелёные |
 | Мобильная версия сайта | ✅ работает без доработок |
+| Wiki (knowledge base) | ✅ создана — wiki/ в репозитории |
+| Тесты в Moodle | 🔄 файлы подготовлены, импорт не выполнен |
 
 ---
 
@@ -62,7 +64,13 @@ nginx (на VPS, хост)
 
 ## Что осталось сделать
 
-### 1. SCORM редизайн (CourseLab)
+### 1. Импорт тестов в Moodle
+- `test_semester1.gift` (25 вопросов) → Moodle Банк вопросов → Импорт → GIFT
+- `геологическое моделированиеqti.xml` (30 вопросов) → Импорт → IMS QTI 2.0
+- Файлы на Google Drive: папка «Тесты» (01_Пробный + 02_Тест_Datamine)
+- После импорта: проверить практические вопросы вручную
+
+### 2. SCORM редизайн (CourseLab)
 `scorm-tools/Leapfrog_geocore_v3.zip` готов — нужно протестировать в Moodle.
 Когда будет доступ к CourseLab — применить редизайн напрямую в .clf и переопубликовать.
 Скрипт переупаковки: `scorm-tools/repack.sh`
