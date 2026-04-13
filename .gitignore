@@ -70,5 +70,8 @@ out/
 generate-compose.sh
 docker-compose.template.yml
 
+# Конвертеры тестов — локальные инструменты
+tools/
+
 # Рабочие документы (не для репо)
 SCORM_REBRANDING.md
