@@ -107,7 +107,7 @@ def build_gift(q_lines, answers):
             lines.append(f"  ~{gift_escape(w[0])}")
     else:
         # Множественный выбор — равные веса на каждый правильный ответ
-        pct = round(100 / len(corrects), 4)
+        pct = round(100 / len(corrects), 5)
         lines = [f"::{title}::{q_esc}{{"]
         for c in corrects:
             lines.append(f"  ~%{pct}%{gift_escape(c[0])}")
