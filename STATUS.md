@@ -1,6 +1,6 @@
 # GeoCore Academy — Статус проекта
 
-> Последнее обновление: 12 апреля 2026  
+> Последнее обновление: 14 апреля 2026  
 > Репозиторий: https://github.com/Andreyhiitola/geocore  
 > Домен: geocore-academy.ru
 
@@ -39,6 +39,7 @@ nginx (на VPS, хост)
 | Мобильная версия сайта | ✅ работает без доработок |
 | Wiki (knowledge base) | ✅ создана — wiki/ в репозитории |
 | Тесты в Moodle | 🔄 импортированы в банк вопросов, тест создаётся |
+| Конвертеры тестов (tools/) | ✅ в репозитории, GUI-лаунчер готов |
 
 ---
 
@@ -54,6 +55,12 @@ nginx (на VPS, хост)
 - `nginx/geocore.conf` — reverse proxy с SSL для обоих поддоменов
 - `.env.example` — шаблон всех переменных
 - `.github/workflows/deploy.yml` — CI/CD: пересборка только при изменениях backend/ или moodle/, деплой на VPS по SSH
+
+### Инструменты
+- `tools/convert.py` — GUI-лаунчер конвертеров (tkinter), выбор файла через «Обзор…»
+- `tools/docx_to_gift.py`, `tools/docx_to_moodle_xml.py` — DOCX → GIFT/XML
+- `tools/qti_to_gift.py`, `tools/qti_to_moodle_xml.py` — QTI 1.2 → GIFT/XML
+- `tools/README.md` — инструкция по запуску
 
 ### Решённые проблемы
 - **ERR_TOO_MANY_REDIRECTS** — Moodle за SSL-прокси уходил в бесконечный редирект. Фикс: `$CFG->sslproxy = true` в config.php (генерируется автоматически когда WWWROOT начинается с https://)
