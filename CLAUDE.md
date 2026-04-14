@@ -25,27 +25,37 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Docker Hub:** `andreysagurov` — образы `geocore-backend`, `geocore-frontend`, `geocore-moodle`
 - **CI/CD:** GitHub Actions — пересобирает образ только при изменениях в соответствующей папке (`backend/`, `frontend/`, `moodle/`), затем деплоит на VPS
 
+## Backend (FastAPI)
+
+Бэкенд будет разделён на два независимых API:
+
+**1. VPS API** (`api.geocore-academy.ru`) — лёгкие операции, живёт в Docker на VPS:
+- `/api/courses` — список курсов из Moodle
+- `/api/requests` — приём заявок на корпоративное обучение
+- `/api/admin/*` — администрирование (защищено `ADMIN_TOKEN` Bearer)
+- `/api/admin/site-json` — редактирование `frontend/js/data/site.json` через GitHub API → запускает CI/CD
+
+**2. Локальный сервер (в сети Wi-Fi)** — тяжёлые геологические вычисления, VPS не потянет:
+- Модули `backend/processing/` (compositor, decluster, wireframe, mac_generator)
+- Пайплайн: validate → composite → decluster → wireframe → mac
+- Собственный URL, доступный фронтенду или VPS API как прокси
+
+Сейчас оба API живут в одном `backend/main.py`. Разделение — в планах, но не сейчас.
+
 ## Ключевые файлы
 
 | Файл | Назначение |
 |------|-----------|
 | `docker-compose.yml` | Production — образы с Docker Hub |
-| `docker-compose.test.yml` | Локальный тест (порты 8081/8001) |
-| `backend/main.py` | FastAPI: геологические расчёты + `/api/courses` из Moodle |
+| `docker-compose.test.yml` | Обкатка новых версий Moodle локально перед деплоем в прод (порты 8081/8001) |
+| `backend/main.py` | FastAPI: геологические расчёты + курсы Moodle + заявки + admin |
 | `frontend/js/data/siteRenderer.js` | Рендеринг nav/курсов/футера, загрузка курсов из API |
 | `frontend/js/data/site.json` | Статические данные: nav, анонсы курсов, футер |
 | `nginx/geocore.conf` | Reverse proxy на хосте VPS |
 | `moodle/entrypoint.sh` | Автоустановка Moodle, генерация config.php |
+| `.github/workflows/deploy.yml` | CI/CD: переменная `MOODLE_VERSION` хранится здесь |
 
-## Правила
-
-- **Moodle не трогать** без явного согласования — `moodle/` только после подтверждения
-- Хотфиксы и конфиги — сразу в `main`, крупные фичи — через ветку `feat/название`
-- Коммиты: `feat:` / `fix:` / `docs:` / `chore:` / `ci:`
-- После сессии обновить `STATUS.md` и `SESSION_LOG.md` — автоматически, без напоминания
-- После сессии обновить `wiki/` — извлечь новые знания и интегрировать в нужные разделы (не дублировать, а добавлять только новое)
-
-## Локальный запуск
+## Локальный запуск (обкатка Moodle)
 
 ```bash
 docker compose -f docker-compose.test.yml up --build
@@ -53,12 +63,20 @@ docker compose -f docker-compose.test.yml up --build
 # API:    http://localhost:8001
 ```
 
-## Обновление Moodle
+Используется для проверки новой версии Moodle перед деплоем. В прод деплоится только после того, как убедились что сборка прошла и миграция БД выполнится без конфликтов.
 
-```
-1. Изменить MOODLE_VERSION в docker-compose.test.yml
-2. docker compose -f docker-compose.test.yml down -v && up --build
-3. Проверить localhost:8081
-4. Изменить MOODLE_VERSION в .github/workflows/deploy.yml
-5. git push → автодеплой
-```
+## Правила
+
+- **Moodle не трогать** — `moodle/` только после явного согласования, рабочую версию нельзя сломать
+- Хотфиксы и конфиги — сразу в `main`, крупные фичи — через ветку `feat/название`
+- Коммиты: `feat:` / `fix:` / `docs:` / `chore:` / `ci:`
+- После сессии обновить `STATUS.md` и `SESSION_LOG.md` — автоматически, без напоминания
+- После сессии обновить `wiki/` — извлечь новые знания и интегрировать в нужные разделы (не дублировать, а добавлять только новое)
+
+## Переменные окружения (backend)
+
+Задаются в `.env` на VPS (шаблон `.env.example`). Критичные:
+- `MOODLE_TOKEN` — Web Services токен Moodle (нужен для `/api/courses`)
+- `ADMIN_TOKEN` — Bearer-токен для `/api/admin/*`
+- `GITHUB_TOKEN` — для редактирования `site.json` через GitHub API
+- `SMTP_*` — транзакционная почта (сейчас Gmail SMTP)
