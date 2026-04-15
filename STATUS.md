@@ -40,6 +40,8 @@ nginx (на VPS, хост)
 | Wiki (knowledge base) | ✅ создана — wiki/ в репозитории |
 | Тесты в Moodle | 🔄 импортированы в банк вопросов, тест создаётся |
 | Конвертеры тестов (tools/) | ✅ в репозитории, GUI-лаунчер готов |
+| Мониторинг VPS + Telegram | ✅ скрипт и контейнер готовы, деплой завтра |
+| Бэкапы (Selectel S3, GFS) | ✅ скрипт и контейнер готовы, деплой завтра |
 
 ---
 
@@ -76,6 +78,14 @@ nginx (на VPS, хост)
 - `~/Downloads/WhatSie/test_datamine.xml` (30 вопросов + 2 картинки) → Банк вопросов → Импорт → **Moodle XML**
 - После импорта: проверить практические вопросы вручную
 
+### 1. Деплой мониторинга и бэкапов на VPS
+Код готов в репо. На VPS нужно:
+- Создать Telegram бота (@BotFather → /newbot)
+- Зарегистрироваться на Selectel → Object Storage → bucket `geocore-backups`
+- Прописать переменные в `.env`: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`
+- `git pull && docker compose up -d --build watchdog backup`
+- Настроить UptimeRobot (внешний мониторинг VPS)
+
 ### 2. SCORM редизайн (CourseLab)
 `scorm-tools/Leapfrog_geocore_v3.zip` готов — нужно протестировать в Moodle.
 Когда будет доступ к CourseLab — применить редизайн напрямую в .clf и переопубликовать.
@@ -89,19 +99,20 @@ nginx (на VPS, хост)
 - Поменять SMTP_HOST=smtp.zoho.eu, SMTP_USER=info@geocore-academy.ru, SMTP_PASS=<zoho>
 - docker compose up -d --force-recreate backend
 
-### 4. www.geocore-academy.ru
+### 4. UptimeRobot (внешний мониторинг VPS)
+Если VPS упадёт — внутренний watchdog тоже умрёт. Нужен внешний пинг.
+uptimerobot.com (бесплатно) → добавить мониторы для трёх доменов → подключить Telegram.
+
+### 5. www.geocore-academy.ru
 Нет DNS записи — не приоритет.
 
-### 5. Разделение бэкенда
+### 6. Разделение бэкенда
 Сейчас весь код в `backend/main.py`. Нужно разделить:
 - **VPS API** — курсы, заявки, admin (остаётся на VPS)
 - **Локальный API** — геологические расчёты (processing/) на локальном сервере в сети Wi-Fi, VPS не потянет тяжёлые вычисления
 
-### 6. Бэкапы
-Бэкапы БД (MariaDB) и файлов Moodle не настроены. Варианты хранения: локально на VPS или S3-совместимое хранилище. Нужно определить расписание и retention policy.
-
-### 6. Мониторинг VPS и алертинг
-Логирование состояния VPS (CPU, RAM, диск, доступность контейнеров) не настроено. При инцидентах нужны уведомления (email или Telegram). Варианты: cron + healthcheck скрипт, Uptime Kuma, или простой watchdog.
+### 7. Саморегистрация студентов в Moodle
+Не приоритет.
 
 ---
 

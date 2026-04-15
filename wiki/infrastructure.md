@@ -45,6 +45,31 @@
 Файл `.env` на VPS заполняется вручную. Шаблон: `.env.example` в репо.
 Критичные переменные: DB_ROOT_PASSWORD, MOODLE_ADMIN_PASS, API_SECRET_KEY, SMTP_PASS.
 
+## Мониторинг
+
+### Внутренний (watchdog)
+- Контейнер `geocore_watchdog` — alpine + docker-cli + crond
+- Скрипт `scripts/healthcheck.sh` запускается каждые 5 минут
+- Проверяет: контейнеры (`docker inspect`), HTTP-эндпоинты, диск (порог 85%), RAM (порог 90%)
+- При проблеме → сообщение в Telegram
+- Переменные: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` в `.env`
+
+### Внешний (UptimeRobot)
+- Нужен отдельно: если VPS упадёт, watchdog умрёт вместе с ним
+- uptimerobot.com (бесплатный план) → мониторы: geocore-academy.ru, courses.geocore-academy.ru, api.geocore-academy.ru
+- Уведомления → Telegram
+
+## Бэкапы
+
+- Контейнер `geocore_backup` — alpine + mariadb-client + awscli + crond
+- Скрипт `scripts/backup.sh` запускается каждый день в 02:00
+- **Что бэкапит:** дамп MariaDB (mysqldump по сети к `mariadb:3306`) + архив volume `moodle_data`
+- **Где хранит:** Selectel S3 (`https://s3.selectel.ru`), bucket `geocore-backups`
+- **GFS-ротация:** 7 ежедневных / 4 еженедельных / 12 ежемесячных → ~17 GB/год
+- **Провайдер:** Selectel — VPS в той же сети, трафик бэкапов бесплатный, ~36₽/мес за 20 GB
+- Переменные: `S3_BUCKET`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION=ru-1`
+- При успехе и ошибке → уведомление в Telegram
+
 ## Связанные разделы
 
 - [[moodle]] — детали по контейнеру Moodle

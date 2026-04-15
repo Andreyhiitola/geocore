@@ -2,6 +2,36 @@
 
 ---
 
+## 2026-04-15 (сессия 10)
+
+### Что сделали
+
+**Мониторинг VPS + Telegram алерты:**
+- `scripts/healthcheck.sh` — проверяет контейнеры (`docker inspect`), HTTP-эндпоинты, диск, RAM; при ошибках шлёт сообщение в Telegram
+- `watchdog/Dockerfile` — alpine-контейнер с docker-cli + curl + crond (каждые 5 минут)
+- `docker-compose.yml` — добавлен сервис `watchdog` (монтирует docker socket read-only)
+- `.env.example` — добавлены `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`
+- Принято решение: внешний мониторинг (UptimeRobot) нужен дополнительно — если VPS упадёт, внутренний watchdog тоже умрёт
+
+**Бэкапы (Selectel S3, GFS-ротация):**
+- `scripts/backup.sh` — дамп MariaDB (`mysqldump` по сети) + архив moodledata volume; GFS: 7 ежедневных / 4 еженедельных / 12 ежемесячных; алерт в Telegram при ошибке и успехе
+- `backup/Dockerfile` — alpine-контейнер с mariadb-client + awscli + crond (каждый день в 02:00)
+- `docker-compose.yml` — добавлен сервис `backup` (подключается к mariadb по внутренней сети, не через docker socket)
+- `.env.example` — добавлены `S3_ENDPOINT`, `S3_BUCKET`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`
+- Выбран Selectel S3 (`https://s3.selectel.ru`): VPS на той же сети → трафик бэкапов бесплатный
+- Оценка хранилища: ~17 GB при GFS за год → берём 20 GB (~36₽/мес)
+
+### Отложено (сделать на VPS)
+- Создать Telegram бота (@BotFather → /newbot), получить BOT_TOKEN и CHAT_ID
+- Зарегистрироваться на Selectel → Object Storage → bucket `geocore-backups` → получить ACCESS_KEY + SECRET_KEY
+- Прописать переменные в `.env` на VPS
+- `git pull && docker compose up -d --build watchdog backup`
+- Проверить первый бэкап вручную: `docker exec geocore_backup /scripts/backup.sh`
+- Замерить реальные размеры volumes: `du -sh /var/lib/docker/volumes/geocore_*`
+- Настроить UptimeRobot (бесплатно) — внешний мониторинг трёх доменов → Telegram
+
+---
+
 ## 2026-04-14 (сессия 9)
 
 ### Что сделали
