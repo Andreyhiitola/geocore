@@ -94,6 +94,29 @@ services:
     networks:
       - geocore_net
 
+  backup:
+    build:
+      context: .
+      dockerfile: backup/Dockerfile
+    container_name: geocore_backup
+    restart: unless-stopped
+    volumes:
+      - moodle_data:/moodledata:ro
+    environment:
+      DB_HOST: mariadb
+      MOODLE_DB_NAME: ${MOODLE_DB_NAME}
+      MOODLE_DB_USER: ${MOODLE_DB_USER}
+      MOODLE_DB_PASSWORD: ${MOODLE_DB_PASSWORD}
+      S3_ENDPOINT: ${S3_ENDPOINT:-https://s3.selectel.ru}
+      S3_BUCKET: ${S3_BUCKET:-}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-ru-1}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
+    networks:
+      - geocore_net
+
   watchtower:
     image: containrrr/watchtower
     container_name: geocore_watchtower
