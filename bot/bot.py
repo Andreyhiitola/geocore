@@ -20,13 +20,22 @@ CPU_WARN  = int(os.environ.get('CPU_WARN', '95'))
 INTERVAL  = int(os.environ.get('CHECK_INTERVAL', '300'))
 
 
-def send(text, chat_id=None):
+KEYBOARD = {'inline_keyboard': [[
+    {'text': '📊 Статус', 'callback_data': '/status'},
+    {'text': '💾 Бэкап',  'callback_data': '/backup'},
+]]}
+
+
+def send(text, chat_id=None, keyboard=False):
     try:
-        requests.post(f"{API}/sendMessage", json={
+        payload = {
             'chat_id': chat_id or CHAT_ID,
             'text': text,
             'parse_mode': 'Markdown',
-        }, timeout=10)
+        }
+        if keyboard:
+            payload['reply_markup'] = KEYBOARD
+        requests.post(f"{API}/sendMessage", json=payload, timeout=10)
     except Exception:
         pass
 
@@ -172,13 +181,24 @@ def watchdog_loop():
 # ── Polling ───────────────────────────────────────────────────────────────────
 
 def handle(upd):
-    msg  = upd.get('message', {})
-    cid  = msg.get('chat', {}).get('id')
-    text = msg.get('text', '').strip()
+    cb = upd.get('callback_query')
+    if cb:
+        cid  = cb.get('message', {}).get('chat', {}).get('id')
+        text = cb.get('data', '').strip()
+        try:
+            requests.post(f"{API}/answerCallbackQuery",
+                          json={'callback_query_id': cb['id']}, timeout=5)
+        except Exception:
+            pass
+    else:
+        msg  = upd.get('message', {})
+        cid  = msg.get('chat', {}).get('id')
+        text = msg.get('text', '').strip()
+
     if cid != CHAT_ID:
         return
     if text in ('/start', '/help'):
-        send("*GeoCore Bot*\n\n`/status` — метрики VPS и статус контейнеров\n`/backup` — запустить бэкап вручную", cid)
+        send("*GeoCore Bot*\n\n📊 /status — метрики VPS и статус контейнеров\n💾 /backup — запустить бэкап вручную", cid, keyboard=True)
     elif text == '/status':
         try:
             send(status_text(), cid)
