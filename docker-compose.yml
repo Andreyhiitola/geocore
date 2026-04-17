@@ -80,17 +80,21 @@ services:
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
 
-  watchdog:
+  bot:
     build:
       context: .
-      dockerfile: watchdog/Dockerfile
-    container_name: geocore_watchdog
+      dockerfile: bot/Dockerfile
+    container_name: geocore_bot
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - /:/rootfs:ro
     environment:
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
       TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
+      DISK_WARN: ${DISK_WARN:-85}
+      RAM_WARN: ${RAM_WARN:-90}
+      CPU_WARN: ${CPU_WARN:-95}
     networks:
       - geocore_net
 

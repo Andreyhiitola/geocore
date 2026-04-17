@@ -112,6 +112,8 @@ s3 ls "s3://${S3_BUCKET}/monthly/" \
     done
 
 # ── 5. Финал ─────────────────────────────────────────────────────────────────
+DB_SIZE=$(du -sh "$DB_FILE" | cut -f1)
+MOODLE_SIZE=$(du -sh "$MOODLE_FILE" | cut -f1)
 rm -rf "$BACKUP_DIR"
 log "Бэкап завершён."
-notify "✅ *GeoCore Backup OK*\n$(date '+%d.%m.%Y %H:%M')\nDB: $(du -sh "$DB_FILE" | cut -f1) | moodle: $(du -sh "$MOODLE_FILE" | cut -f1)"
+notify "✅ *GeoCore Backup OK*\n$(date '+%d.%m.%Y %H:%M')\nDB: ${DB_SIZE} | moodle: ${MOODLE_SIZE}"
