@@ -131,6 +131,7 @@ services:
     environment:
       WATCHTOWER_CLEANUP: "true"
       WATCHTOWER_INTERVAL: "3600"
+      DOCKER_API_VERSION: "1.40"
     command: --label-enable
     networks:
       - geocore_net
