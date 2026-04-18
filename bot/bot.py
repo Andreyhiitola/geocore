@@ -12,7 +12,7 @@ API = f"https://api.telegram.org/bot{TOKEN}"
 CONTAINERS = ['geocore_db', 'geocore_moodle', 'geocore_frontend', 'geocore_api',
               'geocore_backup', 'geocore_watchtower', 'geocore_bot']
 ENDPOINTS = ['https://geocore-academy.ru', 'https://courses.geocore-academy.ru',
-             'https://api.geocore-academy.ru/health']
+             'https://api.geocore-academy.ru/api/health']
 
 DISK_WARN = int(os.environ.get('DISK_WARN', '85'))
 RAM_WARN  = int(os.environ.get('RAM_WARN', '90'))
