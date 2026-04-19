@@ -56,13 +56,13 @@ def send(text, chat_id=None, keyboard=False, inline=None):
         return None
 
 
-def edit(chat_id, message_id, text, inline=None):
+def edit(chat_id, message_id, text, inline=None, parse_mode='HTML'):
     try:
         payload = {
             'chat_id': chat_id,
             'message_id': message_id,
             'text': text,
-            'parse_mode': 'HTML',
+            'parse_mode': parse_mode,
         }
         if inline:
             payload['reply_markup'] = inline
@@ -271,7 +271,7 @@ def handle(upd):
 
     if text == 'status_refresh' and mid_cb:
         try:
-            edit(cid, mid_cb, status_text(), inline=STATUS_KEYBOARD)
+            edit(cid, mid_cb, status_text(), inline=STATUS_KEYBOARD, parse_mode='Markdown')
         except Exception:
             pass
         return
