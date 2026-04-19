@@ -3,7 +3,7 @@ import time
 import threading
 import subprocess
 import requests
-from datetime import datetime
+from datetime import datetime, timedelta
 
 TOKEN = os.environ['TELEGRAM_BOT_TOKEN']
 CHAT_ID = int(os.environ['TELEGRAM_CHAT_ID'])
@@ -23,6 +23,7 @@ INTERVAL  = int(os.environ.get('CHECK_INTERVAL', '300'))
 REPLY_KEYBOARD = {
     'keyboard': [
         [{'text': '📊 Статус'}, {'text': '💾 Бэкап'}],
+        [{'text': '📋 История бэкапов'}],
     ],
     'resize_keyboard': True,
     'persistent': True,
@@ -115,6 +116,42 @@ def status_text():
     for name in CONTAINERS:
         status = containers.get(name, 'not found')
         lines.append(f"{'🟢' if status.startswith('Up') else '🔴'} `{name}`: {status}")
+    return '\n'.join(lines)
+
+
+# ── История бэкапов ───────────────────────────────────────────────────────────
+
+def backup_history_text():
+    r = subprocess.run(
+        ['docker', 'exec', 'geocore_backup', 'cat', '/var/log/backup.log'],
+        capture_output=True, text=True,
+    )
+    runs, cur = [], None
+    for line in r.stdout.splitlines():
+        if 'Старт бэкапа за' in line:
+            cur = {'date': line.split('за ')[-1].strip(), 'time': line[1:9],
+                   'db': '—', 'moodle': '—', 'status': '❓'}
+        elif cur:
+            if 'БД:' in line:
+                cur['db'] = line.split('БД:')[-1].strip()
+            elif 'moodledata:' in line:
+                cur['moodle'] = line.split('moodledata:')[-1].strip()
+            elif 'Бэкап завершён' in line:
+                cur['status'] = '✅'; runs.append(cur); cur = None
+            elif 'ERROR' in line or 'FAILED' in line:
+                cur['status'] = '❌'; runs.append(cur); cur = None
+    if cur:
+        cur['status'] = '❌'; runs.append(cur)
+
+    week_ago = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
+    runs = [x for x in runs if x['date'] >= week_ago]
+
+    if not runs:
+        return "📋 *История бэкапов за неделю*\n\nДанных нет."
+
+    lines = ["📋 *История бэкапов за неделю*\n"]
+    for x in reversed(runs):
+        lines.append(f"{x['status']} `{x['date']}` в `{x['time']}`  DB: {x['db']} | data: {x['moodle']}")
     return '\n'.join(lines)
 
 
@@ -212,6 +249,11 @@ def handle(upd):
         r = subprocess.run(['docker', 'exec', 'geocore_backup', '/scripts/backup.sh'],
                            capture_output=True, text=True)
         send("✅ Бэкап завершён" if r.returncode == 0 else f"❌ Ошибка\n```{r.stderr[-400:]}```", cid)
+    elif text in ('/backup_info', '📋 История бэкапов'):
+        try:
+            send(backup_history_text(), cid)
+        except Exception as e:
+            send(f"Ошибка: {e}", cid)
 
 
 def poll():
