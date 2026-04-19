@@ -20,10 +20,13 @@ CPU_WARN  = int(os.environ.get('CPU_WARN', '95'))
 INTERVAL  = int(os.environ.get('CHECK_INTERVAL', '300'))
 
 
-KEYBOARD = {'inline_keyboard': [[
-    {'text': '📊 Статус', 'callback_data': '/status'},
-    {'text': '💾 Бэкап',  'callback_data': '/backup'},
-]]}
+REPLY_KEYBOARD = {
+    'keyboard': [
+        [{'text': '📊 Статус'}, {'text': '💾 Бэкап'}],
+    ],
+    'resize_keyboard': True,
+    'persistent': True,
+}
 
 
 def send(text, chat_id=None, keyboard=False):
@@ -34,7 +37,7 @@ def send(text, chat_id=None, keyboard=False):
             'parse_mode': 'Markdown',
         }
         if keyboard:
-            payload['reply_markup'] = KEYBOARD
+            payload['reply_markup'] = REPLY_KEYBOARD
         requests.post(f"{API}/sendMessage", json=payload, timeout=10)
     except Exception:
         pass
@@ -198,13 +201,13 @@ def handle(upd):
     if cid != CHAT_ID:
         return
     if text in ('/start', '/help'):
-        send("*GeoCore Bot*\n\n📊 /status — метрики VPS и статус контейнеров\n💾 /backup — запустить бэкап вручную", cid, keyboard=True)
-    elif text == '/status':
+        send("*GeoCore Bot*\n\n📊 Статус — метрики VPS и статус контейнеров\n💾 Бэкап — запустить бэкап вручную", cid, keyboard=True)
+    elif text in ('/status', '📊 Статус'):
         try:
             send(status_text(), cid)
         except Exception as e:
             send(f"Ошибка: {e}", cid)
-    elif text == '/backup':
+    elif text in ('/backup', '💾 Бэкап'):
         send("⏳ Запускаю бэкап...", cid)
         r = subprocess.run(['docker', 'exec', 'geocore_backup', '/scripts/backup.sh'],
                            capture_output=True, text=True)
@@ -225,6 +228,6 @@ def poll():
 
 
 if __name__ == '__main__':
-    send("🟢 *GeoCore Bot запущен*")
+    send("🟢 *GeoCore Bot запущен*", keyboard=True)
     threading.Thread(target=watchdog_loop, daemon=True).start()
     poll()
