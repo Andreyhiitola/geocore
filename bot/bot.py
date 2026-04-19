@@ -32,7 +32,14 @@ REPLY_KEYBOARD = {
 }
 
 
-def send(text, chat_id=None, keyboard=False):
+STATUS_KEYBOARD = {'inline_keyboard': [[
+    {'text': '🔄 Обновить', 'callback_data': 'status_refresh'},
+    {'text': '📋 Логи',     'callback_data': 'status_logs'},
+    {'text': '🗑 Очистить', 'callback_data': 'status_prune'},
+]]}
+
+
+def send(text, chat_id=None, keyboard=False, inline=None):
     try:
         payload = {
             'chat_id': chat_id or CHAT_ID,
@@ -41,20 +48,25 @@ def send(text, chat_id=None, keyboard=False):
         }
         if keyboard:
             payload['reply_markup'] = REPLY_KEYBOARD
+        if inline:
+            payload['reply_markup'] = inline
         r = requests.post(f"{API}/sendMessage", json=payload, timeout=10)
         return r.json().get('result', {}).get('message_id')
     except Exception:
         return None
 
 
-def edit(chat_id, message_id, text):
+def edit(chat_id, message_id, text, inline=None):
     try:
-        requests.post(f"{API}/editMessageText", json={
+        payload = {
             'chat_id': chat_id,
             'message_id': message_id,
             'text': text,
             'parse_mode': 'HTML',
-        }, timeout=10)
+        }
+        if inline:
+            payload['reply_markup'] = inline
+        requests.post(f"{API}/editMessageText", json=payload, timeout=10)
     except Exception:
         pass
 
@@ -226,11 +238,24 @@ def watchdog_loop():
 
 # ── Polling ───────────────────────────────────────────────────────────────────
 
+def get_logs():
+    lines = []
+    for name in CONTAINERS:
+        r = subprocess.run(['docker', 'logs', '--tail', '5', name],
+                           capture_output=True, text=True)
+        out = (r.stdout + r.stderr).strip()
+        if out:
+            lines.append(f"*{name}:*\n```\n{out[-300:]}\n```")
+    return '\n\n'.join(lines) or 'Логи пусты.'
+
+
 def handle(upd):
     cb = upd.get('callback_query')
+    mid_cb = None
     if cb:
-        cid  = cb.get('message', {}).get('chat', {}).get('id')
-        text = cb.get('data', '').strip()
+        cid    = cb.get('message', {}).get('chat', {}).get('id')
+        mid_cb = cb.get('message', {}).get('message_id')
+        text   = cb.get('data', '').strip()
         try:
             requests.post(f"{API}/answerCallbackQuery",
                           json={'callback_query_id': cb['id']}, timeout=5)
@@ -243,11 +268,27 @@ def handle(upd):
 
     if cid != CHAT_ID:
         return
+
+    if text == 'status_refresh' and mid_cb:
+        try:
+            edit(cid, mid_cb, status_text(), inline=STATUS_KEYBOARD)
+        except Exception:
+            pass
+        return
+    elif text == 'status_logs' and mid_cb:
+        send(get_logs(), cid)
+        return
+    elif text == 'status_prune' and mid_cb:
+        r = subprocess.run(['docker', 'system', 'prune', '-f'],
+                           capture_output=True, text=True)
+        freed = next((l for l in r.stdout.splitlines() if 'reclaimed' in l.lower()), 'готово')
+        send(f"🗑 Очистка завершена\n{freed}", cid)
+        return
     if text in ('/start', '/help'):
         send("*GeoCore Bot*\n\n📊 Статус — метрики VPS и статус контейнеров\n💾 Бэкап — запустить бэкап вручную", cid, keyboard=True)
     elif text in ('/status', '📊 Статус'):
         try:
-            send(status_text(), cid)
+            send(status_text(), cid, inline=STATUS_KEYBOARD)
         except Exception as e:
             send(f"Ошибка: {e}", cid)
     elif text in ('/backup', '💾 Бэкап'):
