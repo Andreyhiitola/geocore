@@ -137,36 +137,26 @@ def status_text():
 # ── История бэкапов ───────────────────────────────────────────────────────────
 
 def backup_history_text():
+    import json
     r = subprocess.run(
-        ['docker', 'exec', 'geocore_backup', 'cat', '/var/log/backup.log'],
+        ['docker', 'exec', 'geocore_backup', 'restic', 'snapshots', '--json'],
         capture_output=True, text=True,
     )
-    runs, cur = [], None
-    for line in r.stdout.splitlines():
-        if 'Старт бэкапа за' in line:
-            cur = {'date': line.split('за ')[-1].strip(), 'time': line[1:9],
-                   'db': '—', 'moodle': '—', 'status': '❓'}
-        elif cur:
-            if 'БД:' in line:
-                cur['db'] = line.split('БД:')[-1].strip()
-            elif 'moodledata:' in line:
-                cur['moodle'] = line.split('moodledata:')[-1].strip()
-            elif 'Бэкап завершён' in line:
-                cur['status'] = '✅'; runs.append(cur); cur = None
-            elif 'ERROR' in line or 'FAILED' in line:
-                cur['status'] = '❌'; runs.append(cur); cur = None
-    if cur:
-        cur['status'] = '❌'; runs.append(cur)
+    try:
+        snapshots = json.loads(r.stdout) if r.stdout.strip() else []
+    except Exception:
+        return "📋 *История бэкапов*\n\nНе удалось получить данные."
 
-    week_ago = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
-    runs = [x for x in runs if x['date'] >= week_ago]
+    week_ago = datetime.now() - timedelta(days=7)
+    recent = [s for s in snapshots if datetime.fromisoformat(s['time'][:19]) >= week_ago]
 
-    if not runs:
+    if not recent:
         return "📋 *История бэкапов за неделю*\n\nДанных нет."
 
     lines = ["📋 *История бэкапов за неделю*\n"]
-    for x in reversed(runs):
-        lines.append(f"{x['status']} `{x['date']}` в `{x['time']}`  DB: {x['db']} | data: {x['moodle']}")
+    for s in reversed(recent):
+        dt = datetime.fromisoformat(s['time'][:19])
+        lines.append(f"✅ `{dt.strftime('%d.%m.%Y')}` в `{dt.strftime('%H:%M')}` — `{s['short_id']}`")
     return '\n'.join(lines)
 
 
