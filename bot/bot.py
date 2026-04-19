@@ -273,13 +273,14 @@ def handle(upd):
                     lines.append(f"\n<i>{current}</i>")
                 return '\n'.join(lines)
 
+            output_lines = []
             proc = subprocess.Popen(
                 ['docker', 'exec', 'geocore_backup', '/scripts/backup.sh'],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+                stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
             )
-            stderr_lines = []
             for line in proc.stdout:
                 line = line.strip()
+                output_lines.append(line)
                 if 'Дамп MariaDB' in line:
                     S['db'] = '▶'; edit(cid, mid, render('Создание дампа БД…'))
                 elif 'БД:' in line:
@@ -295,13 +296,12 @@ def handle(upd):
                     S['rot'] = '▶'; edit(cid, mid, render('Ротация старых снимков…'))
                 elif 'Бэкап завершён' in line:
                     S['rot'] = '✅'
-            stderr_out = proc.stderr.read()
             proc.wait()
             backup_running.clear()
             if proc.returncode == 0:
                 edit(cid, mid, f"✅ <b>Бэкап завершён</b>\n\n✅ Дамп БД — <code>{db_size}</code>\n✅ restic — <code>{moodle_size}</code>\n✅ Ротация")
             else:
-                err = (stderr_out or '')[-300:].strip()
+                err = '\n'.join(output_lines[-10:])[-400:]
                 edit(cid, mid, f"❌ <b>Бэкап завершился с ошибкой</b>\n\nDB: <code>{db_size}</code>\n\n<code>{err}</code>")
 
         threading.Thread(target=run_backup, args=(cid, mid), daemon=True).start()
