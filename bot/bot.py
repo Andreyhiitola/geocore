@@ -279,28 +279,24 @@ def handle(upd):
                     done['db'] = '`[▶]`'; edit(cid, mid, render('Создание дампа БД…'))
                 elif 'БД:' in line:
                     db_size = line.split('БД:')[-1].strip()
-                    done['db'] = '`[✓]`'; edit(cid, mid, render())
-                elif 'Архивирование' in line:
-                    done['arch'] = '`[▶]`'; edit(cid, mid, render('Архивирование moodledata (может занять несколько минут)…'))
-                elif 'moodledata:' in line:
-                    moodle_size = line.split('moodledata:')[-1].strip()
-                    done['arch'] = '`[✓]`'; edit(cid, mid, render())
-                elif 'Загрузка ежедневного' in line:
-                    done['s3'] = '`[▶]`'; edit(cid, mid, render('Загрузка файлов в S3…'))
-                elif 'Еженедельный бэкап' in line:
-                    edit(cid, mid, render('Загрузка еженедельного бэкапа…'))
-                elif 'Ежемесячный бэкап' in line:
-                    edit(cid, mid, render('Загрузка ежемесячного бэкапа…'))
-                elif 'Ротация daily' in line:
-                    done['s3'] = '`[✓]`'; done['rot'] = '`[▶]`'; edit(cid, mid, render('Ротация старых бэкапов…'))
+                    done['db'] = '`[✓]`'; done['arch'] = '`[▶]`'
+                    edit(cid, mid, render('Бэкап через restic (только изменения)…'))
+                elif 'processed' in line and 'files' in line:
+                    # "processed 4043 files, 3.379 GiB in 0:01"
+                    moodle_size = line.split('processed')[-1].strip()
+                elif 'snapshot' in line and 'saved' in line:
+                    done['arch'] = '`[✓]`'; done['s3'] = '`[✓]`'
+                    edit(cid, mid, render())
+                elif 'Ротация' in line:
+                    done['rot'] = '`[▶]`'; edit(cid, mid, render('Ротация старых снимков…'))
                 elif 'Бэкап завершён' in line:
                     done['rot'] = '`[✓]`'
             proc.wait()
             backup_running.clear()
             if proc.returncode == 0:
-                edit(cid, mid, f"✅ *Бэкап завершён*\n\n`[✓]` Дамп БД — `{db_size}`\n`[✓]` Архив moodledata — `{moodle_size}`\n`[✓]` Загрузка в S3\n`[✓]` Ротация")
+                edit(cid, mid, f"✅ *Бэкап завершён*\n\n`[✓]` Дамп БД — `{db_size}`\n`[✓]` restic — `{moodle_size}`\n`[✓]` Ротация")
             else:
-                edit(cid, mid, f"❌ *Бэкап завершился с ошибкой*\n\nDB: `{db_size}` | data: `{moodle_size}`")
+                edit(cid, mid, f"❌ *Бэкап завершился с ошибкой*\n\nDB: `{db_size}`\nПроверьте: `docker exec geocore_backup cat /var/log/backup.log`")
 
         threading.Thread(target=run_backup, args=(cid, mid), daemon=True).start()
     elif text in ('/backup_info', '📋 История бэкапов'):
