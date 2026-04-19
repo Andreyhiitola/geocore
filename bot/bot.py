@@ -213,15 +213,16 @@ def check():
         else:
             clear(f'c:{name}')
 
-    for url in ENDPOINTS:
-        try:
-            r = requests.get(url, timeout=10, allow_redirects=True)
-            if r.status_code >= 500:
-                alert(f'http:{url}', f"Сайт недоступен: {url}\nHTTP {r.status_code}")
-            else:
-                clear(f'http:{url}')
-        except Exception:
-            alert(f'http:{url}', f"Сайт недоступен: {url}\n(timeout / нет ответа)")
+    if not backup_running.is_set():
+        for url in ENDPOINTS:
+            try:
+                r = requests.get(url, timeout=10, allow_redirects=True)
+                if r.status_code >= 500:
+                    alert(f'http:{url}', f"Сайт недоступен: {url}\nHTTP {r.status_code}")
+                else:
+                    clear(f'http:{url}')
+            except Exception:
+                alert(f'http:{url}', f"Сайт недоступен: {url}\n(timeout / нет ответа)")
 
 
 def watchdog_loop():
