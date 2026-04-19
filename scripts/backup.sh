@@ -5,6 +5,8 @@
 
 set -euo pipefail
 
+trap 'notify "❌ *GeoCore Backup FAILED*\n$(date +"%d.%m.%Y %H:%M")\nНеожиданный выход (строка $LINENO)"' ERR
+
 # ── Настройки ────────────────────────────────────────────────────────────────
 DATE=$(date +%Y-%m-%d)
 DAY_OF_WEEK=$(date +%u)   # 1=Пн … 7=Вс
@@ -87,7 +89,7 @@ s3 ls "s3://${S3_BUCKET}/daily/" \
     | while read -r key; do
         s3 rm "s3://${S3_BUCKET}/daily/${key}"
         s3 rm "s3://${S3_BUCKET}/daily/${key/db-/moodle-}" 2>/dev/null || true
-    done
+    done || true
 
 log "Ротация weekly (оставляем 4)..."
 s3 ls "s3://${S3_BUCKET}/weekly/" \
@@ -98,7 +100,7 @@ s3 ls "s3://${S3_BUCKET}/weekly/" \
     | while read -r key; do
         s3 rm "s3://${S3_BUCKET}/weekly/${key}"
         s3 rm "s3://${S3_BUCKET}/weekly/${key/db-/moodle-}" 2>/dev/null || true
-    done
+    done || true
 
 log "Ротация monthly (оставляем 12)..."
 s3 ls "s3://${S3_BUCKET}/monthly/" \
@@ -109,7 +111,7 @@ s3 ls "s3://${S3_BUCKET}/monthly/" \
     | while read -r key; do
         s3 rm "s3://${S3_BUCKET}/monthly/${key}"
         s3 rm "s3://${S3_BUCKET}/monthly/${key/db-/moodle-}" 2>/dev/null || true
-    done
+    done || true
 
 # ── 5. Финал ─────────────────────────────────────────────────────────────────
 DB_SIZE=$(du -sh "$DB_FILE" | cut -f1)
