@@ -259,74 +259,55 @@ def handle(upd):
             send(f"Ошибка: {e}", cid)
     elif text in ('/backup', '💾 Бэкап'):
         mid = send("⏳ *Бэкап запущен*\n\n`[ ]` Дамп БД\n`[ ]` Архив moodledata\n`[ ]` Загрузка в S3\n`[ ]` Ротация", cid)
-        STEPS = {
-            'Дамп MariaDB':           ('db',      '`[▶]` Дамп БД…'),
-            'БД:':                    ('db_done', None),
-            'Архивирование':          ('arch',    '`[▶]` Архив moodledata…'),
-            'moodledata:':            ('arch_done', None),
-            'Загрузка ежедневного':   ('s3',      '`[▶]` Загрузка в S3…'),
-            'Еженедельный':           ('weekly',  None),
-            'Ежемесячный':            ('monthly', None),
-            'Ротация daily':          ('rot',     '`[▶]` Ротация…'),
-            'Бэкап завершён':         ('done',    None),
-        }
-        done = {'db': '`[ ]`', 'arch': '`[ ]`', 's3': '`[ ]`', 'rot': '`[ ]`'}
-        db_size = moodle_size = ''
 
-        def render(current=''):
-            lines = [f"⏳ *Бэкап в процессе*\n"]
-            labels = [
-                ('db',   '`[✓]`' if done['db']   == '`[✓]`' else done['db'],   'Дамп БД'),
-                ('arch', '`[✓]`' if done['arch'] == '`[✓]`' else done['arch'], 'Архив moodledata'),
-                ('s3',   '`[✓]`' if done['s3']   == '`[✓]`' else done['s3'],   'Загрузка в S3'),
-                ('rot',  '`[✓]`' if done['rot']  == '`[✓]`' else done['rot'],  'Ротация'),
-            ]
-            for key, mark, label in labels:
-                lines.append(f"{done[key]} {label}")
-            if db_size:
-                lines.append(f"\nDB: `{db_size}` | data: `{moodle_size}`")
-            if current:
-                lines.append(f"\n_{current}_")
-            return '\n'.join(lines)
+        def run_backup(cid, mid):
+            done = {'db': '`[ ]`', 'arch': '`[ ]`', 's3': '`[ ]`', 'rot': '`[ ]`'}
+            db_size = moodle_size = ''
 
-        proc = subprocess.Popen(
-            ['docker', 'exec', 'geocore_backup', '/scripts/backup.sh'],
-            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
-        )
-        for line in proc.stdout:
-            line = line.strip()
-            if 'Дамп MariaDB' in line:
-                done['db'] = '`[▶]`'
-                edit(cid, mid, render('Создание дампа БД…'))
-            elif 'БД:' in line:
-                db_size = line.split('БД:')[-1].strip()
-                done['db'] = '`[✓]`'
-                edit(cid, mid, render())
-            elif 'Архивирование' in line:
-                done['arch'] = '`[▶]`'
-                edit(cid, mid, render('Архивирование moodledata (может занять несколько минут)…'))
-            elif 'moodledata:' in line:
-                moodle_size = line.split('moodledata:')[-1].strip()
-                done['arch'] = '`[✓]`'
-                edit(cid, mid, render())
-            elif 'Загрузка ежедневного' in line:
-                done['s3'] = '`[▶]`'
-                edit(cid, mid, render('Загрузка файлов в S3…'))
-            elif 'Еженедельный бэкап' in line:
-                edit(cid, mid, render('Загрузка еженедельного бэкапа…'))
-            elif 'Ежемесячный бэкап' in line:
-                edit(cid, mid, render('Загрузка ежемесячного бэкапа…'))
-            elif 'Ротация daily' in line:
-                done['s3'] = '`[✓]`'
-                done['rot'] = '`[▶]`'
-                edit(cid, mid, render('Ротация старых бэкапов…'))
-            elif 'Бэкап завершён' in line:
-                done['rot'] = '`[✓]`'
-        proc.wait()
-        if proc.returncode == 0:
-            edit(cid, mid, f"✅ *Бэкап завершён*\n\n`[✓]` Дамп БД — `{db_size}`\n`[✓]` Архив moodledata — `{moodle_size}`\n`[✓]` Загрузка в S3\n`[✓]` Ротация")
-        else:
-            edit(cid, mid, f"❌ *Бэкап завершился с ошибкой*\n\nDB: `{db_size}` | data: `{moodle_size}`")
+            def render(current=''):
+                lines = ["⏳ *Бэкап в процессе*\n"]
+                for key, label in [('db', 'Дамп БД'), ('arch', 'Архив moodledata'),
+                                   ('s3', 'Загрузка в S3'), ('rot', 'Ротация')]:
+                    lines.append(f"{done[key]} {label}")
+                if db_size:
+                    lines.append(f"\nDB: `{db_size}` | data: `{moodle_size}`")
+                if current:
+                    lines.append(f"\n_{current}_")
+                return '\n'.join(lines)
+
+            proc = subprocess.Popen(
+                ['docker', 'exec', 'geocore_backup', '/scripts/backup.sh'],
+                stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
+            )
+            for line in proc.stdout:
+                line = line.strip()
+                if 'Дамп MariaDB' in line:
+                    done['db'] = '`[▶]`'; edit(cid, mid, render('Создание дампа БД…'))
+                elif 'БД:' in line:
+                    db_size = line.split('БД:')[-1].strip()
+                    done['db'] = '`[✓]`'; edit(cid, mid, render())
+                elif 'Архивирование' in line:
+                    done['arch'] = '`[▶]`'; edit(cid, mid, render('Архивирование moodledata (может занять несколько минут)…'))
+                elif 'moodledata:' in line:
+                    moodle_size = line.split('moodledata:')[-1].strip()
+                    done['arch'] = '`[✓]`'; edit(cid, mid, render())
+                elif 'Загрузка ежедневного' in line:
+                    done['s3'] = '`[▶]`'; edit(cid, mid, render('Загрузка файлов в S3…'))
+                elif 'Еженедельный бэкап' in line:
+                    edit(cid, mid, render('Загрузка еженедельного бэкапа…'))
+                elif 'Ежемесячный бэкап' in line:
+                    edit(cid, mid, render('Загрузка ежемесячного бэкапа…'))
+                elif 'Ротация daily' in line:
+                    done['s3'] = '`[✓]`'; done['rot'] = '`[▶]`'; edit(cid, mid, render('Ротация старых бэкапов…'))
+                elif 'Бэкап завершён' in line:
+                    done['rot'] = '`[✓]`'
+            proc.wait()
+            if proc.returncode == 0:
+                edit(cid, mid, f"✅ *Бэкап завершён*\n\n`[✓]` Дамп БД — `{db_size}`\n`[✓]` Архив moodledata — `{moodle_size}`\n`[✓]` Загрузка в S3\n`[✓]` Ротация")
+            else:
+                edit(cid, mid, f"❌ *Бэкап завершился с ошибкой*\n\nDB: `{db_size}` | data: `{moodle_size}`")
+
+        threading.Thread(target=run_backup, args=(cid, mid), daemon=True).start()
     elif text in ('/backup_info', '📋 История бэкапов'):
         try:
             send(backup_history_text(), cid)
