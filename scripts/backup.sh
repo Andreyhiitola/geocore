@@ -9,8 +9,8 @@ trap 'notify "❌ *GeoCore Backup FAILED*\n$(date +"%d.%m.%Y %H:%M")\nНеожи
 # ── Настройки ────────────────────────────────────────────────────────────────
 DATE=$(date +%Y-%m-%d)
 
-export RESTIC_REPOSITORY="s3:${S3_ENDPOINT:-https://s3.selectel.ru}/${S3_BUCKET:?Переменная S3_BUCKET не задана}"
-export RESTIC_PASSWORD="${RESTIC_PASSWORD:?Переменная RESTIC_PASSWORD не задана}"
+: "${RESTIC_REPOSITORY:?Переменная RESTIC_REPOSITORY не задана}"
+: "${RESTIC_PASSWORD:?Переменная RESTIC_PASSWORD не задана}"
 
 TELEGRAM_BOT_TOKEN="${TELEGRAM_BOT_TOKEN:-}"
 TELEGRAM_CHAT_ID="${TELEGRAM_CHAT_ID:-}"
