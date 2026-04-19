@@ -19,6 +19,8 @@ RAM_WARN  = int(os.environ.get('RAM_WARN', '90'))
 CPU_WARN  = int(os.environ.get('CPU_WARN', '95'))
 INTERVAL  = int(os.environ.get('CHECK_INTERVAL', '300'))
 
+backup_running = threading.Event()
+
 
 REPLY_KEYBOARD = {
     'keyboard': [
@@ -199,7 +201,7 @@ def check():
     else:
         clear('ram')
 
-    if cpu_pct >= CPU_WARN:
+    if cpu_pct >= CPU_WARN and not backup_running.is_set():
         alert('cpu', f"CPU: *{cpu_pct}%* — высокая нагрузка\nЕсли держится долго — свяжитесь с провайдером.")
     else:
         clear('cpu')
@@ -261,6 +263,7 @@ def handle(upd):
         mid = send("⏳ *Бэкап запущен*\n\n`[ ]` Дамп БД\n`[ ]` Архив moodledata\n`[ ]` Загрузка в S3\n`[ ]` Ротация", cid)
 
         def run_backup(cid, mid):
+            backup_running.set()
             done = {'db': '`[ ]`', 'arch': '`[ ]`', 's3': '`[ ]`', 'rot': '`[ ]`'}
             db_size = moodle_size = ''
 
@@ -302,6 +305,7 @@ def handle(upd):
                 elif 'Бэкап завершён' in line:
                     done['rot'] = '`[✓]`'
             proc.wait()
+            backup_running.clear()
             if proc.returncode == 0:
                 edit(cid, mid, f"✅ *Бэкап завершён*\n\n`[✓]` Дамп БД — `{db_size}`\n`[✓]` Архив moodledata — `{moodle_size}`\n`[✓]` Загрузка в S3\n`[✓]` Ротация")
             else:
