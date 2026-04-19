@@ -53,7 +53,7 @@ def edit(chat_id, message_id, text):
             'chat_id': chat_id,
             'message_id': message_id,
             'text': text,
-            'parse_mode': 'Markdown',
+            'parse_mode': 'HTML',
         }, timeout=10)
     except Exception:
         pass
@@ -258,45 +258,51 @@ def handle(upd):
             done = {'db': '`[ ]`', 'arch': '`[ ]`', 's3': '`[ ]`', 'rot': '`[ ]`'}
             db_size = moodle_size = ''
 
+            S = {'db': '⬜', 'arch': '⬜', 's3': '⬜', 'rot': '⬜'}
+
             def render(current=''):
-                lines = ["⏳ *Бэкап в процессе*\n"]
-                for key, label in [('db', 'Дамп БД'), ('arch', 'Архив moodledata'),
-                                   ('s3', 'Загрузка в S3'), ('rot', 'Ротация')]:
-                    lines.append(f"{done[key]} {label}")
+                icons = {'⬜': '⬜', '▶': '▶️', '✅': '✅'}
+                rows = [('db', 'Дамп БД'), ('arch', 'Бэкап restic'),
+                        ('s3', 'Загрузка в S3'), ('rot', 'Ротация')]
+                lines = ['⏳ <b>Бэкап в процессе</b>\n']
+                for key, label in rows:
+                    lines.append(f"{S[key]} {label}")
                 if db_size:
-                    lines.append(f"\nDB: `{db_size}` | data: `{moodle_size}`")
+                    lines.append(f"\nDB: <code>{db_size}</code>  data: <code>{moodle_size or '…'}</code>")
                 if current:
-                    lines.append(f"\n_{current}_")
+                    lines.append(f"\n<i>{current}</i>")
                 return '\n'.join(lines)
 
             proc = subprocess.Popen(
                 ['docker', 'exec', 'geocore_backup', '/scripts/backup.sh'],
-                stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
             )
+            stderr_lines = []
             for line in proc.stdout:
                 line = line.strip()
                 if 'Дамп MariaDB' in line:
-                    done['db'] = '`[▶]`'; edit(cid, mid, render('Создание дампа БД…'))
+                    S['db'] = '▶'; edit(cid, mid, render('Создание дампа БД…'))
                 elif 'БД:' in line:
                     db_size = line.split('БД:')[-1].strip()
-                    done['db'] = '`[✓]`'; done['arch'] = '`[▶]`'
+                    S['db'] = '✅'; S['arch'] = '▶'
                     edit(cid, mid, render('Бэкап через restic (только изменения)…'))
                 elif 'processed' in line and 'files' in line:
-                    # "processed 4043 files, 3.379 GiB in 0:01"
                     moodle_size = line.split('processed')[-1].strip()
                 elif 'snapshot' in line and 'saved' in line:
-                    done['arch'] = '`[✓]`'; done['s3'] = '`[✓]`'
+                    S['arch'] = '✅'; S['s3'] = '✅'
                     edit(cid, mid, render())
                 elif 'Ротация' in line:
-                    done['rot'] = '`[▶]`'; edit(cid, mid, render('Ротация старых снимков…'))
+                    S['rot'] = '▶'; edit(cid, mid, render('Ротация старых снимков…'))
                 elif 'Бэкап завершён' in line:
-                    done['rot'] = '`[✓]`'
+                    S['rot'] = '✅'
+            stderr_out = proc.stderr.read()
             proc.wait()
             backup_running.clear()
             if proc.returncode == 0:
-                edit(cid, mid, f"✅ *Бэкап завершён*\n\n`[✓]` Дамп БД — `{db_size}`\n`[✓]` restic — `{moodle_size}`\n`[✓]` Ротация")
+                edit(cid, mid, f"✅ <b>Бэкап завершён</b>\n\n✅ Дамп БД — <code>{db_size}</code>\n✅ restic — <code>{moodle_size}</code>\n✅ Ротация")
             else:
-                edit(cid, mid, f"❌ *Бэкап завершился с ошибкой*\n\nDB: `{db_size}`\nПроверьте: `docker exec geocore_backup cat /var/log/backup.log`")
+                err = (stderr_out or '')[-300:].strip()
+                edit(cid, mid, f"❌ <b>Бэкап завершился с ошибкой</b>\n\nDB: <code>{db_size}</code>\n\n<code>{err}</code>")
 
         threading.Thread(target=run_backup, args=(cid, mid), daemon=True).start()
     elif text in ('/backup_info', '📋 История бэкапов'):
