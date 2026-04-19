@@ -107,6 +107,7 @@ services:
     restart: unless-stopped
     volumes:
       - moodle_data:/moodledata:ro
+      - backup_logs:/var/log
     environment:
       DB_HOST: mariadb
       MOODLE_DB_NAME: ${MOODLE_DB_NAME}
@@ -143,3 +144,4 @@ networks:
 volumes:
   mariadb_data:
   moodle_data:
+  backup_logs:
