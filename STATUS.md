@@ -1,6 +1,6 @@
 # GeoCore Academy — Статус проекта
 
-> Последнее обновление: 19 апреля 2026  
+> Последнее обновление: 20 апреля 2026  
 > Репозиторий: https://github.com/Andreyhiitola/geocore  
 > Домен: geocore-academy.ru
 

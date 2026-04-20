@@ -115,7 +115,8 @@ async def root():
 MOODLE_URL   = os.getenv("MOODLE_URL",   "https://courses.geocore-academy.ru")
 MOODLE_TOKEN = os.getenv("MOODLE_TOKEN", "")
 
-ADMIN_TOKEN  = os.getenv("ADMIN_TOKEN", "")
+ADMIN_TOKEN    = os.getenv("ADMIN_TOKEN", "")
+ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "")
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "")
 GITHUB_REPO  = os.getenv("GITHUB_REPO", "Andreyhiitola/geocore")
 
@@ -272,11 +273,16 @@ async def create_request(request: CourseRequest, background_tasks: BackgroundTas
 
 # ── Admin auth ───────────────────────────────────────────────────────────────
 
-async def require_admin(authorization: Optional[str] = Header(None)):
+async def require_admin(
+    authorization: Optional[str] = Header(None),
+    x_admin_user: Optional[str] = Header(None),
+):
     if not ADMIN_TOKEN:
         raise HTTPException(500, "ADMIN_TOKEN не задан на сервере")
+    if ADMIN_USERNAME and x_admin_user != ADMIN_USERNAME:
+        raise HTTPException(401, "Неверный логин или токен")
     if authorization != f"Bearer {ADMIN_TOKEN}":
-        raise HTTPException(401, "Неверный токен")
+        raise HTTPException(401, "Неверный логин или токен")
 
 
 # ── Admin: заявки ────────────────────────────────────────────────────────────
