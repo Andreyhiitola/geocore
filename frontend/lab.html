@@ -367,6 +367,20 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:4
   window.OrbitControls = OrbitControls;
   console.log('Three.js loaded:', typeof THREE);
 
+  // ТЕМА
+  const themeBtn = document.getElementById('themeBtn');
+  let dark = !localStorage.getItem('geocoreLight');
+  function applyTheme() {
+    document.body.classList.toggle('light', !dark);
+    if (themeBtn) themeBtn.textContent = dark ? '🌙' : '☀️';
+  }
+  applyTheme();
+  themeBtn?.addEventListener('click', () => {
+    dark = !dark;
+    localStorage.setItem('geocoreLight', dark ? '' : '1');
+    applyTheme();
+  });
+
   // ДОСТУП
   const ACCESS_CODE = "GEOCORE2025";
   const accessBlock = document.getElementById('accessBlock');

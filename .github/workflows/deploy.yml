@@ -142,6 +142,7 @@ jobs:
             cd /opt/geocore
             git pull origin main
             docker compose pull
+            docker compose up -d frontend backend --remove-orphans
             docker compose up -d --build bot backup --remove-orphans
             docker image prune -f
             echo "==> Задеплоено: $(date)"

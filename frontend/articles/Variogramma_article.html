@@ -93,6 +93,10 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:4
 .rv{opacity:0;transform:translateY(24px);transition:opacity .65s ease,transform .65s ease;}
 .rv.vis{opacity:1;transform:none;}
 
+body.light{--dark:#F5F4F0;--dark-2:#ECEAE3;--dark-3:#E4E2D9;--dark-4:#D9D7CE;--surface:#DEDAD0;--text:#1A1916;--text-muted:#4A4840;--text-dim:#8A8880;--border:rgba(201,168,76,0.30);--border-dim:rgba(0,0,0,0.10);}
+body.light nav{background:rgba(245,244,240,.92);}
+.theme-btn{background:none;border:1px solid var(--border-dim);color:var(--text-muted);width:34px;height:34px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;}
+.theme-btn:hover{border-color:var(--gold);color:var(--gold);}
 @media(max-width:768px){nav{padding:0 20px;}.nav-back span{display:none;}footer{flex-direction:column;gap:16px;text-align:center;}}
 </style>
 </head>
@@ -103,7 +107,8 @@ footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:4
     <div class="logo-hex"></div>
     <span class="logo-text">Geo<span>Core</span></span>
   </a>
-  <a href="../index.html#blog" class="nav-back">← <span>Назад к блогу</span></a>
+  <a href="../index.html#blog" class="nav-back">← <span>Назад к статьям</span></a>
+  <button class="theme-btn" id="themeBtn">🌙</button>
   <a href="../index.html#sandbox" class="nav-cta">Попробовать симулятор</a>
 </nav>
 
@@ -247,6 +252,11 @@ const obs=new IntersectionObserver(entries=>{
   entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('vis');});
 },{threshold:.08,rootMargin:'0px 0px -20px 0px'});
 document.querySelectorAll('.rv').forEach(el=>obs.observe(el));
+const themeBtn=document.getElementById('themeBtn');
+let dark=!localStorage.getItem('geocoreLight');
+function applyTheme(){document.body.classList.toggle('light',!dark);if(themeBtn)themeBtn.textContent=dark?'🌙':'☀️';}
+applyTheme();
+themeBtn?.addEventListener('click',()=>{dark=!dark;localStorage.setItem('geocoreLight',dark?'':'1');applyTheme();});
 </script>
 </body>
 </html>

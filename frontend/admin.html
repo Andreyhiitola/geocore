@@ -190,6 +190,7 @@ tr:hover td{background:var(--dark-3);}
       <button class="f-btn" data-status="confirmed">Подтверждены</button>
       <button class="f-btn" data-status="paid">Оплачены</button>
       <button class="f-btn" data-status="cancelled">Отменены</button>
+      <button class="f-btn" data-status="archive" style="margin-left:auto;border-color:var(--text-dim)">Архив</button>
     </div>
     <div class="table-wrap">
       <table>
@@ -203,6 +204,7 @@ tr:hover td{background:var(--dark-3);}
             <th>Сотрудник</th>
             <th>Статус</th>
             <th>Дата</th>
+            <th></th>
           </tr>
         </thead>
         <tbody id="reqTable"></tbody>
@@ -385,7 +387,10 @@ function logout() {
 // ── Заявки ─────────────────────────────────────────────────
 async function loadRequests() {
   try {
-    const r = await fetch(`${API}/api/admin/requests`, { headers: h() });
+    const url = currentFilter === 'archive'
+      ? `${API}/api/admin/requests/archive`
+      : `${API}/api/admin/requests`;
+    const r = await fetch(url, { headers: h() });
     if (r.status === 401) { logout(); return; }
     const data = await r.json();
     allRequests = data.requests || [];
@@ -396,7 +401,10 @@ async function loadRequests() {
 function renderRequests() {
   const tbody = document.getElementById('reqTable');
   const empty = document.getElementById('reqEmpty');
-  const list = currentFilter === 'all' ? allRequests : allRequests.filter(r => r.status === currentFilter);
+  const isArchive = currentFilter === 'archive';
+  const list = (isArchive || currentFilter === 'all')
+    ? allRequests
+    : allRequests.filter(r => r.status === currentFilter);
   document.getElementById('reqCount').textContent = `${list.length} из ${allRequests.length}`;
   if (!list.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
   empty.style.display = 'none';
@@ -409,14 +417,26 @@ function renderRequests() {
       <td style="font-family:'IBM Plex Mono',monospace;font-size:13px;text-align:center">${r.headcount || 1}</td>
       <td>${esc(r.employee_name)}<br><span style="font-size:11px;color:var(--text-dim)">${esc(r.employee_email)}</span></td>
       <td>
-        <select class="status-sel" data-id="${r.id}" onchange="updateStatus(this)">
-          <option value="new"       ${r.status==='new'?'selected':''}>Новая</option>
-          <option value="confirmed" ${r.status==='confirmed'?'selected':''}>Подтверждена</option>
-          <option value="paid"      ${r.status==='paid'?'selected':''}>Оплачена</option>
-          <option value="cancelled" ${r.status==='cancelled'?'selected':''}>Отменена</option>
-        </select>
+        ${isArchive
+          ? `<span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-dim)">${esc(r.status)}</span>`
+          : `<select class="status-sel" data-id="${r.id}" onchange="updateStatus(this)">
+              <option value="new"       ${r.status==='new'?'selected':''}>Новая</option>
+              <option value="confirmed" ${r.status==='confirmed'?'selected':''}>Подтверждена</option>
+              <option value="paid"      ${r.status==='paid'?'selected':''}>Оплачена</option>
+              <option value="cancelled" ${r.status==='cancelled'?'selected':''}>Отменена</option>
+            </select>`
+        }
       </td>
       <td style="font-family:'IBM Plex Mono',monospace;font-size:10px;white-space:nowrap">${(r.created_at||'').slice(0,16)}</td>
+      <td style="white-space:nowrap">
+        ${isArchive
+          ? `<button class="btn-del" title="Восстановить" onclick="unarchiveRequest(${r.id})" style="color:var(--green);border-color:var(--green);margin-right:4px">↩</button>
+             <button class="btn-del" title="Удалить" onclick="deleteRequest(${r.id})">✕</button>`
+          : (r.status === 'cancelled'
+              ? `<button class="btn-del" title="В архив" onclick="archiveRequest(${r.id})" style="font-size:11px;width:auto;padding:0 8px">архив</button>`
+              : '')
+        }
+      </td>
     </tr>`).join('');
 }
 
@@ -430,7 +450,36 @@ async function updateStatus(sel) {
     const req = allRequests.find(x => x.id == id);
     if (req) req.status = sel.value;
     showToast('Статус обновлён');
+    renderRequests();
   } catch { showToast('Ошибка', 'err'); loadRequests(); }
+}
+
+async function archiveRequest(id) {
+  try {
+    const r = await fetch(`${API}/api/admin/requests/${id}/archive`, { method: 'PATCH', headers: h() });
+    if (!r.ok) throw new Error();
+    showToast('Заявка перемещена в архив');
+    loadRequests();
+  } catch { showToast('Ошибка', 'err'); }
+}
+
+async function unarchiveRequest(id) {
+  try {
+    const r = await fetch(`${API}/api/admin/requests/${id}/unarchive`, { method: 'PATCH', headers: h() });
+    if (!r.ok) throw new Error();
+    showToast('Заявка восстановлена');
+    loadRequests();
+  } catch { showToast('Ошибка', 'err'); }
+}
+
+async function deleteRequest(id) {
+  if (!confirm('Удалить заявку навсегда?')) return;
+  try {
+    const r = await fetch(`${API}/api/admin/requests/${id}`, { method: 'DELETE', headers: h() });
+    if (!r.ok) throw new Error();
+    showToast('Заявка удалена');
+    loadRequests();
+  } catch { showToast('Ошибка', 'err'); }
 }
 
 document.querySelectorAll('.f-btn').forEach(btn => {
@@ -438,7 +487,7 @@ document.querySelectorAll('.f-btn').forEach(btn => {
     document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     currentFilter = btn.dataset.status;
-    renderRequests();
+    loadRequests();
   });
 });
 

@@ -80,10 +80,13 @@ async def startup():
                         created_at     TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
                 """)
-                # Добавляем поле если таблица уже существовала без него
                 await cur.execute("""
                     ALTER TABLE requests
                     ADD COLUMN IF NOT EXISTS headcount INT DEFAULT 1
+                """)
+                await cur.execute("""
+                    ALTER TABLE requests
+                    ADD COLUMN IF NOT EXISTS archived TINYINT(1) DEFAULT 0
                 """)
         print("[DB] Таблица requests готова")
     except Exception as e:
@@ -289,11 +292,25 @@ async def require_admin(
 
 @app.get("/api/admin/requests")
 async def admin_get_requests(_=Depends(require_admin)):
-    """Список всех заявок"""
+    """Список всех заявок (без архивных)"""
     pool = await get_pool()
     async with pool.acquire() as conn:
         async with conn.cursor(aiomysql.DictCursor) as cur:
-            await cur.execute("SELECT * FROM requests ORDER BY created_at DESC")
+            await cur.execute("SELECT * FROM requests WHERE archived=0 ORDER BY created_at DESC")
+            rows = await cur.fetchall()
+    for row in rows:
+        if row.get("created_at"):
+            row["created_at"] = str(row["created_at"])
+    return {"requests": rows}
+
+
+@app.get("/api/admin/requests/archive")
+async def admin_get_archive(_=Depends(require_admin)):
+    """Список архивных заявок"""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        async with conn.cursor(aiomysql.DictCursor) as cur:
+            await cur.execute("SELECT * FROM requests WHERE archived=1 ORDER BY created_at DESC")
             rows = await cur.fetchall()
     for row in rows:
         if row.get("created_at"):
@@ -317,6 +334,36 @@ async def admin_update_request(request_id: int, body: StatusUpdate, _=Depends(re
                 "UPDATE requests SET status=%s WHERE id=%s",
                 (body.status, request_id)
             )
+    return {"success": True}
+
+
+@app.patch("/api/admin/requests/{request_id}/archive")
+async def admin_archive_request(request_id: int, _=Depends(require_admin)):
+    """Отправить заявку в архив"""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute("UPDATE requests SET archived=1 WHERE id=%s", (request_id,))
+    return {"success": True}
+
+
+@app.patch("/api/admin/requests/{request_id}/unarchive")
+async def admin_unarchive_request(request_id: int, _=Depends(require_admin)):
+    """Восстановить заявку из архива"""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute("UPDATE requests SET archived=0 WHERE id=%s", (request_id,))
+    return {"success": True}
+
+
+@app.delete("/api/admin/requests/{request_id}")
+async def admin_delete_request(request_id: int, _=Depends(require_admin)):
+    """Удалить заявку насовсем (только из архива)"""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute("DELETE FROM requests WHERE id=%s AND archived=1", (request_id,))
     return {"success": True}
 
 
