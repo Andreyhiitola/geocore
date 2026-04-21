@@ -1,202 +1,141 @@
-# Руководство по управлению Moodle в GeoCore Academy
+# Moodle — руководство по обновлению и управлению
 
 ---
 
-## Структура окружений
+## Окружения
 
 | Окружение | Файл | Порт | Назначение |
 |-----------|------|------|------------|
-| Тест | `docker-compose.test.yml` | 8081 | Проверка новых версий локально |
-| Прод | `docker-compose.yml` | 8080 (за nginx) | Рабочий сервер на VPS |
+| Тест | `docker-compose.test.yml` | **8082** | Проверка новых версий локально |
+| Прод | `docker-compose.yml` | 8080 (за nginx) | VPS, geocore-academy.ru |
+
+> ⚠️ Порт 8081 занят `pelikan-bot`. Тест всегда на **8082**.
 
 ---
 
-## Как проверить версию Moodle
+## Алгоритм обновления Moodle
 
-**В браузере** (войти как admin):
-```
-Администрирование → Сервер → Информация о системе
-```
+> **Обязательный порядок:** сначала локальный тест — только потом прод.  
+> Менять `MOODLE_VERSION` в `deploy.yml` без пройденного локального теста запрещено.
 
-**Через терминал:**
-```bash
-# В тестовом контейнере
-docker exec geocore_moodle_test cat /var/www/moodle/version.php | grep release
-
-# В продовом контейнере
-docker exec geocore_moodle cat /var/www/moodle/version.php | grep release
-```
-
----
-
-## Как отслеживать новые релизы Moodle
-
-- Страница релизов: https://moodlerelease.org
-- GitHub теги: https://github.com/moodle/moodle/tags
-
-Нас интересуют теги вида `v5.1.3`, `v5.1.4`, `v5.2.0` — ветка **5.x стабильная**.
-
-**Подписаться на уведомления GitHub:**
-Открыть https://github.com/moodle/moodle → **Watch → Custom → Releases** — получать письмо при каждом новом теге.
-
----
-
-## Алгоритм тестирования новой версии перед деплоем в прод
-
-```
-Вышел новый тег (например v5.1.4)
-         ↓
-Шаг 1 — Обновляем версию в тестовом окружении
-         ↓
-Шаг 2 — Запускаем тест локально
-         ↓
-Шаг 3 — Проверяем что всё работает
-         ↓
-Шаг 4 — Если ОК, обновляем прод
-```
-
-### Шаг 1 — Меняем версию в тесте
-
-В файле `docker-compose.test.yml` найти и изменить:
-```yaml
-MOODLE_TEST_VERSION: 5.1.4   # ← новая версия
-```
-
-### Шаг 2 — Запускаем тест
+### 1. Локальный тест новой версии
 
 ```bash
 cd ~/Desktop/geocore
 
-# Сносим старые данные (обязательно при смене версии!)
+# Сносим старые тестовые данные (только тест — volumes с тестовыми данными)
 docker compose -f docker-compose.test.yml down -v
 
-# Собираем и запускаем
-docker compose -f docker-compose.test.yml up --build
+# Собираем и запускаем с новой версией
+MOODLE_TEST_VERSION=5.1.4 docker compose -f docker-compose.test.yml up --build
 ```
 
-Установка займёт ~5 минут. Ждём сообщения:
+Установка ~5 минут. Ждём в логах:
 ```
 ==> Moodle успешно установлен!
 ==> Запускаем Apache...
 ```
 
-### Шаг 3 — Проверяем
+### 2. Проверяем на localhost:8082
 
-Открыть в браузере: **http://localhost:8081**
-
-Чеклист проверки:
 - [ ] Страница входа открывается
-- [ ] Вход работает (admin / Admin1234!)
+- [ ] Вход работает (`admin` / `Admin1234!`)
 - [ ] Курсы отображаются
-- [ ] Нет ошибок в логах: `docker logs geocore_moodle_test`
+- [ ] Логи без ошибок: `docker logs geocore_moodle_test`
 
-### Шаг 4 — Деплоим в прод
+### 3. Деплой в прод (только после ✅ шага 2)
 
-Если тест прошёл успешно — обновляем версию в двух файлах:
+Меняем одну строку в `deploy.yml`:
 
-**`.github/workflows/deploy.yml`** — строка:
 ```yaml
-MOODLE_VERSION: '5.1.4'
+env:
+  MOODLE_VERSION: '5.1.4'   # ← обновить здесь
 ```
 
-**`.env.example`** — строка:
-```
-MOODLE_VERSION=5.1.4
-```
+Коммит и пуш:
 
-Затем коммит и пуш:
 ```bash
-git add .github/workflows/deploy.yml .env.example
-git commit -m "feat: обновление Moodle до версии 5.1.4"
+git add .github/workflows/deploy.yml
+git commit -m "ci: обновление Moodle до 5.1.4"
 git push
 ```
 
-GitHub Actions автоматически соберёт новый образ и задеплоит на VPS.
+**CI/CD автоматически:**
+1. Собирает образ `andreysagurov/geocore-moodle:5.1.4` (~10 мин)
+2. Обновляет `MOODLE_VERSION` в `.env` на VPS
+3. Делает `docker compose pull moodle && up -d moodle`
+4. `upgrade.php` выполняется внутри контейнера — данные сохраняются
+
+### 4. Проверяем на проде
+
+```bash
+# Версия в логах
+docker logs geocore_moodle 2>&1 | grep -i "обновление\|успешно\|5.1"
+
+# Какой образ запущен
+docker inspect geocore_moodle --format='{{.Config.Image}}'
+```
 
 ---
 
-## Тегирование образов на Docker Hub
+## Следить за релизами
 
-Репозиторий: `andreysagurov/geocore-moodle`
+- GitHub теги: https://github.com/moodle/moodle/tags — ветка **MOODLE\_5\_1\_STABLE**
+- Подписаться: **Watch → Custom → Releases** на github.com/moodle/moodle
 
-### Схема тегов
+---
 
-| Тег | Пример | Смысл |
-|-----|--------|-------|
-| `{версия_moodle}` | `5.1.3` | Базовая версия Moodle |
-| `{версия_moodle}-r{N}` | `5.1.3-r1` | Moodle + N-я ревизия наших правок |
-| `latest` | `latest` | Всегда последний актуальный образ |
+## Важные правила
 
-### Текущее состояние
+> **`down -v` — только для тестового окружения.** Эта команда уничтожает volumes с данными.  
+> На проде (`docker-compose.yml`) запускать `down -v` запрещено — потеря БД и moodledata невосстановима.
 
-```
-5.1.3 = 5.1.3-r1 = latest
-```
+> **При смене major-версии** (например 5.1 → 5.2) — сначала сделать бэкап через бота, потом тест.
 
-Все три тега указывают на один образ. Это нормально — `latest` всегда совпадает с последней ревизией.
+> **Пароль тестового admin:** `Admin1234!` — захардкожен в `docker-compose.test.yml`.
 
-### Когда создавать новую ревизию
-
-При любых изменениях в `moodle/` (entrypoint, тема, php.ini) без обновления версии Moodle:
-
-```bash
-# На VPS после git pull
-docker build -t andreysagurov/geocore-moodle:5.1.3 \
-             -t andreysagurov/geocore-moodle:5.1.3-r2 \
-             -t andreysagurov/geocore-moodle:latest \
-             /opt/geocore/moodle/
-
-docker push andreysagurov/geocore-moodle:5.1.3
-docker push andreysagurov/geocore-moodle:5.1.3-r2
-docker push andreysagurov/geocore-moodle:latest
-```
-
-### Откат к предыдущей ревизии
-
-Если после обновления что-то сломалось — откатиться к предыдущей ревизии:
-
-```bash
-# В docker-compose.yml временно поменять тег
-image: andreysagurov/geocore-moodle:5.1.3-r1
-
-# Перезапустить
-docker compose pull moodle
-docker compose up -d moodle
-```
+> **Секреты не коммитить** — `.env` в `.gitignore`. На VPS создаётся из `.env.example`.
 
 ---
 
 ## Быстрые команды
 
 ```bash
-# Запустить тест
-docker compose -f docker-compose.test.yml up --build
+# Тест: запустить
+MOODLE_TEST_VERSION=5.1.4 docker compose -f docker-compose.test.yml up --build
 
-# Остановить тест (сохранить данные)
+# Тест: остановить (сохранить данные)
 docker compose -f docker-compose.test.yml down
 
-# Остановить тест и удалить все данные
+# Тест: остановить и удалить данные (чистый старт)
 docker compose -f docker-compose.test.yml down -v
 
-# Логи Moodle
+# Логи тестового Moodle
 docker logs geocore_moodle_test
 
-# Логи БД
-docker logs geocore_db_test
+# Логи продового Moodle
+docker logs geocore_moodle --tail 50
 
-# Зайти внутрь контейнера Moodle
-docker exec -it geocore_moodle_test bash
+# Версия запущенного образа
+docker inspect geocore_moodle --format='{{.Config.Image}}'
 
-# Статус всех контейнеров
-docker ps
+# Зайти внутрь контейнера
+docker exec -it geocore_moodle bash
 ```
 
 ---
 
-## Важные замечания
+## Откат
 
-> **При смене версии Moodle всегда делать `down -v`** — старая схема БД несовместима с новой версией и Moodle не запустится.
+Если после обновления что-то сломалось — откатиться немедленно:
 
-> **Пароль админа в тесте:** `Admin1234!` — захардкожен в `docker-compose.test.yml`, не менять.
+```bash
+# На VPS: вернуть прошлую версию в .env
+sed -i 's/MOODLE_VERSION=5.1.4/MOODLE_VERSION=5.1.3/' /opt/geocore/.env
 
-> **Секреты не коммитить** — файлы `.env`, `.env.prod`, `.env.test` в `.gitignore`. На VPS создаётся вручную из `.env.example`.
+# Перезапустить со старым образом (он уже есть на Docker Hub)
+docker compose pull moodle
+docker compose up -d moodle
+```
+
+Данные не теряются — `upgrade.php` не откатывается, но Moodle 5.1.3 нормально работает с обновлённой схемой.
