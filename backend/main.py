@@ -518,19 +518,18 @@ async def _create_moodle_accounts(req: dict) -> list:
                     else f"gc_{req['id']}_{i+1}@temp.geocore.ru"
             moodle_id = 0
             try:
-                params = {
+                payload = {
                     "wstoken": MOODLE_TOKEN,
                     "wsfunction": "core_user_create_users",
                     "moodlewsrestformat": "json",
                     "users[0][username]": username,
                     "users[0][password]": password,
                     "users[0][firstname]": f"User{i+1}",
-                    "users[0][lastname]": (req.get("company_name") or "")[:30],
+                    "users[0][lastname]": (req.get("company_name") or "GeoCore")[:30] or "GeoCore",
                     "users[0][email]": email,
                     "users[0][auth]": "manual",
-                    "users[0][confirmed]": 1,
                 }
-                resp = await client.get(f"{MOODLE_URL}/webservice/rest/server.php", params=params)
+                resp = await client.post(f"{MOODLE_URL}/webservice/rest/server.php", data=payload)
                 data = resp.json()
                 if isinstance(data, list) and data:
                     moodle_id = data[0].get("id", 0)
