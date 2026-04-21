@@ -27,7 +27,7 @@ nginx (на VPS, хост)
 | DNS (courses, api → VPS) | ✅ настроен |
 | nginx + SSL (Let's Encrypt) | ✅ работает |
 | MariaDB контейнер | ✅ работает |
-| Moodle 5.1.3 контейнер | ✅ работает, тема geocore активна |
+| Moodle 5.1.4 контейнер | ✅ работает, тема geocore активна |
 | courses.geocore-academy.ru | ✅ открывается |
 | GitHub Actions CI/CD | ✅ работает — автодеплой по git push |
 | FastAPI контейнер | ✅ работает |
@@ -124,7 +124,7 @@ uptimerobot.com (бесплатно) → добавить мониторы дл�
 
 ```env
 DOCKERHUB_USER=...
-MOODLE_VERSION=5.1.3
+MOODLE_VERSION=5.1.4
 
 DB_ROOT_PASSWORD=         # сильный пароль
 MOODLE_DB_NAME=moodle
