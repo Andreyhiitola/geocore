@@ -173,6 +173,16 @@ async def root():
 MOODLE_URL   = os.getenv("MOODLE_URL",   "https://courses.geocore-academy.ru")
 MOODLE_TOKEN = os.getenv("MOODLE_TOKEN", "")
 
+# Реквизиты выставителя счёта (настраиваются через .env)
+INV_SELLER_NAME    = os.getenv("INVOICE_COMPANY_NAME",   "")
+INV_SELLER_INN     = os.getenv("INVOICE_INN",            "")
+INV_SELLER_KPP     = os.getenv("INVOICE_KPP",            "")
+INV_SELLER_ACCOUNT = os.getenv("INVOICE_ACCOUNT",        "")
+INV_SELLER_BANK    = os.getenv("INVOICE_BANK",           "")
+INV_SELLER_BIK     = os.getenv("INVOICE_BIK",            "")
+INV_SELLER_CORR    = os.getenv("INVOICE_CORR_ACCOUNT",   "")
+INV_SELLER_ADDR    = os.getenv("INVOICE_ADDRESS",        "")
+
 ADMIN_TOKEN    = os.getenv("ADMIN_TOKEN", "")
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "")
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "")
@@ -311,34 +321,110 @@ def _generate_secure_password() -> str:
 
 def _make_invoice_pdf(request_id: int, company_name: str, course_name: str,
                       total_price, inn: str) -> str:
+    from reportlab.lib import colors
+    from reportlab.platypus import Table, TableStyle
+
     path = os.path.join(INVOICES_DIR, f"invoice_{request_id}.pdf")
     buf = io.BytesIO()
+    W, H = A4
     c = canvas.Canvas(buf, pagesize=A4)
-    _, H = A4
     fn_b, fn = _pdf_font(True), _pdf_font(False)
-    c.setFont(fn_b, 16)
-    c.drawString(20*mm, H - 25*mm, f"Счёт на оплату № {request_id}")
-    c.setFont(fn, 11)
-    y = H - 42*mm
-    for label, val in [
-        ("Компания:", company_name),
-        ("ИНН:", inn),
-        ("Курс:", course_name),
-        ("Сумма:", f"{total_price or 0} руб."),
-    ]:
-        c.drawString(20*mm, y, f"{label}  {val}")
-        y -= 8*mm
-    y -= 4*mm
-    c.setFont(fn_b, 10)
-    c.drawString(20*mm, y, "Реквизиты (тестовые):")
-    y -= 7*mm
+    price = total_price or 0
+    nds = "Без НДС"
+    margin = 20 * mm
+
+    def line(y_pos):
+        c.setLineWidth(0.5)
+        c.line(margin, y_pos, W - margin, y_pos)
+
+    # ── Заголовок ──────────────────────────────────────────────────────────────
+    c.setFont(fn_b, 14)
+    c.drawString(margin, H - 20*mm, f"Счёт на оплату № {request_id}")
+    from datetime import date as _date
     c.setFont(fn, 10)
-    for line in [
-        "ИП Тестов Тест Тестович", "ИНН 1234567890",
-        "р/с 40802810700000000000", "Банк: ТЕСТ-БАНК, БИК 044525999",
-    ]:
-        c.drawString(20*mm, y, line)
-        y -= 6*mm
+    c.drawString(margin, H - 28*mm, f"от {_date.today().strftime('%d.%m.%Y')}")
+
+    # ── Банковские реквизиты продавца ──────────────────────────────────────────
+    y = H - 38*mm
+    line(y + 3*mm)
+    c.setFont(fn_b, 9)
+    c.drawString(margin, y, "Банк получателя:")
+    c.setFont(fn, 9)
+    c.drawString(60*mm, y, INV_SELLER_BANK or "—")
+    y -= 6*mm
+    c.setFont(fn_b, 9); c.drawString(margin, y, "БИК:")
+    c.setFont(fn, 9);   c.drawString(60*mm, y, INV_SELLER_BIK or "—")
+    y -= 6*mm
+    c.setFont(fn_b, 9); c.drawString(margin, y, "К/С:")
+    c.setFont(fn, 9);   c.drawString(60*mm, y, INV_SELLER_CORR or "—")
+    y -= 6*mm
+    c.setFont(fn_b, 9); c.drawString(margin, y, "Р/С:")
+    c.setFont(fn, 9);   c.drawString(60*mm, y, INV_SELLER_ACCOUNT or "—")
+    line(y - 3*mm)
+
+    # ── Продавец ───────────────────────────────────────────────────────────────
+    y -= 12*mm
+    c.setFont(fn_b, 9); c.drawString(margin, y, "Поставщик (Исполнитель):")
+    c.setFont(fn, 9)
+    seller_info = INV_SELLER_NAME or "—"
+    if INV_SELLER_INN:
+        seller_info += f", ИНН {INV_SELLER_INN}"
+    if INV_SELLER_KPP:
+        seller_info += f", КПП {INV_SELLER_KPP}"
+    if INV_SELLER_ADDR:
+        seller_info += f", {INV_SELLER_ADDR}"
+    c.drawString(60*mm, y, seller_info[:90])
+
+    y -= 7*mm
+    c.setFont(fn_b, 9); c.drawString(margin, y, "Покупатель (Заказчик):")
+    c.setFont(fn, 9)
+    buyer_info = company_name or "—"
+    if inn:
+        buyer_info += f", ИНН {inn}"
+    c.drawString(60*mm, y, buyer_info[:90])
+    line(y - 4*mm)
+
+    # ── Таблица услуг ──────────────────────────────────────────────────────────
+    y -= 14*mm
+    c.setFont(fn_b, 11)
+    c.drawString(margin, y, f"Счёт на оплату № {request_id}")
+
+    y -= 10*mm
+    col_w = [85*mm, 20*mm, 25*mm, 25*mm, 25*mm]
+    data = [
+        ["Наименование", "Кол.", "Ед.", "Цена", "Сумма"],
+        [course_name, "1", "усл.", f"{price:,.0f}", f"{price:,.0f}"],
+    ]
+    tbl = Table(data, colWidths=col_w)
+    tbl.setStyle(TableStyle([
+        ("FONTNAME",       (0, 0), (-1, 0),  fn_b),
+        ("FONTNAME",       (0, 1), (-1, -1), fn),
+        ("FONTSIZE",       (0, 0), (-1, -1), 9),
+        ("BACKGROUND",     (0, 0), (-1, 0),  colors.HexColor("#DDDDDD")),
+        ("GRID",           (0, 0), (-1, -1), 0.5, colors.black),
+        ("ALIGN",          (1, 0), (-1, -1), "CENTER"),
+        ("ALIGN",          (3, 1), (-1, -1), "RIGHT"),
+        ("TOPPADDING",     (0, 0), (-1, -1), 4),
+        ("BOTTOMPADDING",  (0, 0), (-1, -1), 4),
+    ]))
+    tbl.wrapOn(c, W, H)
+    tbl.drawOn(c, margin, y - 20*mm)
+
+    # ── Итог ───────────────────────────────────────────────────────────────────
+    y -= 34*mm
+    c.setFont(fn, 9)
+    c.drawString(margin, y, f"НДС: {nds}")
+    y -= 7*mm
+    c.setFont(fn_b, 10)
+    c.drawRightString(W - margin, y, f"Итого к оплате: {price:,.0f} руб.")
+
+    # ── Подпись ────────────────────────────────────────────────────────────────
+    y -= 20*mm
+    line(y + 3*mm)
+    c.setFont(fn, 9)
+    c.drawString(margin, y, "Руководитель / ИП  ________________  ")
+    c.drawString(120*mm, y, "М.П.")
+
     c.save()
     with open(path, "wb") as f:
         f.write(buf.getvalue())
