@@ -126,6 +126,25 @@ tr:hover td{background:var(--dark-3);}
 .footer-col{background:var(--dark-3);border:1px solid var(--border-dim);padding:16px;}
 .footer-col-title{font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim);margin-bottom:12px;}
 
+/* ── ANALYTICS ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:32px;}
+.kpi-card{background:var(--dark-3);border:1px solid var(--border-dim);padding:20px 24px;}
+.kpi-val{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:var(--gold);line-height:1;}
+.kpi-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-dim);margin-top:6px;}
+.kpi-sub{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-muted);margin-top:4px;}
+.chart-wrap{background:var(--dark-3);border:1px solid var(--border-dim);padding:20px 24px;margin-bottom:16px;}
+.chart-title{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-dim);margin-bottom:16px;}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.bar-label{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-muted);width:70px;flex-shrink:0;text-align:right;}
+.bar-track{flex:1;background:var(--dark-4);height:18px;position:relative;}
+.bar-fill{height:100%;background:var(--gold);opacity:.7;transition:width .4s;}
+.bar-val{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-dim);width:60px;flex-shrink:0;}
+.expiry-list{background:var(--dark-3);border:1px solid var(--border-dim);padding:20px 24px;}
+.expiry-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border-dim);font-size:13px;}
+.expiry-row:last-child{border-bottom:none;}
+.badge-warn{color:#E8A84C;font-family:'IBM Plex Mono',monospace;font-size:9px;padding:2px 7px;border:1px solid #E8A84C44;}
+.badge-exp{color:var(--red);font-family:'IBM Plex Mono',monospace;font-size:9px;padding:2px 7px;border:1px solid var(--red)44;}
+
 /* ── TOAST ── */
 .toast{position:fixed;bottom:24px;right:24px;background:var(--dark-4);border:1px solid var(--border);padding:12px 20px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;z-index:999;}
 .toast.show{opacity:1;transform:none;}
@@ -209,6 +228,7 @@ tr:hover td{background:var(--dark-3);}
 
   <div class="tabs">
     <div class="tab active" data-tab="requests">Заявки</div>
+    <div class="tab" data-tab="analytics">Аналитика</div>
     <div class="tab" data-tab="content">Контент сайта</div>
   </div>
 
@@ -245,6 +265,7 @@ tr:hover td{background:var(--dark-3);}
             <th>Счёт</th>
             <th>Оплата</th>
             <th>Зачислены</th>
+            <th>Доступ до</th>
             <th>Статус</th>
             <th>Дата</th>
             <th></th>
@@ -253,6 +274,23 @@ tr:hover td{background:var(--dark-3);}
         <tbody id="reqTable"></tbody>
       </table>
       <div class="empty-state" id="reqEmpty" style="display:none">Заявок нет</div>
+    </div>
+  </div>
+
+  <!-- ══ TAB: АНАЛИТИКА ══ -->
+  <div class="tab-panel" id="tab-analytics">
+    <div class="panel-header">
+      <div class="panel-title">Аналитика</div>
+      <div class="panel-count" id="analyticsUpdated"></div>
+    </div>
+    <div class="kpi-grid" id="kpiGrid"></div>
+    <div class="chart-wrap">
+      <div class="chart-title">Выручка по месяцам (руб.)</div>
+      <div id="revenueChart"></div>
+    </div>
+    <div class="expiry-list">
+      <div class="chart-title">Истекает доступ (ближайшие 30 дней)</div>
+      <div id="expiryList"></div>
     </div>
   </div>
 
@@ -535,6 +573,16 @@ function enrollBadge(r) {
   if (r.payment_status === 'paid')  return `<span class="badge badge-gold">⚠ нет</span>`;
   return `<span class="badge badge-dim">—</span>`;
 }
+function expiryBadge(r) {
+  if (!r.access_expiry_date) return `<span class="badge badge-dim">—</span>`;
+  const exp = new Date(r.access_expiry_date);
+  const now = new Date();
+  const days = Math.ceil((exp - now) / 86400000);
+  const label = exp.toISOString().slice(0,10);
+  if (days < 0)  return `<span class="badge" style="color:var(--red)">${label}</span>`;
+  if (days <= 14) return `<span class="badge badge-gold">${label} (${days}д)</span>`;
+  return `<span class="badge badge-dim">${label}</span>`;
+}
 
 function renderRequests() {
   const tbody = document.getElementById('reqTable');
@@ -561,6 +609,7 @@ function renderRequests() {
       <td>${invoiceBadge(r)}</td>
       <td>${paymentBadge(r)}</td>
       <td>${enrollBadge(r)}</td>
+      <td>${expiryBadge(r)}</td>
       <td>
         ${isArchive
           ? `<span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-dim)">${esc(r.status)}</span>`
@@ -671,7 +720,8 @@ document.querySelectorAll('.tab').forEach(tab => {
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     tab.classList.add('active');
     document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
-    if (tab.dataset.tab === 'content' && !siteData) loadSiteJson();
+    if (tab.dataset.tab === 'content')   { if (!siteData) loadSiteJson(); }
+    if (tab.dataset.tab === 'analytics') loadAnalytics();
   });
 });
 
@@ -1068,6 +1118,89 @@ document.getElementById('themeBtn').addEventListener('click', () => {
   applyTheme(next);
 });
 applyTheme(localStorage.getItem('gc_admin_theme') || 'dark');
+
+// ── Аналитика ──────────────────────────────────────────────
+async function loadAnalytics() {
+  try {
+    const [actRes, archRes] = await Promise.all([
+      fetch(`${API}/api/admin/requests`, { headers: h() }),
+      fetch(`${API}/api/admin/requests/archive`, { headers: h() }),
+    ]);
+    const active  = (await actRes.json()).requests  || [];
+    const archive = (await archRes.json()).requests || [];
+    const all = [...active, ...archive];
+    const paid = all.filter(r => r.payment_status === 'paid');
+    const now  = new Date();
+
+    // KPI
+    const totalRevenue = paid.reduce((s, r) => s + (+r.total_price || 0), 0);
+    const enrolled     = paid.filter(r => r.moodle_accounts_generated).length;
+    const expiringSoon = paid.filter(r => {
+      if (!r.access_expiry_date) return false;
+      const d = Math.ceil((new Date(r.access_expiry_date) - now) / 86400000);
+      return d >= 0 && d <= 30;
+    }).length;
+    const expired = paid.filter(r => {
+      if (!r.access_expiry_date) return false;
+      return new Date(r.access_expiry_date) < now;
+    }).length;
+    const totalStudents = paid.reduce((s, r) => s + (+r.headcount || 1), 0);
+
+    document.getElementById('kpiGrid').innerHTML = [
+      { val: paid.length,                    label: 'Оплаченных заявок',     sub: `всего заявок: ${all.length}` },
+      { val: totalStudents,                  label: 'Студентов зачислено',   sub: `аккаунтов создано: ${enrolled}` },
+      { val: totalRevenue.toLocaleString('ru') + ' ₽', label: 'Выручка',    sub: 'все оплаченные' },
+      { val: expiringSoon,                   label: 'Истекает ≤30 дней',     sub: `уже истекло: ${expired}`, warn: expiringSoon > 0 },
+    ].map(k => `
+      <div class="kpi-card">
+        <div class="kpi-val" style="${k.warn ? 'color:var(--gold)' : ''}">${k.val}</div>
+        <div class="kpi-label">${k.label}</div>
+        <div class="kpi-sub">${k.sub}</div>
+      </div>`).join('');
+
+    // График выручки по месяцам
+    const byMonth = {};
+    paid.forEach(r => {
+      const m = (r.created_at || '').slice(0, 7);
+      if (m) byMonth[m] = (byMonth[m] || 0) + (+r.total_price || 0);
+    });
+    const months = Object.keys(byMonth).sort().slice(-6);
+    const maxVal = Math.max(...months.map(m => byMonth[m]), 1);
+    document.getElementById('revenueChart').innerHTML = months.length
+      ? months.map(m => `
+        <div class="bar-row">
+          <div class="bar-label">${m}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${byMonth[m]/maxVal*100}%"></div></div>
+          <div class="bar-val">${byMonth[m].toLocaleString('ru')} ₽</div>
+        </div>`).join('')
+      : '<div style="color:var(--text-dim);font-size:12px">Нет данных</div>';
+
+    // Истекающие доступы
+    const expList = paid
+      .filter(r => r.access_expiry_date)
+      .map(r => ({ ...r, days: Math.ceil((new Date(r.access_expiry_date) - now) / 86400000) }))
+      .filter(r => r.days <= 30)
+      .sort((a, b) => a.days - b.days);
+
+    document.getElementById('expiryList').innerHTML = expList.length
+      ? expList.map(r => `
+        <div class="expiry-row">
+          <div>
+            <span style="color:var(--text)">${esc(r.company_name)}</span>
+            <span style="color:var(--text-dim);font-size:11px;margin-left:8px">${esc(r.course_name)}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-dim)">${r.access_expiry_date}</span>
+            ${r.days < 0
+              ? `<span class="badge-exp">истёк</span>`
+              : `<span class="badge-warn">${r.days}д</span>`}
+          </div>
+        </div>`).join('')
+      : '<div style="color:var(--text-dim);font-size:12px;padding:12px 0">Нет истекающих доступов</div>';
+
+    document.getElementById('analyticsUpdated').textContent = `обновлено: ${new Date().toLocaleTimeString('ru')}`;
+  } catch(e) { console.error(e); }
+}
 
 if (token) showAdmin();
 </script>
