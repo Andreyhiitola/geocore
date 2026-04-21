@@ -238,6 +238,7 @@ tr:hover td{background:var(--dark-3);}
             <th>Сумма</th>
             <th>Счёт</th>
             <th>Оплата</th>
+            <th>Зачислены</th>
             <th>Статус</th>
             <th>Дата</th>
             <th></th>
@@ -522,6 +523,11 @@ function paymentBadge(r) {
   if (s === 'partial') return `<span class="badge badge-gold">Частично</span>`;
   return `<span class="badge badge-dim">—</span>`;
 }
+function enrollBadge(r) {
+  if (r.moodle_accounts_generated) return `<span class="badge badge-green">✓ да</span>`;
+  if (r.payment_status === 'paid')  return `<span class="badge badge-gold">⚠ нет</span>`;
+  return `<span class="badge badge-dim">—</span>`;
+}
 
 function renderRequests() {
   const tbody = document.getElementById('reqTable');
@@ -543,6 +549,7 @@ function renderRequests() {
       <td style="font-family:'IBM Plex Mono',monospace;font-size:12px">${r.total_price ? r.total_price + ' ₽' : '—'}</td>
       <td>${invoiceBadge(r)}</td>
       <td>${paymentBadge(r)}</td>
+      <td>${enrollBadge(r)}</td>
       <td>
         ${isArchive
           ? `<span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-dim)">${esc(r.status)}</span>`
