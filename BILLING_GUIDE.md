@@ -28,6 +28,49 @@ git push
 
 CI/CD пересоберёт образ `geocore-backend` (~3–5 мин). Следить в GitHub Actions.
 
+---
+
+## Что проверить после перезапуска контейнера бэкенда
+
+После `docker compose up -d --force-recreate backend` или обновления через CI/CD:
+
+```bash
+# 1. Контейнер запущен
+docker ps | grep geocore_api
+
+# 2. API отвечает
+curl https://api.geocore-academy.ru/api/health
+
+# 3. MOODLE_TOKEN актуален (ключ не должен быть «недействителен»)
+curl https://api.geocore-academy.ru/api/courses
+
+# 4. Логи без ошибок запуска
+docker logs geocore_api --tail 20
+```
+
+### Если `/api/courses` возвращает «Ключ недействителен»
+
+Токен сбросился после пересоздания контейнера Moodle. Нужно создать новый:
+
+1. Moodle → **Сервер → Веб-службы → Управление ключами**
+2. Удалить старый токен пользователя `geocore_api` → создать новый
+3. Скопировать токен в `.env` на VPS: `MOODLE_TOKEN=<новый токен>`
+4. Перезапустить бэкенд: `docker compose up -d --force-recreate backend`
+
+### Если аккаунты Moodle не создаются (invalidparameter)
+
+```bash
+docker logs geocore_api --tail 50 2>&1 | grep -i "moodle\|error"
+```
+
+Причины и решения:
+
+| Ошибка | Причина | Решение |
+|--------|---------|---------|
+| `Ключ недействителен` | Устаревший MOODLE_TOKEN | Обновить токен (см. выше) |
+| `invalidparameter` | Неверный параметр API | Проверить версию бэкенда — пересобрать |
+| `Пользователь уже существует` | Повторный вызов mark-paid | Игнорировать, зачислить вручную |
+
 ### Проверить после деплоя
 
 ```bash
