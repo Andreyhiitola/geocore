@@ -14,6 +14,17 @@ from email.mime.multipart import MIMEMultipart
 import httpx
 import aiomysql
 from typing import Optional
+from fastapi.staticfiles import StaticFiles
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import mm
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+import qrcode as qrcode_lib
+import secrets
+import string
+import time
+from datetime import date as date_type, timedelta
 
 # Импортируем наши модули
 from processing.validator import validate_csv
@@ -39,6 +50,30 @@ app = FastAPI(
     description="API для подготовки данных к импорту в Datamine Studio RM",
     version="1.0.0"
 )
+
+# ── Static files (счета, QR) ──────────────────────────────────────────────────
+_BASE_DIR    = os.path.dirname(os.path.abspath(__file__))
+STATIC_DIR   = os.path.join(_BASE_DIR, "static")
+INVOICES_DIR = os.path.join(STATIC_DIR, "invoices")
+QR_DIR       = os.path.join(STATIC_DIR, "qr")
+os.makedirs(INVOICES_DIR, exist_ok=True)
+os.makedirs(QR_DIR, exist_ok=True)
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+# ── PDF-шрифты (Кириллица через DejaVu если установлено fonts-dejavu-core) ────
+_FONT_REG  = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+_FONT_BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+try:
+    if os.path.exists(_FONT_REG):
+        pdfmetrics.registerFont(TTFont("DjvSans",   _FONT_REG))
+        pdfmetrics.registerFont(TTFont("DjvSans-B", _FONT_BOLD))
+except Exception:
+    pass
+
+def _pdf_font(bold: bool = False) -> str:
+    if os.path.exists(_FONT_REG):
+        return "DjvSans-B" if bold else "DjvSans"
+    return "Helvetica-Bold" if bold else "Helvetica"
 
 # ── База данных ───────────────────────────────────────────────────────────────
 
@@ -87,6 +122,26 @@ async def startup():
                 await cur.execute("""
                     ALTER TABLE requests
                     ADD COLUMN IF NOT EXISTS archived TINYINT(1) DEFAULT 0
+                """)
+                for _col in [
+                    "ALTER TABLE requests ADD COLUMN IF NOT EXISTS total_price DECIMAL(10,2) NULL",
+                    "ALTER TABLE requests ADD COLUMN IF NOT EXISTS invoice_status VARCHAR(20) DEFAULT 'not_created'",
+                    "ALTER TABLE requests ADD COLUMN IF NOT EXISTS invoice_link VARCHAR(512) NULL",
+                    "ALTER TABLE requests ADD COLUMN IF NOT EXISTS payment_status VARCHAR(20) DEFAULT 'unpaid'",
+                    "ALTER TABLE requests ADD COLUMN IF NOT EXISTS access_expiry_date DATE NULL",
+                    "ALTER TABLE requests ADD COLUMN IF NOT EXISTS moodle_accounts_generated TINYINT(1) DEFAULT 0",
+                ]:
+                    await cur.execute(_col)
+                await cur.execute("""
+                    CREATE TABLE IF NOT EXISTS moodle_accounts (
+                        id             INT AUTO_INCREMENT PRIMARY KEY,
+                        request_id     INT NOT NULL,
+                        username       VARCHAR(100) NOT NULL,
+                        password       VARCHAR(255) NOT NULL,
+                        moodle_user_id INT DEFAULT 0,
+                        created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        FOREIGN KEY (request_id) REFERENCES requests(id) ON DELETE CASCADE
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
                 """)
         print("[DB] Таблица requests готова")
     except Exception as e:
@@ -247,6 +302,169 @@ def _send_request_emails(req: CourseRequest) -> None:
         print(f"[email] Ошибка авто-ответа: {e}")
 
 
+# ── PDF / QR helpers ─────────────────────────────────────────────────────────
+
+def _generate_secure_password() -> str:
+    chars = string.ascii_letters + string.digits + "!@#$%^"
+    return ''.join(secrets.choice(chars) for _ in range(12))
+
+
+def _make_invoice_pdf(request_id: int, company_name: str, course_name: str,
+                      total_price, inn: str) -> str:
+    path = os.path.join(INVOICES_DIR, f"invoice_{request_id}.pdf")
+    buf = io.BytesIO()
+    c = canvas.Canvas(buf, pagesize=A4)
+    _, H = A4
+    fn_b, fn = _pdf_font(True), _pdf_font(False)
+    c.setFont(fn_b, 16)
+    c.drawString(20*mm, H - 25*mm, f"Счёт на оплату № {request_id}")
+    c.setFont(fn, 11)
+    y = H - 42*mm
+    for label, val in [
+        ("Компания:", company_name),
+        ("ИНН:", inn),
+        ("Курс:", course_name),
+        ("Сумма:", f"{total_price or 0} руб."),
+    ]:
+        c.drawString(20*mm, y, f"{label}  {val}")
+        y -= 8*mm
+    y -= 4*mm
+    c.setFont(fn_b, 10)
+    c.drawString(20*mm, y, "Реквизиты (тестовые):")
+    y -= 7*mm
+    c.setFont(fn, 10)
+    for line in [
+        "ИП Тестов Тест Тестович", "ИНН 1234567890",
+        "р/с 40802810700000000000", "Банк: ТЕСТ-БАНК, БИК 044525999",
+    ]:
+        c.drawString(20*mm, y, line)
+        y -= 6*mm
+    c.save()
+    with open(path, "wb") as f:
+        f.write(buf.getvalue())
+    return path
+
+
+def _make_qr(request_id: int, total_price) -> str:
+    path = os.path.join(QR_DIR, f"qr_{request_id}.png")
+    data = f"Test QR | invoice {request_id} | {total_price or 0} rub. (not real payment)"
+    img = qrcode_lib.make(data)
+    img.save(path)
+    return path
+
+
+def _send_accounts_email(to_email: str, accounts: list, course_name: str,
+                         expiry_date) -> None:
+    if not all([SMTP_HOST, SMTP_USER, SMTP_PASS]):
+        return
+    rows = "\n".join(f"  Логин: {a['username']}\n  Пароль: {a['password']}" for a in accounts)
+    body = (
+        f"Здравствуйте!\n\n"
+        f"Ваша оплата подтверждена. Доступ к курсу «{course_name}» предоставлен.\n\n"
+        f"Данные для входа:\n{rows}\n\n"
+        f"Ссылка: {MOODLE_URL}\n"
+        f"Доступ до: {expiry_date or 'не ограничен'}\n\n"
+        f"С уважением,\nGeoCore Academy\ninfo@geocore-academy.ru"
+    )
+    msg = MIMEMultipart()
+    msg["From"]    = f"GeoCore Academy <{SMTP_USER}>"
+    msg["To"]      = to_email
+    msg["Subject"] = f"Данные для входа — {course_name}"
+    msg.attach(MIMEText(body, "plain", "utf-8"))
+    try:
+        _smtp_send(msg)
+        print(f"[email] Аккаунты → {to_email}")
+    except Exception as e:
+        print(f"[email] Ошибка отправки аккаунтов: {e}")
+
+
+async def _get_moodle_course_id(course_name: str) -> Optional[int]:
+    if not MOODLE_TOKEN:
+        return None
+    params = {"wstoken": MOODLE_TOKEN, "wsfunction": "core_course_get_courses",
+               "moodlewsrestformat": "json"}
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            resp = await client.get(f"{MOODLE_URL}/webservice/rest/server.php", params=params)
+            courses = resp.json()
+        if not isinstance(courses, list):
+            return None
+        needle = course_name.lower()
+        for c in courses:
+            if c["id"] != 1 and needle in c.get("fullname", "").lower():
+                return c["id"]
+    except Exception as e:
+        print(f"[moodle] Ошибка поиска курса: {e}")
+    return None
+
+
+async def _create_moodle_accounts(req: dict) -> list:
+    accounts = []
+    if not MOODLE_TOKEN:
+        print("[moodle] MOODLE_TOKEN не задан — аккаунты не созданы")
+        return accounts
+    course_id = await _get_moodle_course_id(req["course_name"])
+    expiry_ts = 0
+    if req.get("access_expiry_date"):
+        try:
+            exp = req["access_expiry_date"]
+            if isinstance(exp, str):
+                exp = date_type.fromisoformat(exp)
+            expiry_ts = int(time.mktime(exp.timetuple()))
+        except Exception:
+            expiry_ts = 0
+    pool = await get_pool()
+    async with httpx.AsyncClient(timeout=15) as client:
+        for i in range(int(req.get("headcount") or 1)):
+            username = f"gc_{req['id']}_{i+1}"
+            password = _generate_secure_password()
+            email = (req.get("employee_email") or f"user_{req['id']}_{i+1}@temp.geocore.ru") \
+                    if (req.get("headcount") or 1) == 1 \
+                    else f"gc_{req['id']}_{i+1}@temp.geocore.ru"
+            moodle_id = 0
+            try:
+                params = {
+                    "wstoken": MOODLE_TOKEN,
+                    "wsfunction": "core_user_create_users",
+                    "moodlewsrestformat": "json",
+                    "users[0][username]": username,
+                    "users[0][password]": password,
+                    "users[0][firstname]": f"User{i+1}",
+                    "users[0][lastname]": (req.get("company_name") or "")[:30],
+                    "users[0][email]": email,
+                    "users[0][auth]": "manual",
+                    "users[0][confirmed]": 1,
+                }
+                resp = await client.get(f"{MOODLE_URL}/webservice/rest/server.php", params=params)
+                data = resp.json()
+                if isinstance(data, list) and data:
+                    moodle_id = data[0].get("id", 0)
+                    if course_id:
+                        enrol = {
+                            "wstoken": MOODLE_TOKEN,
+                            "wsfunction": "enrol_manual_enrol_users",
+                            "moodlewsrestformat": "json",
+                            "enrolments[0][roleid]": 5,
+                            "enrolments[0][userid]": moodle_id,
+                            "enrolments[0][courseid]": course_id,
+                            "enrolments[0][timestart]": int(time.time()),
+                            "enrolments[0][timeend]": expiry_ts,
+                        }
+                        await client.get(f"{MOODLE_URL}/webservice/rest/server.php", params=enrol)
+                else:
+                    print(f"[moodle] Ошибка создания пользователя: {data}")
+            except Exception as e:
+                print(f"[moodle] Ошибка для пользователя {username}: {e}")
+            async with pool.acquire() as conn:
+                async with conn.cursor() as cur:
+                    await cur.execute(
+                        "INSERT INTO moodle_accounts (request_id, username, password, moodle_user_id) VALUES (%s,%s,%s,%s)",
+                        (req["id"], username, password, moodle_id)
+                    )
+            accounts.append({"username": username, "password": password})
+    return accounts
+
+
 @app.post("/api/requests")
 async def create_request(request: CourseRequest, background_tasks: BackgroundTasks):
     """Приём заявки на корпоративное обучение"""
@@ -365,6 +583,150 @@ async def admin_delete_request(request_id: int, _=Depends(require_admin)):
         async with conn.cursor() as cur:
             await cur.execute("DELETE FROM requests WHERE id=%s AND archived=1", (request_id,))
     return {"success": True}
+
+
+@app.get("/api/admin/requests/{request_id}")
+async def admin_get_request(request_id: int, _=Depends(require_admin)):
+    """Получить одну заявку + её аккаунты Moodle"""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        async with conn.cursor(aiomysql.DictCursor) as cur:
+            await cur.execute("SELECT * FROM requests WHERE id=%s", (request_id,))
+            req = await cur.fetchone()
+            if not req:
+                raise HTTPException(404, "Заявка не найдена")
+            await cur.execute(
+                "SELECT username, password FROM moodle_accounts WHERE request_id=%s ORDER BY id",
+                (request_id,)
+            )
+            accounts = await cur.fetchall()
+    for k in ("created_at", "access_expiry_date"):
+        if req.get(k):
+            req[k] = str(req[k])
+    req["accounts"] = list(accounts)
+    return req
+
+
+@app.patch("/api/admin/requests/{request_id}/headcount")
+async def admin_update_headcount(request_id: int, headcount: int, _=Depends(require_admin)):
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute("UPDATE requests SET headcount=%s WHERE id=%s", (headcount, request_id))
+    return {"success": True}
+
+
+@app.patch("/api/admin/requests/{request_id}/total_price")
+async def admin_update_total_price(request_id: int, total_price: float, _=Depends(require_admin)):
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute("UPDATE requests SET total_price=%s WHERE id=%s", (total_price, request_id))
+    return {"success": True}
+
+
+@app.post("/api/admin/requests/{request_id}/generate-invoice")
+async def admin_generate_invoice(request_id: int, _=Depends(require_admin)):
+    """Сформировать заглушку счёта (PDF + QR)"""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        async with conn.cursor(aiomysql.DictCursor) as cur:
+            await cur.execute("SELECT * FROM requests WHERE id=%s", (request_id,))
+            req = await cur.fetchone()
+    if not req:
+        raise HTTPException(404, "Заявка не найдена")
+    if not req.get("total_price"):
+        raise HTTPException(400, "Сначала укажите стоимость (total_price)")
+    try:
+        _make_invoice_pdf(request_id, req["company_name"], req["course_name"],
+                          req["total_price"], req["inn"])
+        _make_qr(request_id, req["total_price"])
+    except Exception as e:
+        raise HTTPException(500, f"Ошибка генерации PDF: {e}")
+    invoice_url = f"/static/invoices/invoice_{request_id}.pdf"
+    qr_url      = f"/static/qr/qr_{request_id}.png"
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                "UPDATE requests SET invoice_status='created', invoice_link=%s WHERE id=%s",
+                (invoice_url, request_id)
+            )
+    return {"invoice_url": invoice_url, "qr_url": qr_url, "status": "created"}
+
+
+@app.post("/api/admin/requests/{request_id}/mark-paid")
+async def admin_mark_paid(request_id: int,
+                          background_tasks: BackgroundTasks,
+                          expiry_date: Optional[str] = None,
+                          _=Depends(require_admin)):
+    """Подтвердить оплату — обновить статус, создать аккаунты Moodle, отправить email"""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        async with conn.cursor(aiomysql.DictCursor) as cur:
+            await cur.execute("UPDATE requests SET payment_status='paid', status='paid' WHERE id=%s", (request_id,))
+            if expiry_date:
+                await cur.execute("UPDATE requests SET access_expiry_date=%s WHERE id=%s",
+                                  (expiry_date, request_id))
+            else:
+                await cur.execute(
+                    "UPDATE requests SET access_expiry_date=DATE_ADD(CURDATE(), INTERVAL 30 DAY) WHERE id=%s",
+                    (request_id,)
+                )
+            await cur.execute("SELECT * FROM requests WHERE id=%s", (request_id,))
+            req = await cur.fetchone()
+    if not req:
+        raise HTTPException(404, "Заявка не найдена")
+    if req.get("access_expiry_date"):
+        req["access_expiry_date"] = str(req["access_expiry_date"])
+    if req.get("moodle_accounts_generated"):
+        async with pool.acquire() as conn:
+            async with conn.cursor(aiomysql.DictCursor) as cur:
+                await cur.execute(
+                    "SELECT username, password FROM moodle_accounts WHERE request_id=%s", (request_id,)
+                )
+                existing = await cur.fetchall()
+        return {"ok": True, "accounts": list(existing)}
+    accounts = await _create_moodle_accounts(req)
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute("UPDATE requests SET moodle_accounts_generated=1 WHERE id=%s", (request_id,))
+    background_tasks.add_task(
+        _send_accounts_email,
+        req.get("contact_email", ""),
+        accounts,
+        req.get("course_name", ""),
+        req.get("access_expiry_date")
+    )
+    return {"ok": True, "accounts": accounts}
+
+
+@app.post("/api/admin/requests/{request_id}/send-accounts")
+async def admin_send_accounts(request_id: int, background_tasks: BackgroundTasks,
+                              _=Depends(require_admin)):
+    """Повторно отправить аккаунты Moodle клиенту (ручная отправка из админки)"""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        async with conn.cursor(aiomysql.DictCursor) as cur:
+            await cur.execute("SELECT * FROM requests WHERE id=%s", (request_id,))
+            req = await cur.fetchone()
+            if not req:
+                raise HTTPException(404, "Заявка не найдена")
+            await cur.execute(
+                "SELECT username, password FROM moodle_accounts WHERE request_id=%s ORDER BY id",
+                (request_id,)
+            )
+            accounts = list(await cur.fetchall())
+    if not accounts:
+        raise HTTPException(400, "Аккаунты для этой заявки ещё не созданы")
+    expiry = str(req["access_expiry_date"]) if req.get("access_expiry_date") else None
+    background_tasks.add_task(
+        _send_accounts_email,
+        req.get("contact_email", ""),
+        accounts,
+        req.get("course_name", ""),
+        expiry
+    )
+    return {"ok": True, "sent_to": req.get("contact_email")}
 
 
 # ── Admin: site.json через GitHub API ────────────────────────────────────────

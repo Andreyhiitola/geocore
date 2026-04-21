@@ -89,6 +89,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /:/rootfs:ro
+      - /opt/geocore/bot_data:/app/data
     environment:
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
       TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}

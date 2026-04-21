@@ -4,7 +4,7 @@ WORKDIR /app
 
 # libgomp1 нужен scipy и numpy — без него будет ошибка libgomp.so.1 not found
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libgomp1 curl \
+    libgomp1 curl fonts-dejavu-core \
     && rm -rf /var/lib/apt/lists/*
 
 # Сначала копируем только requirements.txt — Docker кеширует этот слой

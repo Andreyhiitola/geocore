@@ -2,6 +2,42 @@
 
 ---
 
+## 2026-04-21 (сессия 15)
+
+### Что сделали
+
+**Расширение админки — счета, оплаты, аккаунты Moodle (Этапы 1–3 дорожной карты):**
+
+**Backend `backend/main.py`:**
+- Новые колонки в `requests`: `total_price`, `invoice_status`, `invoice_link`, `payment_status`, `access_expiry_date`, `moodle_accounts_generated` (через `ALTER TABLE ... ADD COLUMN IF NOT EXISTS`)
+- Новая таблица `moodle_accounts` (request_id, username, password, moodle_user_id)
+- Статика: `app.mount("/static", StaticFiles(...))` → `/static/invoices/` и `/static/qr/`
+- Регистрация DejaVu-шрифтов для reportlab (поддержка кириллицы при наличии `fonts-dejavu-core`)
+- Новые эндпоинты:
+  - `GET /api/admin/requests/{id}` — одна заявка + аккаунты
+  - `PATCH /api/admin/requests/{id}/headcount` и `/total_price`
+  - `POST /api/admin/requests/{id}/generate-invoice` — генерация PDF + QR (заглушка)
+  - `POST /api/admin/requests/{id}/mark-paid` — подтвердить оплату + создать аккаунты Moodle + отправить email
+- Хелперы: `_make_invoice_pdf`, `_make_qr`, `_create_moodle_accounts`, `_send_accounts_email`, `_get_moodle_course_id`, `_generate_secure_password`
+
+**`backend/requirements.txt`:** добавлены `reportlab`, `qrcode[pil]`, `Pillow`
+
+**`backend/Dockerfile`:** добавлен `fonts-dejavu-core` (кириллица в PDF)
+
+**Frontend `frontend/admin.html`:**
+- Таблица заявок: новые колонки «Сумма», «Счёт», «Оплата» (бейджи), убрана колонка «Сотрудник»
+- Кнопка ✎ на каждой строке открывает модальное окно
+- Модальное окно: все детали заявки + редактирование headcount/total_price + формирование счёта + подтверждение оплаты + список аккаунтов Moodle
+- CSS: модальное окно, бейджи статусов (badge-dim/blue/green/gold), кнопки btn-invoice/btn-paid
+
+### Состояние после сессии
+- Этапы 1–3 реализованы, готово к деплою
+- Этап 4 (тестирование): заполнить заявку → открыть модалку → сформировать счёт → отметить оплаченным
+- Для реального Moodle: нужен `MOODLE_TOKEN` с разрешениями `core_user_create_users` + `enrol_manual_enrol_users`
+- Счета сохраняются в `/app/static/` внутри контейнера (теряются при перезапуске — это норма для заглушки)
+
+---
+
 ## 2026-04-20 (сессия 14)
 
 ### Что сделали

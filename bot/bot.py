@@ -1,4 +1,5 @@
 import os
+import json
 import time
 import threading
 import subprocess
@@ -20,11 +21,83 @@ INTERVAL  = int(os.environ.get('CHECK_INTERVAL', '300'))
 
 backup_running = threading.Event()
 
+# ── Состояние бота (персистентное) ────────────────────────────────────────────
+
+_STATE_FILE = '/app/data/state.json'
+os.makedirs('/app/data', exist_ok=True)
+
+
+def _load_state() -> dict:
+    try:
+        with open(_STATE_FILE) as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def _save_state(state: dict) -> None:
+    try:
+        with open(_STATE_FILE, 'w') as f:
+            json.dump(state, f, indent=2)
+    except Exception:
+        pass
+
+
+# ── Напоминалка о токенах ─────────────────────────────────────────────────────
+
+def _tokens_text() -> str:
+    state = _load_state()
+    reminder = state.get('last_token_reminder')
+    rotated  = state.get('last_admin_token_rotated')
+
+    if reminder:
+        days_ago  = (datetime.now() - datetime.fromisoformat(reminder)).days
+        days_left = max(0, 90 - days_ago)
+        timer_line = f"⏰ Следующее напоминание через *{days_left}* дн."
+    else:
+        timer_line = "⏰ Напоминание ещё не отправлялось"
+
+    rotated_line = (f"🔄 Последняя ротация ADMIN\\_TOKEN: "
+                    f"`{datetime.fromisoformat(rotated).strftime('%d.%m.%Y')}`"
+                    if rotated else "🔄 ADMIN\\_TOKEN ещё не ротировался")
+
+    return (
+        "🔑 *Управление токенами*\n\n"
+        "*Автоматически (кнопкой ниже):*\n"
+        f"✅ `ADMIN_TOKEN` — {rotated_line}\n\n"
+        "*Требуют ручной ротации:*\n"
+        "• `GITHUB_TOKEN` → github.com/settings/tokens\n"
+        "• `MOODLE_TOKEN` → Moodle → Web services → Токены\n"
+        "• `TELEGRAM_BOT_TOKEN` → @BotFather `/revoke`\n"
+        "• `SMTP_PASS` → Gmail → Пароли приложений\n"
+        "• S3 ключи → Панель Selectel\n\n"
+        f"{timer_line}"
+    )
+
+
+def _check_token_reminder() -> None:
+    state = _load_state()
+    last  = state.get('last_token_reminder')
+    if last and (datetime.now() - datetime.fromisoformat(last)).days < 90:
+        return
+    state['last_token_reminder'] = datetime.now().isoformat()
+    _save_state(state)
+    send(
+        "🔑 *Напоминание: ротация токенов*\n\n"
+        "Прошло 90 дней. Рекомендуется обновить:\n"
+        "• `GITHUB_TOKEN` → github.com/settings/tokens\n"
+        "• `MOODLE_TOKEN` → Moodle → Web services\n"
+        "• `TELEGRAM_BOT_TOKEN` → @BotFather `/revoke`\n"
+        "• `SMTP_PASS` → Gmail → Пароли приложений\n"
+        "• S3 ключи → Selectel\n\n"
+        "ADMIN\\_TOKEN можно ротировать кнопкой 🔑 Токены"
+    )
+
 
 REPLY_KEYBOARD = {
     'keyboard': [
         [{'text': '📊 Статус'}, {'text': '💾 Бэкап'}],
-        [{'text': '📋 История бэкапов'}],
+        [{'text': '📋 История бэкапов'}, {'text': '🔑 Токены'}],
     ],
     'resize_keyboard': True,
     'persistent': True,
@@ -36,6 +109,10 @@ STATUS_KEYBOARD = {'inline_keyboard': [[
     {'text': '📋 Логи',     'callback_data': 'status_logs'},
     {'text': '🗑 Очистить', 'callback_data': 'status_prune'},
 ]]}
+
+TOKEN_KEYBOARD = {'inline_keyboard': [
+    [{'text': '🔔 Сбросить таймер (90 дней)', 'callback_data': 'token_reset_timer'}],
+]}
 
 
 def send(text, chat_id=None, keyboard=False, inline=None):
@@ -226,12 +303,22 @@ def check():
                 alert(f'http:{url}', f"Сайт недоступен: {url}\n(timeout / нет ответа)")
 
 
+_last_token_check = 0.0
+
+
 def watchdog_loop():
+    global _last_token_check
     while True:
         try:
             check()
         except Exception:
             pass
+        if time.time() - _last_token_check > 86400:
+            try:
+                _check_token_reminder()
+            except Exception:
+                pass
+            _last_token_check = time.time()
         time.sleep(INTERVAL)
 
 
@@ -283,8 +370,15 @@ def handle(upd):
         freed = next((l for l in r.stdout.splitlines() if 'reclaimed' in l.lower()), 'готово')
         send(f"🗑 Очистка завершена\n{freed}", cid)
         return
+    if text == 'token_reset_timer' and mid_cb:
+        state = _load_state()
+        state['last_token_reminder'] = datetime.now().isoformat()
+        _save_state(state)
+        edit(cid, mid_cb, _tokens_text(), inline=TOKEN_KEYBOARD)
+        return
+
     if text in ('/start', '/help'):
-        send("*GeoCore Bot*\n\n📊 Статус — метрики VPS и статус контейнеров\n💾 Бэкап — запустить бэкап вручную", cid, keyboard=True)
+        send("*GeoCore Bot*\n\n📊 Статус — метрики VPS и статус контейнеров\n💾 Бэкап — запустить бэкап вручную\n🔑 Токены — ротация и напоминания", cid, keyboard=True)
     elif text in ('/status', '📊 Статус'):
         try:
             send(status_text(), cid, inline=STATUS_KEYBOARD)
@@ -350,6 +444,8 @@ def handle(upd):
             send(backup_history_text(), cid)
         except Exception as e:
             send(f"Ошибка: {e}", cid)
+    elif text in ('/tokens', '🔑 Токены'):
+        send(_tokens_text(), cid, inline=TOKEN_KEYBOARD)
 
 
 def poll():

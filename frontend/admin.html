@@ -132,12 +132,46 @@ tr:hover td{background:var(--dark-3);}
 .toast.ok{border-color:var(--green);color:var(--green);}
 .toast.err{border-color:var(--red);color:var(--red);}
 
+/* ── BADGES ── */
+.badge{font-family:'IBM Plex Mono',monospace;font-size:9.5px;padding:2px 7px;letter-spacing:.04em;}
+.badge-dim{color:var(--text-dim);}
+.badge-blue{color:var(--blue);}
+.badge-green{color:var(--green);}
+.badge-gold{color:var(--gold);}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);align-items:center;justify-content:center;z-index:200;padding:16px;}
+.modal-box{background:var(--dark-3);border:1px solid var(--border);width:100%;max-width:580px;max-height:90vh;overflow-y:auto;}
+.modal-head{padding:20px 24px;border-bottom:1px solid var(--border-dim);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.modal-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;}
+.modal-close{background:none;border:none;color:var(--text-dim);font-size:20px;cursor:pointer;line-height:1;padding:0;flex-shrink:0;transition:color .2s;}
+.modal-close:hover{color:var(--red);}
+.modal-body{padding:24px;}
+.ms-label{font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim);margin-bottom:4px;}
+.ms-val{font-size:13px;color:var(--text);}
+.modal-inp{width:100%;background:var(--dark-2);border:1px solid var(--border-dim);color:var(--text);padding:8px 10px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;outline:none;transition:border-color .2s;}
+.modal-inp:focus{border-color:var(--gold);}
+.modal-2col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+.modal-divider{border:none;border-top:1px solid var(--border-dim);margin:18px 0;}
+.btn-modal-save{background:none;border:1px solid var(--gold-dim);color:var(--gold);padding:7px 16px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.08em;cursor:pointer;transition:all .2s;}
+.btn-modal-save:hover{background:var(--gold);color:var(--dark);}
+.btn-invoice{background:none;border:1px solid var(--blue);color:var(--blue);padding:7px 16px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.08em;cursor:pointer;transition:all .2s;margin-right:8px;}
+.btn-invoice:hover:not(:disabled){background:var(--blue);color:var(--dark);}
+.btn-paid{background:none;border:1px solid var(--green);color:var(--green);padding:7px 16px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.08em;cursor:pointer;transition:all .2s;}
+.btn-paid:hover:not(:disabled){background:var(--green);color:var(--dark);}
+.btn-invoice:disabled,.btn-paid:disabled,.btn-modal-save:disabled{opacity:.5;cursor:default;}
+.modal-link{color:var(--gold);font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.04em;text-decoration:none;margin-right:16px;}
+.modal-link:hover{text-decoration:underline;}
+.accounts-tbl{width:100%;border-collapse:collapse;margin-top:8px;}
+.accounts-tbl td{font-family:'IBM Plex Mono',monospace;font-size:11px;padding:6px 8px;border-bottom:1px solid var(--border-dim);}
+
 @media(max-width:768px){
   .tab-panel{padding:16px;}
   header,.tabs{padding:0 16px;}
   .form-row{grid-template-columns:1fr;}
   .footer-meta{grid-template-columns:1fr;}
-  th:nth-child(4),td:nth-child(4),th:nth-child(6),td:nth-child(6){display:none;}
+  .modal-2col{grid-template-columns:1fr;}
+  th:nth-child(4),td:nth-child(4),th:nth-child(6),td:nth-child(6),th:nth-child(7),td:nth-child(7),th:nth-child(8),td:nth-child(8){display:none;}
 }
 </style>
 </head>
@@ -201,7 +235,9 @@ tr:hover td{background:var(--dark-3);}
             <th>Компания / ИНН</th>
             <th>Контакт</th>
             <th>Чел.</th>
-            <th>Сотрудник</th>
+            <th>Сумма</th>
+            <th>Счёт</th>
+            <th>Оплата</th>
             <th>Статус</th>
             <th>Дата</th>
             <th></th>
@@ -323,6 +359,68 @@ tr:hover td{background:var(--dark-3);}
   </div>
 </div>
 
+<!-- MODAL: управление заявкой -->
+<div id="reqModal" class="modal-overlay" style="display:none" onclick="handleModalOverlayClick(event)">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Заявка <span id="m-id" style="color:var(--gold)"></span></div>
+        <div id="m-course-title" style="font-size:12px;color:var(--text-muted);margin-top:4px"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-2col">
+        <div>
+          <div class="ms-label">Компания / ИНН</div>
+          <div class="ms-val" id="m-company"></div>
+        </div>
+        <div>
+          <div class="ms-label">Контакт / Сотрудник</div>
+          <div class="ms-val" id="m-employee"></div>
+        </div>
+      </div>
+      <div class="modal-2col">
+        <div>
+          <div class="ms-label">Количество участников</div>
+          <input class="modal-inp" type="number" id="m-headcount" min="1">
+        </div>
+        <div>
+          <div class="ms-label">Стоимость (руб.)</div>
+          <input class="modal-inp" type="number" step="0.01" id="m-price" placeholder="0.00">
+        </div>
+      </div>
+      <button class="btn-modal-save" id="m-save-btn" onclick="saveModalFields()">Сохранить</button>
+
+      <hr class="modal-divider">
+
+      <div style="margin-bottom:16px">
+        <div class="ms-label" style="margin-bottom:6px">Счёт на оплату</div>
+        <div id="m-invoice-status" style="font-size:13px;margin-bottom:8px"></div>
+        <div id="m-invoice-links" style="margin-bottom:10px"></div>
+        <button class="btn-invoice" id="m-gen-btn" onclick="generateInvoice()">Сформировать счёт</button>
+      </div>
+
+      <hr class="modal-divider">
+
+      <div style="margin-bottom:16px">
+        <div class="ms-label" style="margin-bottom:6px">Статус оплаты</div>
+        <div id="m-payment-status" style="font-size:13px;margin-bottom:10px"></div>
+        <button class="btn-paid" id="m-paid-btn" onclick="markPaid()">Отметить оплаченным</button>
+      </div>
+
+      <div id="m-accounts-section" style="display:none">
+        <hr class="modal-divider" style="margin-top:0">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <div class="ms-label" style="margin-bottom:0">Аккаунты Moodle</div>
+          <button class="btn-invoice" id="m-resend-btn" onclick="sendAccounts()" style="margin-right:0">Отправить клиенту ✉</button>
+        </div>
+        <div id="m-accounts-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -398,6 +496,33 @@ async function loadRequests() {
   } catch { showToast('Ошибка загрузки заявок', 'err'); }
 }
 
+async function sendAccounts() {
+  if (!currentModalId) return;
+  const btn = document.getElementById('m-resend-btn');
+  btn.disabled = true;
+  try {
+    const r = await fetch(`${API}/api/admin/requests/${currentModalId}/send-accounts`,
+      { method: 'POST', headers: h() });
+    const data = await r.json();
+    if (!r.ok) { showToast(data.detail || 'Ошибка', 'err'); return; }
+    showToast(`Письмо отправлено → ${data.sent_to}`);
+  } catch { showToast('Ошибка отправки', 'err'); }
+  finally { btn.disabled = false; }
+}
+
+function invoiceBadge(r) {
+  const s = r.invoice_status || 'not_created';
+  if (s === 'created') return `<span class="badge badge-blue">Создан</span>`;
+  if (s === 'sent')    return `<span class="badge badge-green">Отправлен</span>`;
+  return `<span class="badge badge-dim">—</span>`;
+}
+function paymentBadge(r) {
+  const s = r.payment_status || 'unpaid';
+  if (s === 'paid')    return `<span class="badge badge-green">Оплачен</span>`;
+  if (s === 'partial') return `<span class="badge badge-gold">Частично</span>`;
+  return `<span class="badge badge-dim">—</span>`;
+}
+
 function renderRequests() {
   const tbody = document.getElementById('reqTable');
   const empty = document.getElementById('reqEmpty');
@@ -415,7 +540,9 @@ function renderRequests() {
       <td>${esc(r.company_name)}<br><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-dim)">${esc(r.inn)}</span></td>
       <td>${esc(r.contact_email)}</td>
       <td style="font-family:'IBM Plex Mono',monospace;font-size:13px;text-align:center">${r.headcount || 1}</td>
-      <td>${esc(r.employee_name)}<br><span style="font-size:11px;color:var(--text-dim)">${esc(r.employee_email)}</span></td>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:12px">${r.total_price ? r.total_price + ' ₽' : '—'}</td>
+      <td>${invoiceBadge(r)}</td>
+      <td>${paymentBadge(r)}</td>
       <td>
         ${isArchive
           ? `<span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-dim)">${esc(r.status)}</span>`
@@ -429,11 +556,12 @@ function renderRequests() {
       </td>
       <td style="font-family:'IBM Plex Mono',monospace;font-size:10px;white-space:nowrap">${(r.created_at||'').slice(0,16)}</td>
       <td style="white-space:nowrap">
+        <button class="btn-del" title="Подробнее" onclick="openRequestModal(${r.id})" style="color:var(--gold);border-color:var(--gold-dim)">✎</button>
         ${isArchive
-          ? `<button class="btn-del" title="Восстановить" onclick="unarchiveRequest(${r.id})" style="color:var(--green);border-color:var(--green);margin-right:4px">↩</button>
-             <button class="btn-del" title="Удалить" onclick="deleteRequest(${r.id})">✕</button>`
+          ? ` <button class="btn-del" title="Восстановить" onclick="unarchiveRequest(${r.id})" style="color:var(--green);border-color:var(--green)">↩</button>
+              <button class="btn-del" title="Удалить" onclick="deleteRequest(${r.id})">✕</button>`
           : (r.status === 'cancelled'
-              ? `<button class="btn-del" title="В архив" onclick="archiveRequest(${r.id})" style="font-size:11px;width:auto;padding:0 8px">архив</button>`
+              ? ` <button class="btn-del" title="В архив" onclick="archiveRequest(${r.id})" style="font-size:11px;width:auto;padding:0 8px">архив</button>`
               : '')
         }
       </td>
@@ -750,6 +878,130 @@ async function saveSiteJson() {
     showToast('Ошибка сохранения', 'err');
     status.textContent = '';
   } finally { btn.disabled = false; }
+}
+
+// ── Модальное окно заявки ──────────────────────────────────
+let currentModalId = null;
+
+function handleModalOverlayClick(e) {
+  if (e.target === document.getElementById('reqModal')) closeModal();
+}
+function closeModal() {
+  document.getElementById('reqModal').style.display = 'none';
+  currentModalId = null;
+}
+
+async function openRequestModal(id) {
+  currentModalId = id;
+  try {
+    const r = await fetch(`${API}/api/admin/requests/${id}`, { headers: h() });
+    if (!r.ok) throw new Error();
+    const req = await r.json();
+    fillModal(req);
+    document.getElementById('reqModal').style.display = 'flex';
+  } catch { showToast('Ошибка загрузки заявки', 'err'); }
+}
+
+function fillModal(req) {
+  document.getElementById('m-id').textContent = `#${req.id}`;
+  document.getElementById('m-course-title').textContent = req.course_name;
+  document.getElementById('m-company').textContent = `${req.company_name} (ИНН: ${req.inn})`;
+  document.getElementById('m-employee').textContent =
+    `${req.contact_email}\n${req.employee_name} / ${req.employee_email}`;
+  document.getElementById('m-headcount').value = req.headcount || 1;
+  document.getElementById('m-price').value = req.total_price || '';
+
+  const invMap = { not_created: '— не создан', created: '✓ создан', sent: '✓ отправлен' };
+  document.getElementById('m-invoice-status').textContent = invMap[req.invoice_status || 'not_created'];
+
+  const payMap = { unpaid: '— не оплачен', paid: '✓ оплачен', partial: '~ частичная оплата' };
+  const payEl = document.getElementById('m-payment-status');
+  payEl.textContent = payMap[req.payment_status || 'unpaid'];
+  payEl.style.color = req.payment_status === 'paid' ? 'var(--green)' : 'var(--text)';
+
+  const linksDiv = document.getElementById('m-invoice-links');
+  if (req.invoice_link) {
+    const qrUrl = req.invoice_link.replace('/invoices/invoice_', '/qr/qr_').replace('.pdf', '.png');
+    linksDiv.innerHTML = `<a href="${API}${req.invoice_link}" target="_blank" class="modal-link">📄 Счёт PDF</a><a href="${API}${qrUrl}" target="_blank" class="modal-link">🔲 QR-код</a>`;
+  } else {
+    linksDiv.innerHTML = '';
+  }
+  document.getElementById('m-paid-btn').style.display = req.payment_status === 'paid' ? 'none' : '';
+  document.getElementById('m-gen-btn').disabled = false;
+  document.getElementById('m-save-btn').disabled = false;
+
+  const accSection = document.getElementById('m-accounts-section');
+  if (req.accounts && req.accounts.length) {
+    accSection.style.display = 'block';
+    document.getElementById('m-accounts-list').innerHTML =
+      `<table class="accounts-tbl"><tr><td style="color:var(--text-dim)">Логин</td><td style="color:var(--text-dim)">Пароль</td></tr>` +
+      req.accounts.map(a => `<tr><td>${esc(a.username)}</td><td>${esc(a.password)}</td></tr>`).join('') +
+      `</table>`;
+  } else {
+    accSection.style.display = 'none';
+  }
+}
+
+async function saveModalFields() {
+  if (!currentModalId) return;
+  const btn = document.getElementById('m-save-btn');
+  btn.disabled = true;
+  try {
+    const hc = parseInt(document.getElementById('m-headcount').value) || 1;
+    const pr = document.getElementById('m-price').value;
+    await fetch(`${API}/api/admin/requests/${currentModalId}/headcount?headcount=${hc}`,
+      { method: 'PATCH', headers: h() });
+    if (pr) await fetch(`${API}/api/admin/requests/${currentModalId}/total_price?total_price=${pr}`,
+      { method: 'PATCH', headers: h() });
+    showToast('Сохранено');
+    loadRequests();
+  } catch { showToast('Ошибка', 'err'); }
+  finally { btn.disabled = false; }
+}
+
+async function generateInvoice() {
+  if (!currentModalId) return;
+  const btn = document.getElementById('m-gen-btn');
+  btn.disabled = true;
+  try {
+    const r = await fetch(`${API}/api/admin/requests/${currentModalId}/generate-invoice`,
+      { method: 'POST', headers: h() });
+    const data = await r.json();
+    if (!r.ok) { showToast(data.detail || 'Ошибка', 'err'); return; }
+    const qrUrl = data.invoice_url.replace('/invoices/invoice_', '/qr/qr_').replace('.pdf', '.png');
+    document.getElementById('m-invoice-links').innerHTML =
+      `<a href="${API}${data.invoice_url}" target="_blank" class="modal-link">📄 Счёт PDF</a><a href="${API}${qrUrl}" target="_blank" class="modal-link">🔲 QR-код</a>`;
+    document.getElementById('m-invoice-status').textContent = '✓ создан';
+    showToast('Счёт сформирован');
+    loadRequests();
+  } catch { showToast('Ошибка генерации счёта', 'err'); }
+  finally { btn.disabled = false; }
+}
+
+async function markPaid() {
+  if (!currentModalId) return;
+  if (!confirm('Подтвердить оплату? Будут созданы аккаунты Moodle и отправлен email клиенту.')) return;
+  const btn = document.getElementById('m-paid-btn');
+  btn.disabled = true;
+  try {
+    const r = await fetch(`${API}/api/admin/requests/${currentModalId}/mark-paid`,
+      { method: 'POST', headers: h() });
+    const data = await r.json();
+    if (!r.ok) { showToast(data.detail || 'Ошибка', 'err'); return; }
+    document.getElementById('m-payment-status').textContent = '✓ оплачен';
+    document.getElementById('m-payment-status').style.color = 'var(--green)';
+    btn.style.display = 'none';
+    if (data.accounts && data.accounts.length) {
+      document.getElementById('m-accounts-section').style.display = 'block';
+      document.getElementById('m-accounts-list').innerHTML =
+        `<table class="accounts-tbl"><tr><td style="color:var(--text-dim)">Логин</td><td style="color:var(--text-dim)">Пароль</td></tr>` +
+        data.accounts.map(a => `<tr><td>${esc(a.username)}</td><td>${esc(a.password)}</td></tr>`).join('') +
+        `</table>`;
+    }
+    showToast('Оплата подтверждена, аккаунты созданы');
+    loadRequests();
+  } catch { showToast('Ошибка', 'err'); }
+  finally { btn.disabled = false; }
 }
 
 // ── Events ─────────────────────────────────────────────────
