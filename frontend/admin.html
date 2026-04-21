@@ -226,10 +226,16 @@ tr:hover td{background:var(--dark-3);}
       <button class="f-btn" data-status="cancelled">Отменены</button>
       <button class="f-btn" data-status="archive" style="margin-left:auto;border-color:var(--text-dim)">Архив</button>
     </div>
+    <div id="bulkBar" style="display:none;padding:6px 0;gap:8px;align-items:center">
+      <span id="bulkCount" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-dim)">0 выбрано</span>
+      <button class="btn-del" onclick="deleteSelected()" style="width:auto;padding:0 12px;font-size:11px">✕ Удалить выбранные</button>
+      <button class="btn-del" onclick="clearSelection()" style="width:auto;padding:0 12px;font-size:11px;color:var(--text-dim)">Снять выделение</button>
+    </div>
     <div class="table-wrap">
       <table>
         <thead>
           <tr>
+            <th id="thCheck" style="display:none"><input type="checkbox" id="checkAll" onchange="toggleAll(this)"></th>
             <th>#</th>
             <th>Курс</th>
             <th>Компания / ИНН</th>
@@ -493,6 +499,7 @@ async function loadRequests() {
     if (r.status === 401) { logout(); return; }
     const data = await r.json();
     allRequests = data.requests || [];
+    clearSelection();
     renderRequests();
   } catch { showToast('Ошибка загрузки заявок', 'err'); }
 }
@@ -533,14 +540,18 @@ function renderRequests() {
   const tbody = document.getElementById('reqTable');
   const empty = document.getElementById('reqEmpty');
   const isArchive = currentFilter === 'archive';
-  const list = (isArchive || currentFilter === 'all')
-    ? allRequests
-    : allRequests.filter(r => r.status === currentFilter);
+  const list = currentFilter === 'all'
+    ? allRequests.filter(r => !r.archived)
+    : isArchive
+      ? allRequests
+      : allRequests.filter(r => r.status === currentFilter && !r.archived);
   document.getElementById('reqCount').textContent = `${list.length} из ${allRequests.length}`;
+  document.getElementById('thCheck').style.display = isArchive ? '' : 'none';
   if (!list.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
   empty.style.display = 'none';
   tbody.innerHTML = list.map(r => `
     <tr>
+      ${isArchive ? `<td><input type="checkbox" class="row-check" data-id="${r.id}" onchange="updateBulkBar()"></td>` : ''}
       <td style="color:var(--text-dim);font-family:'IBM Plex Mono',monospace;font-size:11px">${r.id}</td>
       <td class="td-main">${esc(r.course_name)}</td>
       <td>${esc(r.company_name)}<br><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-dim)">${esc(r.inn)}</span></td>
@@ -587,6 +598,33 @@ async function updateStatus(sel) {
     showToast('Статус обновлён');
     renderRequests();
   } catch { showToast('Ошибка', 'err'); loadRequests(); }
+}
+
+function updateBulkBar() {
+  const checked = document.querySelectorAll('.row-check:checked');
+  const bar = document.getElementById('bulkBar');
+  document.getElementById('bulkCount').textContent = `${checked.length} выбрано`;
+  bar.style.display = checked.length ? 'flex' : 'none';
+}
+function toggleAll(cb) {
+  document.querySelectorAll('.row-check').forEach(c => { c.checked = cb.checked; });
+  updateBulkBar();
+}
+function clearSelection() {
+  document.querySelectorAll('.row-check').forEach(c => { c.checked = false; });
+  const cb = document.getElementById('checkAll');
+  if (cb) cb.checked = false;
+  document.getElementById('bulkBar').style.display = 'none';
+}
+async function deleteSelected() {
+  const ids = [...document.querySelectorAll('.row-check:checked')].map(c => +c.dataset.id);
+  if (!ids.length) return;
+  if (!confirm(`Удалить ${ids.length} заявок? Это действие нельзя отменить.`)) return;
+  await Promise.all(ids.map(id =>
+    fetch(`${API}/api/admin/requests/${id}`, { method: 'DELETE', headers: h() })
+  ));
+  showToast(`Удалено: ${ids.length}`);
+  loadRequests();
 }
 
 async function archiveRequest(id) {
