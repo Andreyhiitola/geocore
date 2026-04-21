@@ -315,8 +315,17 @@ def _send_request_emails(req: CourseRequest) -> None:
 # ── PDF / QR helpers ─────────────────────────────────────────────────────────
 
 def _generate_secure_password() -> str:
-    chars = string.ascii_letters + string.digits + "!@#$%^"
-    return ''.join(secrets.choice(chars) for _ in range(12))
+    specials = "!@#$*-"
+    pwd = [
+        secrets.choice(string.ascii_uppercase),
+        secrets.choice(string.ascii_lowercase),
+        secrets.choice(string.digits),
+        secrets.choice(specials),
+    ]
+    rest = [secrets.choice(string.ascii_letters + string.digits + specials) for _ in range(8)]
+    combined = pwd + rest
+    secrets.SystemRandom().shuffle(combined)
+    return ''.join(combined)
 
 
 def _make_invoice_pdf(request_id: int, company_name: str, course_name: str,
