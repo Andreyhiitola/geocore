@@ -147,15 +147,23 @@ API_SECRET_KEY=           # случайная строка 32+ символа
 
 ## Алгоритм обновления Moodle
 
+> ⚠️ **ОБЯЗАТЕЛЬНО:** сначала локальная сборка и проверка — только потом продакшен.
+> Менять `deploy.yml` без пройденного локального теста запрещено.
+
 ```
 1. Вышел новый тег (например v5.1.4)
 2. Меняешь MOODLE_VERSION в docker-compose.test.yml
+
+   # ⚠️ down -v ТОЛЬКО для тестового окружения — сносит локальные тестовые volumes
+   # НИКОГДА не запускать на проде (docker-compose.yml) — уничтожит БД и moodledata
 3. docker compose -f docker-compose.test.yml down -v
-4. docker compose -f docker-compose.test.yml up --build
-5. Проверяешь localhost:8081
-6. Если OK → меняешь MOODLE_VERSION в .github/workflows/deploy.yml
+
+4. MOODLE_TEST_VERSION=5.1.4 docker compose -f docker-compose.test.yml up --build
+5. Проверяешь localhost:8081 — Moodle открылся, миграция прошла без ошибок
+6. ✅ Только после успешной проверки → меняешь MOODLE_VERSION в .github/workflows/deploy.yml
 7. git commit && git push → автодеплой на VPS
 8. Данные сохраняются (upgrade.php обновляет только схему БД)
+   # На проде down -v не нужен и запрещён — CI/CD делает pull + up -d
 ```
 
 ---

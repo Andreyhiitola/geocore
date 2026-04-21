@@ -32,7 +32,7 @@ services:
     depends_on:
       - mariadb-test
     ports:
-      - "8081:80"
+      - "8082:80"
     volumes:
       - moodle_test_data:/var/moodledata
     environment:
@@ -40,7 +40,7 @@ services:
       MOODLE_DB_NAME: moodle_test
       MOODLE_DB_USER: moodle
       MOODLE_DB_PASSWORD: testpass
-      MOODLE_WWWROOT: http://localhost:8081
+      MOODLE_WWWROOT: http://localhost:8082
       MOODLE_SITE_NAME: Geocore-Academy
       MOODLE_SITE_SHORTNAME: geocore-test
       MOODLE_LANG: ru
