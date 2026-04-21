@@ -121,6 +121,7 @@ jobs:
         with:
           context: ./moodle
           push: true
+          no-cache: true
           build-args: MOODLE_VERSION=${{ env.MOODLE_VERSION }}
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/geocore-moodle:${{ env.MOODLE_VERSION }}
 
