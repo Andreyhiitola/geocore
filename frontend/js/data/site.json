@@ -66,6 +66,10 @@
         "href": "#courses"
       },
       {
+        "label": "Платформа →",
+        "href": "https://courses.geocore-academy.ru"
+      },
+      {
         "label": "Песочница",
         "href": "sandbox.html"
       },
