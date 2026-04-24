@@ -1,6 +1,6 @@
 FROM alpine:3.19
 
-RUN apk add --no-cache bash curl mariadb-client restic python3
+RUN apk add --no-cache bash curl mariadb-client aws-cli
 
 COPY scripts/backup.sh /scripts/backup.sh
 RUN chmod +x /scripts/backup.sh
