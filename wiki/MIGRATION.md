@@ -16,6 +16,28 @@
 
 ## Уровень 1 — Локальное тестирование за NAT
 
+### Proxmox VM — полный клон продакшена
+
+Отдельная VM со своим IP — самый чистый вариант: те же порты, тот же `docker-compose.yml`, никаких конфликтов с хостом.
+
+```bash
+# На VM: клонировать репо
+git clone https://github.com/Andreyhiitola/geocore /opt/geocore
+cd /opt/geocore
+
+# Взять .env с прод VPS и поменять только MOODLE_WWWROOT
+scp user@<prod-vps-ip>:/opt/geocore/.env .env
+sed -i 's|MOODLE_WWWROOT=.*|MOODLE_WWWROOT=http://<vm-ip>:8080|' .env
+
+# Поднять стек (тот же docker-compose.yml что на проде)
+docker compose up -d
+```
+
+Всё остальное в `.env` (S3-ключи, пароли, Telegram) — берётся с прода как есть.  
+`sslproxy` не включится автоматически, т.к. WWWROOT начинается с `http://` — это правильно.
+
+---
+
 ### Что работает без публичного IP
 
 | Задача | Работает? | Как |
