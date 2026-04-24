@@ -8,11 +8,35 @@
 
 **Скрипт восстановления из S3 — `scripts/restore.sh`:**
 - Создан полноценный `scripts/restore.sh` для восстановления из Selectel S3 при инцидентах
-- Интерактивный выбор точки восстановления из S3 (daily/weekly/monthly) или передача аргументом
-- Флаг `--dry-run` / `DRY_RUN=true` — проверяет доступность файлов в S3 без реального восстановления
-- Восстановление moodledata через named Docker volume (`docker run --rm alpine`) — не bind-mount
-- Volume находится автоматически через `docker inspect` (надёжнее угадывания имени проекта)
+- Интерактивный выбор точки восстановления (daily/weekly/monthly) или аргументом
+- Флаги: `--dry-run` (проверка без восстановления), `--auto` (для cron на standby без вопросов)
+- Восстановление moodledata через named Docker volume (`docker run --rm alpine`)
+- Volume находится через `docker inspect` (надёжнее угадывания имени проекта)
 - Безопасная передача пароля БД через tmpfile внутри контейнера, не через ENV/ps
+- Проверка готовности Moodle по HTTP (curl login/index.php), не по процессу PHP
+- Применены замечания code review: убрана автоустановка зависимостей, добавлен комментарий gzip -l
+
+**Убран restic — переход на plain S3 бэкап:**
+- `scripts/backup.sh` — заменён на aws s3 (GFS daily/weekly/monthly)
+- `backup/Dockerfile` — `restic` → `aws-cli`
+- `docker-compose.yml` — убраны `RESTIC_REPOSITORY` и `RESTIC_PASSWORD`
+- `.env.example` — убран `RESTIC_PASSWORD`
+- Теперь `backup.sh` и `restore.sh` работают с одним форматом файлов — рассинхрон устранён
+
+**Документация:**
+- `wiki/BACKUP.md` — инструкция по бэкапам (упрощена после удаления restic)
+- `wiki/MIGRATION.md` — три уровня инфраструктуры: локальная VM за NAT, переезд VPS, standby active-passive, балансировка (будущее)
+- `.env.example` — исправлен S3_ENDPOINT на `s3.ru-3.storage.selcloud.ru`, добавлен HTTPS_PROXY
+
+**Инфраструктура:**
+- Обсудили настройку Proxmox VM как локального VPS (свой IP, те же порты что прод)
+- Паттерн: `scp .env с прод + sed MOODLE_WWWROOT` = рабочее окружение за 30 сек
+
+### Состояние после сессии
+- `scripts/restore.sh` и `scripts/backup.sh` — готовы, протестированы синтаксически
+- Всё запушено, CI/CD пересобирает backup-контейнер
+- На VPS вручную: удалить `RESTIC_PASSWORD` из `.env`, затем `docker compose up -d --build backup`
+- Proxmox VM для тестирования — запуск запланирован
 - Пересоздание БД (DROP + CREATE) перед импортом дампа
 - Ожидание готовности MariaDB и Moodle без `sleep` (polling с timeout)
 - Telegram-уведомления о старте, успехе и ошибках
