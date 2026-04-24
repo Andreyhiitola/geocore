@@ -2,6 +2,40 @@
 
 ---
 
+## 2026-04-24 (сессия 16)
+
+### Что сделали
+
+**Скрипт восстановления из S3 — `scripts/restore.sh`:**
+- Создан полноценный `scripts/restore.sh` для восстановления из Selectel S3 при инцидентах
+- Интерактивный выбор точки восстановления из S3 (daily/weekly/monthly) или передача аргументом
+- Флаг `--dry-run` / `DRY_RUN=true` — проверяет доступность файлов в S3 без реального восстановления
+- Восстановление moodledata через named Docker volume (`docker run --rm alpine`) — не bind-mount
+- Volume находится автоматически через `docker inspect` (надёжнее угадывания имени проекта)
+- Безопасная передача пароля БД через tmpfile внутри контейнера, не через ENV/ps
+- Пересоздание БД (DROP + CREATE) перед импортом дампа
+- Ожидание готовности MariaDB и Moodle без `sleep` (polling с timeout)
+- Telegram-уведомления о старте, успехе и ошибках
+- Проверка свободного места перед распаковкой
+
+**Для тренировки на локальном окружении:**
+```bash
+COMPOSE_FILE=docker-compose.test.yml \
+MOODLE_SERVICE=moodle-test \
+MARIADB_SERVICE=mariadb-test \
+MOODLE_DB_NAME=moodle_test \
+MOODLE_DB_USER=moodle \
+MOODLE_DB_PASSWORD=testpass \
+MOODLE_URL=http://localhost:8082 \
+./scripts/restore.sh --dry-run
+```
+
+### Состояние после сессии
+- `scripts/restore.sh` готов, синтаксис проверен
+- Требует: `aws` CLI с настроенными ключами Selectel, `S3_BUCKET`, `MOODLE_DB_PASSWORD` в окружении
+
+---
+
 ## 2026-04-21 (сессия 15, продолжение)
 
 ### Что сделали (дополнение)
