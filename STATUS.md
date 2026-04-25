@@ -43,7 +43,7 @@ nginx (на VPS, хост)
 | Мониторинг VPS + Telegram | ✅ работает — алерты, кнопки Статус/Бэкап/История |
 | Админка (admin.html) | ✅ авторизация логин+токен, архив, счета, оплаты, аккаунты Moodle |
 | Тема день/ночь | ✅ синхронна на всех страницах (единый ключ geocoreLight) |
-| Бэкапы (Selectel S3, plain tar.gz) | ✅ GFS-ротация daily/weekly/monthly, Telegram уведомления, бот показывает историю из S3 |
+| Бэкапы (Selectel S3, plain tar.gz) | ⚠️ Код исправлен (cron env, S3 таймауты, ротация), деплой на VPS нужен |
 | Скрипт восстановления из S3 | ✅ `scripts/restore.sh` — dry-run, --auto для cron, Telegram |
 | Watchtower (автообновление) | ✅ работает — исправлен DOCKER_API_VERSION=1.40 |
 
@@ -83,11 +83,11 @@ nginx (на VPS, хост)
 - `~/Downloads/WhatSie/test_datamine.xml` — **30 вопросов**, 2 изображения → Банк вопросов → Импорт → **Moodle XML**
 - После импорта: проверить изображения в вопросах, создать тест из банка
 
-### 0. На VPS: удалить RESTIC_PASSWORD из .env
+### 0. Задеплоить исправления бэкапа на VPS
 ```bash
-nano /opt/geocore/.env   # удалить строку RESTIC_PASSWORD
-docker compose up -d --build backup
+cd /opt/geocore && git pull && docker compose up -d --build backup bot
 ```
+После деплоя автоматические ночные бэкапы в 02:00 заработают.
 
 ### 1. Деплой мониторинга и бэкапов на VPS
 Код готов в репо. На VPS нужно:
