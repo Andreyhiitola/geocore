@@ -1,6 +1,6 @@
 # GeoCore Academy — Статус проекта
 
-> Последнее обновление: 20 апреля 2026  
+> Последнее обновление: 25 апреля 2026  
 > Репозиторий: https://github.com/Andreyhiitola/geocore  
 > Домен: geocore-academy.ru
 
@@ -43,7 +43,7 @@ nginx (на VPS, хост)
 | Мониторинг VPS + Telegram | ✅ работает — алерты, кнопки Статус/Бэкап/История |
 | Админка (admin.html) | ✅ авторизация логин+токен, архив, счета, оплаты, аккаунты Moodle |
 | Тема день/ночь | ✅ синхронна на всех страницах (единый ключ geocoreLight) |
-| Бэкапы (Selectel S3, plain tar.gz) | ✅ GFS-ротация daily/weekly/monthly, Telegram уведомления |
+| Бэкапы (Selectel S3, plain tar.gz) | ✅ GFS-ротация daily/weekly/monthly, Telegram уведомления, бот показывает историю из S3 |
 | Скрипт восстановления из S3 | ✅ `scripts/restore.sh` — dry-run, --auto для cron, Telegram |
 | Watchtower (автообновление) | ✅ работает — исправлен DOCKER_API_VERSION=1.40 |
 
