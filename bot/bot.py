@@ -14,10 +14,12 @@ CONTAINERS = ['geocore_db', 'geocore_moodle', 'geocore_frontend', 'geocore_api',
               'geocore_backup', 'geocore_watchtower', 'geocore_bot']
 ENDPOINTS = ['https://geocore-academy.ru', 'https://courses.geocore-academy.ru']
 
-DISK_WARN = int(os.environ.get('DISK_WARN', '85'))
-RAM_WARN  = int(os.environ.get('RAM_WARN', '90'))
-CPU_WARN  = int(os.environ.get('CPU_WARN', '95'))
-INTERVAL  = int(os.environ.get('CHECK_INTERVAL', '300'))
+DISK_WARN    = int(os.environ.get('DISK_WARN', '85'))
+RAM_WARN     = int(os.environ.get('RAM_WARN', '90'))
+CPU_WARN     = int(os.environ.get('CPU_WARN', '95'))
+INTERVAL     = int(os.environ.get('CHECK_INTERVAL', '300'))
+HTTP_TIMEOUT = int(os.environ.get('HTTP_TIMEOUT', '30'))
+HTTP_RETRIES = int(os.environ.get('HTTP_RETRIES', '2'))
 
 backup_running = threading.Event()
 
@@ -303,14 +305,24 @@ def check():
 
     if not backup_running.is_set():
         for url in ENDPOINTS:
-            try:
-                r = requests.get(url, timeout=10, allow_redirects=True)
-                if r.status_code >= 500:
-                    alert(f'http:{url}', f"Сайт недоступен: {url}\nHTTP {r.status_code}")
-                else:
-                    clear(f'http:{url}')
-            except Exception:
+            last_exc = None
+            last_code = None
+            for attempt in range(HTTP_RETRIES):
+                try:
+                    r = requests.get(url, timeout=HTTP_TIMEOUT, allow_redirects=True)
+                    last_code = r.status_code
+                    last_exc = None
+                    break
+                except Exception as e:
+                    last_exc = e
+                    if attempt < HTTP_RETRIES - 1:
+                        time.sleep(5)
+            if last_exc is not None:
                 alert(f'http:{url}', f"Сайт недоступен: {url}\n(timeout / нет ответа)")
+            elif last_code >= 500:
+                alert(f'http:{url}', f"Сайт недоступен: {url}\nHTTP {last_code}")
+            else:
+                clear(f'http:{url}')
 
 
 _last_token_check = 0.0
