@@ -225,26 +225,36 @@ def status_text():
 # ── История бэкапов ───────────────────────────────────────────────────────────
 
 def backup_history_text():
-    import json
     r = subprocess.run(
-        ['docker', 'exec', 'geocore_backup', 'restic', 'snapshots', '--json'],
+        ['docker', 'exec', 'geocore_backup', 'sh', '-c',
+         'aws --endpoint-url "$S3_ENDPOINT" s3 ls "s3://$S3_BUCKET/daily/"'],
         capture_output=True, text=True,
     )
-    try:
-        snapshots = json.loads(r.stdout) if r.stdout.strip() else []
-    except Exception:
+    if r.returncode != 0 or not r.stdout.strip():
         return "📋 *История бэкапов*\n\nНе удалось получить данные."
 
     week_ago = datetime.now() - timedelta(days=7)
-    recent = [s for s in snapshots if datetime.fromisoformat(s['time'][:19]) >= week_ago]
+    entries = []
+    for row in r.stdout.strip().splitlines():
+        parts = row.split()
+        if len(parts) < 4:
+            continue
+        filename = parts[3]
+        if not filename.startswith('db-'):
+            continue
+        try:
+            dt = datetime.strptime(f"{parts[0]} {parts[1]}", '%Y-%m-%d %H:%M:%S')
+        except ValueError:
+            continue
+        if dt >= week_ago:
+            entries.append((dt, filename))
 
-    if not recent:
+    if not entries:
         return "📋 *История бэкапов за неделю*\n\nДанных нет."
 
     lines = ["📋 *История бэкапов за неделю*\n"]
-    for s in reversed(recent):
-        dt = datetime.fromisoformat(s['time'][:19])
-        lines.append(f"✅ `{dt.strftime('%d.%m.%Y')}` в `{dt.strftime('%H:%M')}` — `{s['short_id']}`")
+    for dt, filename in sorted(entries, reverse=True):
+        lines.append(f"✅ `{dt.strftime('%d.%m.%Y')}` в `{dt.strftime('%H:%M')}` — `{filename}`")
     return '\n'.join(lines)
 
 
@@ -396,7 +406,7 @@ def handle(upd):
 
             def render(current=''):
                 icons = {'⬜': '⬜', '▶': '▶️', '✅': '✅'}
-                rows = [('db', 'Дамп БД'), ('arch', 'Бэкап restic'),
+                rows = [('db', 'Дамп БД'), ('arch', 'Архив moodledata'),
                         ('s3', 'Загрузка в S3'), ('rot', 'Ротация')]
                 lines = ['⏳ <b>Бэкап в процессе</b>\n']
                 for key, label in rows:
@@ -420,20 +430,20 @@ def handle(upd):
                 elif 'БД:' in line:
                     db_size = line.split('БД:')[-1].strip()
                     S['db'] = '✅'; S['arch'] = '▶'
-                    edit(cid, mid, render('Бэкап через restic (только изменения)…'))
-                elif 'processed' in line and 'files' in line:
-                    moodle_size = line.split('processed')[-1].strip()
-                elif 'snapshot' in line and 'saved' in line:
-                    S['arch'] = '✅'; S['s3'] = '✅'
-                    edit(cid, mid, render())
-                elif 'Ротация' in line:
-                    S['rot'] = '▶'; edit(cid, mid, render('Ротация старых снимков…'))
+                    edit(cid, mid, render('Архивирование moodledata…'))
+                elif 'moodledata:' in line:
+                    moodle_size = line.split('moodledata:')[-1].strip()
+                    S['arch'] = '✅'; S['s3'] = '▶'
+                    edit(cid, mid, render('Загрузка в S3…'))
+                elif 'Ротация' in line and S['rot'] == '⬜':
+                    S['s3'] = '✅'; S['rot'] = '▶'
+                    edit(cid, mid, render('Ротация старых бэкапов…'))
                 elif 'Бэкап завершён' in line:
                     S['rot'] = '✅'
             proc.wait()
             backup_running.clear()
             if proc.returncode == 0:
-                edit(cid, mid, f"✅ <b>Бэкап завершён</b>\n\n✅ Дамп БД — <code>{db_size}</code>\n✅ restic — <code>{moodle_size}</code>\n✅ Ротация")
+                edit(cid, mid, f"✅ <b>Бэкап завершён</b>\n\n✅ Дамп БД — <code>{db_size}</code>\n✅ moodledata — <code>{moodle_size}</code>\n✅ Ротация")
             else:
                 err = '\n'.join(output_lines[-10:])[-400:]
                 edit(cid, mid, f"❌ <b>Бэкап завершился с ошибкой</b>\n\nDB: <code>{db_size}</code>\n\n<code>{err}</code>")

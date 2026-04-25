@@ -27,7 +27,7 @@ notify() {
     curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
         -d chat_id="${TELEGRAM_CHAT_ID}" \
         -d parse_mode="Markdown" \
-        -d text="${message}" > /dev/null
+        -d text="${message}" > /dev/null || true
 }
 
 s3() { aws --endpoint-url "$S3_ENDPOINT" s3 "$@"; }
@@ -86,7 +86,7 @@ fi
 log "Ротация daily (оставляем 7)..."
 s3 ls "s3://${S3_BUCKET}/daily/" \
     | awk '{print $4}' \
-    | grep '^db-' \
+    | { grep '^db-' || true; } \
     | sort \
     | head -n -7 \
     | while read -r key; do
@@ -97,7 +97,7 @@ s3 ls "s3://${S3_BUCKET}/daily/" \
 log "Ротация weekly (оставляем 4)..."
 s3 ls "s3://${S3_BUCKET}/weekly/" \
     | awk '{print $4}' \
-    | grep '^db-' \
+    | { grep '^db-' || true; } \
     | sort \
     | head -n -4 \
     | while read -r key; do
@@ -108,7 +108,7 @@ s3 ls "s3://${S3_BUCKET}/weekly/" \
 log "Ротация monthly (оставляем 12)..."
 s3 ls "s3://${S3_BUCKET}/monthly/" \
     | awk '{print $4}' \
-    | grep '^db-' \
+    | { grep '^db-' || true; } \
     | sort \
     | head -n -12 \
     | while read -r key; do
