@@ -30,7 +30,10 @@ notify() {
         -d text="${message}" > /dev/null || true
 }
 
-s3() { aws --endpoint-url "$S3_ENDPOINT" s3 "$@"; }
+s3() { aws --endpoint-url "$S3_ENDPOINT" --cli-connect-timeout 30 --cli-read-timeout 300 s3 "$@"; }
+
+# Уведомить в Telegram при неожиданных ошибках (set -e)
+trap 'fail "Неожиданная ошибка в строке $LINENO"' ERR
 
 # ── Подготовка ───────────────────────────────────────────────────────────────
 log "Старт бэкапа за $DATE"
@@ -70,19 +73,20 @@ s3 cp "$MOODLE_FILE" "s3://${S3_BUCKET}/daily/moodle-${DATE}.tar.gz" || fail "О
 if [[ "$DAY_OF_WEEK" == "7" ]]; then
     WEEK=$(date +%Y-W%V)
     log "Еженедельный бэкап ($WEEK)..."
-    s3 cp "$DB_FILE"     "s3://${S3_BUCKET}/weekly/db-${WEEK}.sql.gz"
-    s3 cp "$MOODLE_FILE" "s3://${S3_BUCKET}/weekly/moodle-${WEEK}.tar.gz"
+    s3 cp "$DB_FILE"     "s3://${S3_BUCKET}/weekly/db-${WEEK}.sql.gz"     || fail "Ошибка загрузки weekly db в S3"
+    s3 cp "$MOODLE_FILE" "s3://${S3_BUCKET}/weekly/moodle-${WEEK}.tar.gz" || fail "Ошибка загрузки weekly moodle в S3"
 fi
 
 # Ежемесячный (1-го числа)
 if [[ "$DAY_OF_MONTH" == "01" ]]; then
     MONTH=$(date +%Y-%m)
     log "Ежемесячный бэкап ($MONTH)..."
-    s3 cp "$DB_FILE"     "s3://${S3_BUCKET}/monthly/db-${MONTH}.sql.gz"
-    s3 cp "$MOODLE_FILE" "s3://${S3_BUCKET}/monthly/moodle-${MONTH}.tar.gz"
+    s3 cp "$DB_FILE"     "s3://${S3_BUCKET}/monthly/db-${MONTH}.sql.gz"     || fail "Ошибка загрузки monthly db в S3"
+    s3 cp "$MOODLE_FILE" "s3://${S3_BUCKET}/monthly/moodle-${MONTH}.tar.gz" || fail "Ошибка загрузки monthly moodle в S3"
 fi
 
 # ── 5. Ротация старых бэкапов ────────────────────────────────────────────────
+# Ротация некритична — ошибки не прерывают бэкап
 log "Ротация daily (оставляем 7)..."
 s3 ls "s3://${S3_BUCKET}/daily/" \
     | awk '{print $4}' \
@@ -90,9 +94,9 @@ s3 ls "s3://${S3_BUCKET}/daily/" \
     | sort \
     | head -n -7 \
     | while read -r key; do
-        s3 rm "s3://${S3_BUCKET}/daily/${key}"
+        s3 rm "s3://${S3_BUCKET}/daily/${key}" || true
         s3 rm "s3://${S3_BUCKET}/daily/${key/db-/moodle-}" 2>/dev/null || true
-    done
+    done || log "Ротация daily: пропущена (ошибка S3)"
 
 log "Ротация weekly (оставляем 4)..."
 s3 ls "s3://${S3_BUCKET}/weekly/" \
@@ -101,9 +105,9 @@ s3 ls "s3://${S3_BUCKET}/weekly/" \
     | sort \
     | head -n -4 \
     | while read -r key; do
-        s3 rm "s3://${S3_BUCKET}/weekly/${key}"
+        s3 rm "s3://${S3_BUCKET}/weekly/${key}" || true
         s3 rm "s3://${S3_BUCKET}/weekly/${key/db-/moodle-}" 2>/dev/null || true
-    done
+    done || log "Ротация weekly: пропущена (ошибка S3)"
 
 log "Ротация monthly (оставляем 12)..."
 s3 ls "s3://${S3_BUCKET}/monthly/" \
@@ -112,9 +116,9 @@ s3 ls "s3://${S3_BUCKET}/monthly/" \
     | sort \
     | head -n -12 \
     | while read -r key; do
-        s3 rm "s3://${S3_BUCKET}/monthly/${key}"
+        s3 rm "s3://${S3_BUCKET}/monthly/${key}" || true
         s3 rm "s3://${S3_BUCKET}/monthly/${key/db-/moodle-}" 2>/dev/null || true
-    done
+    done || log "Ротация monthly: пропущена (ошибка S3)"
 
 # ── 6. Финал ─────────────────────────────────────────────────────────────────
 rm -rf "$BACKUP_DIR"

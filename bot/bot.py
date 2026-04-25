@@ -411,13 +411,12 @@ def handle(upd):
 
         def run_backup(cid, mid):
             backup_running.set()
-            done = {'db': '`[ ]`', 'arch': '`[ ]`', 's3': '`[ ]`', 'rot': '`[ ]`'}
             db_size = moodle_size = ''
-
             S = {'db': '⬜', 'arch': '⬜', 's3': '⬜', 'rot': '⬜'}
+            s3_start = [0.0]
+            s3_ticking = [False]
 
             def render(current=''):
-                icons = {'⬜': '⬜', '▶': '▶️', '✅': '✅'}
                 rows = [('db', 'Дамп БД'), ('arch', 'Архив moodledata'),
                         ('s3', 'Загрузка в S3'), ('rot', 'Ротация')]
                 lines = ['⏳ <b>Бэкап в процессе</b>\n']
@@ -429,29 +428,47 @@ def handle(upd):
                     lines.append(f"\n<i>{current}</i>")
                 return '\n'.join(lines)
 
+            def s3_ticker():
+                while s3_ticking[0]:
+                    time.sleep(30)
+                    if not s3_ticking[0]:
+                        break
+                    elapsed = int(time.time() - s3_start[0])
+                    mins, secs = divmod(elapsed, 60)
+                    edit(cid, mid, render(f'Загрузка в S3… {mins}м {secs}с'))
+
             output_lines = []
             proc = subprocess.Popen(
                 ['docker', 'exec', 'geocore_backup', '/scripts/backup.sh'],
                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
             )
-            for line in proc.stdout:
-                line = line.strip()
-                output_lines.append(line)
-                if 'Дамп MariaDB' in line:
-                    S['db'] = '▶'; edit(cid, mid, render('Создание дампа БД…'))
-                elif 'БД:' in line:
-                    db_size = line.split('БД:')[-1].strip()
-                    S['db'] = '✅'; S['arch'] = '▶'
-                    edit(cid, mid, render('Архивирование moodledata…'))
-                elif 'moodledata:' in line:
-                    moodle_size = line.split('moodledata:')[-1].strip()
-                    S['arch'] = '✅'; S['s3'] = '▶'
-                    edit(cid, mid, render('Загрузка в S3…'))
-                elif 'Ротация' in line and S['rot'] == '⬜':
-                    S['s3'] = '✅'; S['rot'] = '▶'
-                    edit(cid, mid, render('Ротация старых бэкапов…'))
-                elif 'Бэкап завершён' in line:
-                    S['rot'] = '✅'
+            try:
+                for line in proc.stdout:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    output_lines.append(line)
+                    if 'Дамп MariaDB' in line:
+                        S['db'] = '▶'; edit(cid, mid, render('Создание дампа БД…'))
+                    elif 'БД:' in line:
+                        db_size = line.split('БД:')[-1].strip()
+                        S['db'] = '✅'; S['arch'] = '▶'
+                        edit(cid, mid, render('Архивирование moodledata…'))
+                    elif 'moodledata:' in line:
+                        moodle_size = line.split('moodledata:')[-1].strip()
+                        S['arch'] = '✅'; S['s3'] = '▶'
+                        s3_start[0] = time.time()
+                        s3_ticking[0] = True
+                        threading.Thread(target=s3_ticker, daemon=True).start()
+                        edit(cid, mid, render('Загрузка в S3…'))
+                    elif 'Ротация' in line and S['rot'] == '⬜':
+                        s3_ticking[0] = False
+                        S['s3'] = '✅'; S['rot'] = '▶'
+                        edit(cid, mid, render('Ротация старых бэкапов…'))
+                    elif 'Бэкап завершён' in line:
+                        S['rot'] = '✅'
+            finally:
+                s3_ticking[0] = False
             proc.wait()
             backup_running.clear()
             if proc.returncode == 0:
