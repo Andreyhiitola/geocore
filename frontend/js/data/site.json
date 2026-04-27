@@ -222,11 +222,14 @@
   ],
   "contacts": {
     "phone": "+79???777777",
-    "corp_email": "info@geocore-academy.ru"
+    "corp_email": "info@geocore-academy.ru",
+    "email": "",
+    "telegram": "",
+    "linkedin": ""
   },
   "footer": {
     "description": "Профессиональное обучение оценке месторождений. Россия, СНГ и международный рынок.",
-    "copyright": "© 2025 GeoCore Academy · Все права защищены",
+    "copyright": "© 2025  GeoCore Academy · Все права защищены",
     "columns": [
       {
         "title": "Курсы",
