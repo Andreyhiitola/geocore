@@ -64,10 +64,20 @@ log "moodledata: $(du -sh "$MOODLE_FILE" | cut -f1)"
 DB_SIZE=$(du -sh "$DB_FILE" | cut -f1)
 MOODLE_SIZE=$(du -sh "$MOODLE_FILE" | cut -f1)
 
+# ── 3. Бэкап USN-app SQLite ─────────────────────────────────────────────────
+USN_FILE=""
+if [ -f "/usn_data/usn.db" ]; then
+    log "Копирование USN-app базы..."
+    USN_FILE="$BACKUP_DIR/usn-${DATE}.db"
+    cp /usn_data/usn.db "$USN_FILE"
+    log "USN DB: $(du -sh "$USN_FILE" | cut -f1)"
+fi
+
 # ── 4. Загрузка в S3 ─────────────────────────────────────────────────────────
 log "Загрузка ежедневного бэкапа в S3..."
 s3 cp "$DB_FILE"     "s3://${S3_BUCKET}/daily/db-${DATE}.sql.gz"     || fail "Ошибка загрузки db в S3"
 s3 cp "$MOODLE_FILE" "s3://${S3_BUCKET}/daily/moodle-${DATE}.tar.gz" || fail "Ошибка загрузки moodle в S3"
+[[ -n "$USN_FILE" ]] && s3 cp "$USN_FILE" "s3://${S3_BUCKET}/daily/usn-${DATE}.db" || true
 
 # Еженедельный (каждое воскресенье)
 if [[ "$DAY_OF_WEEK" == "7" ]]; then

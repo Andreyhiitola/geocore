@@ -193,6 +193,9 @@ ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "")
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "")
 GITHUB_REPO  = os.getenv("GITHUB_REPO", "Andreyhiitola/geocore")
 
+USN_API_URL = os.getenv("USN_API_URL", "http://geocore_usn_api:5000")
+USN_API_KEY = os.getenv("USN_API_KEY", "")
+
 SMTP_HOST    = os.getenv("SMTP_HOST", "smtp.yandex.ru")
 SMTP_PORT    = int(os.getenv("SMTP_PORT", "587"))
 SMTP_USER    = os.getenv("SMTP_USER", "")   # noreply@geocore-academy.ru
@@ -650,6 +653,29 @@ def _make_contract_pdf(request_id: int, contract_number: str,
     return path
 
 
+def _record_income_in_usn(course_name: str, amount: float, company_name: str) -> None:
+    """Фиксируем доход в USN-app при подтверждении оплаты."""
+    if not USN_API_URL or amount <= 0:
+        return
+    import urllib.request, json as _json, datetime
+    payload = _json.dumps({
+        "date": datetime.date.today().isoformat(),
+        "description": f"{course_name} — {company_name}",
+        "amount": amount,
+        "category": "services",
+    }).encode()
+    req = urllib.request.Request(
+        f"{USN_API_URL}/api/income",
+        data=payload,
+        headers={"Content-Type": "application/json", "x-api-key": USN_API_KEY},
+        method="POST",
+    )
+    try:
+        urllib.request.urlopen(req, timeout=5)
+    except Exception as e:
+        print(f"[USN] Не удалось записать доход: {e}")
+
+
 def _send_accounts_email(to_email: str, accounts: list, course_name: str,
                          expiry_date) -> None:
     if not all([SMTP_HOST, SMTP_USER, SMTP_PASS]):
@@ -1033,6 +1059,13 @@ async def admin_mark_paid(request_id: int,
         accounts,
         req.get("course_name", ""),
         req.get("access_expiry_date")
+    )
+    # Фиксируем доход в USN-app
+    background_tasks.add_task(
+        _record_income_in_usn,
+        req.get("course_name", "Курс"),
+        float(req.get("total_price") or 0),
+        str(req.get("company_name", "")),
     )
     return {"ok": True, "accounts": accounts}
 

@@ -75,6 +75,8 @@ services:
       ADMIN_TOKEN: ${ADMIN_TOKEN:-}
       GITHUB_TOKEN: ${GITHUB_TOKEN:-}
       GITHUB_REPO: ${GITHUB_REPO:-Andreyhiitola/geocore}
+      USN_API_URL: ${USN_API_URL:-http://geocore_usn_api:5000}
+      USN_API_KEY: ${USN_API_KEY:-}
     networks:
       - geocore_net
     labels:
@@ -108,6 +110,7 @@ services:
     restart: unless-stopped
     volumes:
       - moodle_data:/moodledata:ro
+      - usn_data:/usn_data:ro
       - backup_logs:/var/log
     environment:
       DB_HOST: mariadb
@@ -121,6 +124,28 @@ services:
       AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-ru-3}
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
       TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
+    networks:
+      - geocore_net
+
+  usn_backend:
+    image: andreysagurov/usn-backend:latest
+    container_name: geocore_usn_api
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3001:5000"
+    volumes:
+      - usn_data:/app/data
+    environment:
+      USN_API_KEY: ${USN_API_KEY:-}
+    networks:
+      - geocore_net
+
+  usn_frontend:
+    image: andreysagurov/usn-frontend:latest
+    container_name: geocore_usn_front
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3002:80"
     networks:
       - geocore_net
 
@@ -146,3 +171,4 @@ volumes:
   mariadb_data:
   moodle_data:
   backup_logs:
+  usn_data:
