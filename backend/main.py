@@ -1079,6 +1079,10 @@ async def admin_get_site_json(_=Depends(require_admin)):
             headers={"Authorization": f"Bearer {GITHUB_TOKEN}",
                      "Accept": "application/vnd.github.v3+json"}
         )
+        if resp.status_code == 401:
+            raise HTTPException(502, "GitHub token невалиден или истёк — обновите GITHUB_TOKEN в .env")
+        if resp.status_code == 404:
+            raise HTTPException(404, "site.json не найден в репозитории")
         resp.raise_for_status()
         data = resp.json()
     content = base64.b64decode(data["content"]).decode("utf-8")
@@ -1108,6 +1112,8 @@ async def admin_put_site_json(body: SiteJsonUpdate, _=Depends(require_admin)):
             json={"message": "admin: update site.json",
                   "content": encoded, "sha": body.sha}
         )
+        if resp.status_code == 401:
+            raise HTTPException(502, "GitHub token невалиден или истёк — обновите GITHUB_TOKEN в .env")
         resp.raise_for_status()
     return {"success": True}
 
