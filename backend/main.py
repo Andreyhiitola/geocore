@@ -54,10 +54,12 @@ app = FastAPI(
 # ── Static files (счета, QR) ──────────────────────────────────────────────────
 _BASE_DIR    = os.path.dirname(os.path.abspath(__file__))
 STATIC_DIR   = os.path.join(_BASE_DIR, "static")
-INVOICES_DIR = os.path.join(STATIC_DIR, "invoices")
-QR_DIR       = os.path.join(STATIC_DIR, "qr")
-os.makedirs(INVOICES_DIR, exist_ok=True)
-os.makedirs(QR_DIR, exist_ok=True)
+INVOICES_DIR   = os.path.join(STATIC_DIR, "invoices")
+QR_DIR         = os.path.join(STATIC_DIR, "qr")
+CONTRACTS_DIR  = os.path.join(STATIC_DIR, "contracts")
+os.makedirs(INVOICES_DIR,  exist_ok=True)
+os.makedirs(QR_DIR,        exist_ok=True)
+os.makedirs(CONTRACTS_DIR, exist_ok=True)
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 # ── PDF-шрифты (Кириллица через DejaVu если установлено fonts-dejavu-core) ────
@@ -130,6 +132,9 @@ async def startup():
                     "ALTER TABLE requests ADD COLUMN IF NOT EXISTS payment_status VARCHAR(20) DEFAULT 'unpaid'",
                     "ALTER TABLE requests ADD COLUMN IF NOT EXISTS access_expiry_date DATE NULL",
                     "ALTER TABLE requests ADD COLUMN IF NOT EXISTS moodle_accounts_generated TINYINT(1) DEFAULT 0",
+                    "ALTER TABLE requests ADD COLUMN IF NOT EXISTS contract_status VARCHAR(20) DEFAULT 'not_created'",
+                    "ALTER TABLE requests ADD COLUMN IF NOT EXISTS contract_link VARCHAR(512) NULL",
+                    "ALTER TABLE requests ADD COLUMN IF NOT EXISTS contract_number VARCHAR(50) NULL",
                 ]:
                     await cur.execute(_col)
                 await cur.execute("""
@@ -448,6 +453,203 @@ def _make_qr(request_id: int, total_price) -> str:
     return path
 
 
+def _make_contract_pdf(request_id: int, contract_number: str,
+                       company_name: str, inn: str, contact_name: str,
+                       course_name: str, total_price, headcount: int) -> str:
+    """Договор оказания образовательных услуг (PDF, 2 страницы)."""
+    from datetime import date as _date
+    from reportlab.platypus import Paragraph, Spacer, Table, TableStyle
+    from reportlab.lib.styles import ParagraphStyle
+    from reportlab.lib import colors
+    from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_LEFT
+
+    path = os.path.join(CONTRACTS_DIR, f"contract_{request_id}.pdf")
+    buf  = io.BytesIO()
+    W, H = A4
+    c    = canvas.Canvas(buf, pagesize=A4)
+    fn_b, fn = _pdf_font(True), _pdf_font(False)
+    margin = 20 * mm
+    today  = _date.today()
+    price  = float(total_price or 0)
+    cnt    = int(headcount or 1)
+
+    def draw_text(text: str, x: float, y: float, bold=False, size=9, max_w=None):
+        c.setFont(fn_b if bold else fn, size)
+        if max_w:
+            # wrap manually
+            words = text.split()
+            line, lines = [], []
+            for w in words:
+                test = " ".join(line + [w])
+                if c.stringWidth(test, fn_b if bold else fn, size) > max_w:
+                    lines.append(" ".join(line)); line = [w]
+                else:
+                    line.append(w)
+            lines.append(" ".join(line))
+            for i, l in enumerate(lines):
+                c.drawString(x, y - i * (size + 2), l)
+            return y - len(lines) * (size + 2)
+        else:
+            c.drawString(x, y, text)
+            return y
+
+    def hline(y_pos, lw=0.5):
+        c.setLineWidth(lw)
+        c.line(margin, y_pos, W - margin, y_pos)
+
+    # ─── СТРАНИЦА 1 ─────────────────────────────────────────────────────────
+
+    # Заголовок
+    c.setFont(fn_b, 13)
+    c.drawCentredString(W / 2, H - 22*mm, "ДОГОВОР ОКАЗАНИЯ ОБРАЗОВАТЕЛЬНЫХ УСЛУГ")
+    c.setFont(fn_b, 10)
+    c.drawCentredString(W / 2, H - 30*mm, f"№ {contract_number}")
+    c.setFont(fn, 9)
+    c.drawString(margin,      H - 38*mm, f"г. Санкт-Петербург")
+    c.drawRightString(W - margin, H - 38*mm, f"{today.strftime('%d %B %Y г.').replace('January','января').replace('February','февраля').replace('March','марта').replace('April','апреля').replace('May','мая').replace('June','июня').replace('July','июля').replace('August','августа').replace('September','сентября').replace('October','октября').replace('November','ноября').replace('December','декабря')}")
+    hline(H - 41*mm)
+
+    # Стороны
+    y = H - 50*mm
+    seller = INV_SELLER_NAME or "Исполнитель"
+    seller_inn = INV_SELLER_INN or ""
+    buyer  = company_name or "Заказчик"
+    buyer_inn = inn or ""
+
+    parties = (
+        f"{seller} (ИНН {seller_inn}), именуемое в дальнейшем «Исполнитель», с одной стороны, "
+        f"и {buyer} (ИНН {buyer_inn}), именуемое в дальнейшем «Заказчик», "
+        f"с другой стороны, совместно именуемые «Стороны», заключили настоящий договор о нижеследующем:"
+    )
+    c.setFont(fn, 9)
+    text_w = W - 2 * margin
+    y = draw_text(parties, margin, y, size=9, max_w=text_w)
+    y -= 6*mm
+
+    sections = [
+        ("1. ПРЕДМЕТ ДОГОВОРА", [
+            f"1.1. Исполнитель обязуется оказать Заказчику образовательные услуги "
+            f"по программе: «{course_name}» (далее — «Курс»), а Заказчик обязуется "
+            f"принять и оплатить данные услуги.",
+            f"1.2. Количество слушателей: {cnt} чел.",
+            "1.3. Форма обучения: дистанционная (онлайн-платформа Moodle).",
+            "1.4. Срок доступа к материалам курса: 30 (тридцать) календарных дней с момента "
+            "предоставления доступа.",
+        ]),
+        ("2. СТОИМОСТЬ И ПОРЯДОК ОПЛАТЫ", [
+            f"2.1. Стоимость услуг составляет {price:,.0f} ({"%.0f" % price} рублей 00 копеек), НДС не облагается.",
+            "2.2. Заказчик производит оплату на основании выставленного Исполнителем счёта "
+            "в течение 5 (пяти) банковских дней с момента его выставления.",
+            "2.3. Оплата производится безналичным перечислением на расчётный счёт Исполнителя.",
+        ]),
+        ("3. ПРАВА И ОБЯЗАННОСТИ СТОРОН", [
+            "3.1. Исполнитель обязан: предоставить Заказчику доступ к материалам Курса "
+            "в течение 2 (двух) рабочих дней после поступления оплаты; обеспечить "
+            "функционирование онлайн-платформы в режиме 24/7.",
+            "3.2. Заказчик обязан: своевременно оплатить услуги; обеспечить соблюдение "
+            "авторских прав на материалы Курса; не передавать данные доступа третьим лицам.",
+            "3.3. Заказчик вправе получить сертификат об обучении по окончании Курса "
+            "при условии прохождения итогового тестирования.",
+        ]),
+        ("4. ОТВЕТСТВЕННОСТЬ СТОРОН", [
+            "4.1. За неисполнение или ненадлежащее исполнение обязательств Стороны несут "
+            "ответственность в соответствии с действующим законодательством РФ.",
+            "4.2. Исполнитель не несёт ответственности за невозможность доступа к Курсу "
+            "вследствие технических неполадок на стороне Заказчика.",
+        ]),
+        ("5. КОНФИДЕНЦИАЛЬНОСТЬ", [
+            "5.1. Стороны обязуются сохранять конфиденциальность информации, полученной "
+            "в ходе исполнения настоящего договора.",
+        ]),
+        ("6. ЗАКЛЮЧИТЕЛЬНЫЕ ПОЛОЖЕНИЯ", [
+            "6.1. Договор вступает в силу с момента подписания обеими Сторонами и действует "
+            "до полного исполнения обязательств.",
+            "6.2. Все изменения и дополнения к договору действительны в письменной форме.",
+            "6.3. Споры разрешаются путём переговоров; при недостижении согласия — "
+            "в суде по месту нахождения Исполнителя.",
+            f"6.4. Договор составлен в 2 (двух) экземплярах, имеющих одинаковую юридическую "
+            f"силу.",
+        ]),
+    ]
+
+    for title, items in sections:
+        if y < 40*mm:
+            c.showPage()
+            y = H - 20*mm
+        c.setFont(fn_b, 9)
+        c.drawString(margin, y, title)
+        y -= 5*mm
+        for item in items:
+            if y < 30*mm:
+                c.showPage()
+                y = H - 20*mm
+            y = draw_text(item, margin, y, size=9, max_w=text_w)
+            y -= 4*mm
+        y -= 2*mm
+
+    # Реквизиты и подписи
+    if y < 60*mm:
+        c.showPage()
+        y = H - 20*mm
+
+    hline(y)
+    y -= 8*mm
+    c.setFont(fn_b, 9)
+    c.drawString(margin, y, "РЕКВИЗИТЫ И ПОДПИСИ СТОРОН")
+    y -= 8*mm
+
+    col_w = (W - 2 * margin) / 2 - 5*mm
+    lx, rx = margin, margin + col_w + 10*mm
+
+    def col_line(label, value, x, yy, w):
+        c.setFont(fn_b, 8); c.drawString(x, yy, label)
+        c.setFont(fn, 8);   c.drawString(x + 30*mm, yy, value or "—")
+        return yy - 5*mm
+
+    c.setFont(fn_b, 9)
+    c.drawString(lx, y, "Исполнитель:")
+    c.drawString(rx, y, "Заказчик:")
+    y -= 6*mm
+
+    seller_lines = [
+        ("Наименование:", INV_SELLER_NAME or ""),
+        ("ИНН:", INV_SELLER_INN or ""),
+        ("КПП:", INV_SELLER_KPP or ""),
+        ("Р/С:", INV_SELLER_ACCOUNT or ""),
+        ("Банк:", INV_SELLER_BANK or ""),
+        ("БИК:", INV_SELLER_BIK or ""),
+        ("Адрес:", INV_SELLER_ADDR or ""),
+    ]
+    buyer_lines = [
+        ("Наименование:", company_name or ""),
+        ("ИНН:", inn or ""),
+        ("КПП:", ""),
+        ("Р/С:", ""),
+        ("Банк:", ""),
+        ("БИК:", ""),
+        ("Адрес:", ""),
+    ]
+    y0 = y
+    for (ll, lv), (rl, rv) in zip(seller_lines, buyer_lines):
+        col_line(ll, lv, lx, y, col_w)
+        col_line(rl, rv, rx, y, col_w)
+        y -= 5*mm
+
+    y -= 8*mm
+    c.setFont(fn, 9)
+    c.drawString(lx, y, "Подпись / печать:  ____________________")
+    c.drawString(rx, y, "Подпись / печать:  ____________________")
+    y -= 7*mm
+    c.setFont(fn, 8)
+    c.drawString(lx, y, f"({INV_SELLER_NAME or 'Исполнитель'})")
+    c.drawString(rx, y, f"({contact_name or company_name or 'Заказчик'})")
+
+    c.save()
+    with open(path, "wb") as f:
+        f.write(buf.getvalue())
+    return path
+
+
 def _send_accounts_email(to_email: str, accounts: list, course_name: str,
                          expiry_date) -> None:
     if not all([SMTP_HOST, SMTP_USER, SMTP_PASS]):
@@ -746,6 +948,47 @@ async def admin_generate_invoice(request_id: int, _=Depends(require_admin)):
                 (invoice_url, request_id)
             )
     return {"invoice_url": invoice_url, "qr_url": qr_url, "status": "created"}
+
+
+@app.post("/api/admin/requests/{request_id}/generate-contract")
+async def admin_generate_contract(request_id: int, _=Depends(require_admin)):
+    """Сформировать договор оказания образовательных услуг (PDF)"""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        async with conn.cursor(aiomysql.DictCursor) as cur:
+            await cur.execute("SELECT * FROM requests WHERE id=%s", (request_id,))
+            req = await cur.fetchone()
+    if not req:
+        raise HTTPException(404, "Заявка не найдена")
+    if not req.get("total_price"):
+        raise HTTPException(400, "Сначала укажите стоимость (total_price)")
+
+    from datetime import date as _date
+    contract_number = req.get("contract_number") or f"{request_id}/{_date.today().year}"
+
+    try:
+        _make_contract_pdf(
+            request_id   = request_id,
+            contract_number = contract_number,
+            company_name = req.get("company_name", ""),
+            inn          = req.get("inn", ""),
+            contact_name = req.get("contact_name", ""),
+            course_name  = req.get("course_name", ""),
+            total_price  = req.get("total_price"),
+            headcount    = req.get("headcount", 1),
+        )
+    except Exception as e:
+        raise HTTPException(500, f"Ошибка генерации договора: {e}")
+
+    contract_url = f"/static/contracts/contract_{request_id}.pdf"
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                "UPDATE requests SET contract_status='created', contract_link=%s, "
+                "contract_number=%s WHERE id=%s",
+                (contract_url, contract_number, request_id)
+            )
+    return {"contract_url": contract_url, "contract_number": contract_number, "status": "created"}
 
 
 @app.post("/api/admin/requests/{request_id}/mark-paid")

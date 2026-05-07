@@ -440,6 +440,15 @@ tr:hover td{background:var(--dark-3);}
       <hr class="modal-divider">
 
       <div style="margin-bottom:16px">
+        <div class="ms-label" style="margin-bottom:6px">Договор</div>
+        <div id="m-contract-status" style="font-size:13px;margin-bottom:8px"></div>
+        <div id="m-contract-links" style="margin-bottom:10px"></div>
+        <button class="btn-invoice" id="m-contract-btn" onclick="generateContract()">Сформировать договор</button>
+      </div>
+
+      <hr class="modal-divider">
+
+      <div style="margin-bottom:16px">
         <div class="ms-label" style="margin-bottom:6px">Счёт на оплату</div>
         <div id="m-invoice-status" style="font-size:13px;margin-bottom:8px"></div>
         <div id="m-invoice-links" style="margin-bottom:10px"></div>
@@ -1006,6 +1015,16 @@ function fillModal(req) {
   document.getElementById('m-headcount').value = req.headcount || 1;
   document.getElementById('m-price').value = req.total_price || '';
 
+  // Договор
+  const contrMap = { not_created: '— не создан', created: '✓ создан', sent: '✓ отправлен' };
+  document.getElementById('m-contract-status').textContent = contrMap[req.contract_status || 'not_created'];
+  const contrLinks = document.getElementById('m-contract-links');
+  if (req.contract_link) {
+    contrLinks.innerHTML = `<a href="${API}${req.contract_link}" target="_blank" class="modal-link">📋 Договор PDF</a>`;
+    if (req.contract_number) contrLinks.innerHTML += ` <span style="color:var(--text-dim);font-size:11px">№ ${req.contract_number}</span>`;
+  } else { contrLinks.innerHTML = ''; }
+  document.getElementById('m-contract-btn').disabled = false;
+
   const invMap = { not_created: '— не создан', created: '✓ создан', sent: '✓ отправлен' };
   document.getElementById('m-invoice-status').textContent = invMap[req.invoice_status || 'not_created'];
 
@@ -1051,6 +1070,25 @@ async function saveModalFields() {
     showToast('Сохранено');
     loadRequests();
   } catch { showToast('Ошибка', 'err'); }
+  finally { btn.disabled = false; }
+}
+
+async function generateContract() {
+  if (!currentModalId) return;
+  const btn = document.getElementById('m-contract-btn');
+  btn.disabled = true;
+  try {
+    const r = await fetch(`${API}/api/admin/requests/${currentModalId}/generate-contract`,
+      { method: 'POST', headers: h() });
+    const data = await r.json();
+    if (!r.ok) { showToast(data.detail || 'Ошибка', 'err'); return; }
+    const linksDiv = document.getElementById('m-contract-links');
+    linksDiv.innerHTML = `<a href="${API}${data.contract_url}" target="_blank" class="modal-link">📋 Договор PDF</a>`;
+    if (data.contract_number) linksDiv.innerHTML += ` <span style="color:var(--text-dim);font-size:11px">№ ${data.contract_number}</span>`;
+    document.getElementById('m-contract-status').textContent = '✓ создан';
+    showToast('Договор сформирован');
+    loadRequests();
+  } catch { showToast('Ошибка генерации договора', 'err'); }
   finally { btn.disabled = false; }
 }
 
