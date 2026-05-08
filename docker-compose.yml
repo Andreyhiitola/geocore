@@ -97,6 +97,8 @@ services:
       GITHUB_REPO: ${GITHUB_REPO:-Andreyhiitola/geocore}
       USN_API_URL: ${USN_API_URL:-http://geocore_usn_api:5000}
       USN_API_KEY: ${USN_API_KEY:-}
+      MAX_CSV_BYTES: ${MAX_CSV_BYTES:-5242880}
+      MAX_CSV_ROWS: ${MAX_CSV_ROWS:-20000}
     networks:
       - geocore_net
     healthcheck:

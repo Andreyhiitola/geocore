@@ -63,10 +63,10 @@ function renderSoonCard(c, idx) {
 function renderPlannedCard(c) {
   return `
     <div class="cc cc-planned">
-      <span class="cc-icon">${c.icon}</span>
-      <div class="cc-tag">${c.tag}</div>
-      <h3 class="cc-t">${c.title}</h3>
-      <p class="cc-d">${c.desc}</p>
+      <span class="cc-icon">${esc(c.icon)}</span>
+      <div class="cc-tag">${esc(c.tag)}</div>
+      <h3 class="cc-t">${esc(c.title)}</h3>
+      <p class="cc-d">${esc(c.desc)}</p>
     </div>`;
 }
 
@@ -230,9 +230,9 @@ function openRequestForm(courseTitle) {
 
 function openSoonModal(c) {
   showModal(`
-    <div class="modal-tag">${c.tag}</div>
-    <h2 class="modal-title">${c.title}</h2>
-    <p class="modal-desc">${c.desc || 'Подробная программа курса готовится.'}</p>
+    <div class="modal-tag">${esc(c.tag)}</div>
+    <h2 class="modal-title">${esc(c.title)}</h2>
+    <p class="modal-desc">${esc(c.desc || 'Подробная программа курса готовится.')}</p>
     <div class="modal-soon-note">
       <div class="modal-soon-icon">⏳</div>
       <div>
@@ -258,7 +258,7 @@ function moodleToCourse(c, idx, total, meta = {}) {
     icon:  meta.icon  || '📚',
     tag:   meta.tag   || '',
     title: c.title,
-    desc:  c.summary.replace(/<[^>]+>/g, '').slice(0, 120),
+    desc:  String(c.summary || '').replace(/<[^>]+>/g, '').slice(0, 120),
     meta:  meta.meta  || [],
     href:  c.href,
     modal: meta.modal || null,
@@ -272,9 +272,9 @@ export function renderFooter(data) {
   if (!fi) return;
   const cols = data.footer.columns.map(col => `
     <div>
-      <div class="fc-t">${col.title}</div>
+      <div class="fc-t">${esc(col.title)}</div>
       <ul class="fl">
-        ${col.links.map(l => `<li><a href="${l.href}">${l.label}</a></li>`).join('')}
+        ${col.links.map(l => `<li><a href="${esc(safeHref(l.href))}">${esc(l.label)}</a></li>`).join('')}
       </ul>
     </div>`).join('');
   fi.innerHTML = `
@@ -283,7 +283,7 @@ export function renderFooter(data) {
         <div class="logo-hex"></div>
         <span class="logo-text">Geo<span>Core</span></span>
       </a>
-      <p class="fb-d">${data.footer.description}</p>
+      <p class="fb-d">${esc(data.footer.description)}</p>
     </div>
     ${cols}`;
   const fc = document.querySelector('.fc');

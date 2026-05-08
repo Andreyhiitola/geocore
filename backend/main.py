@@ -201,6 +201,9 @@ GITHUB_REPO  = os.getenv("GITHUB_REPO", "Andreyhiitola/geocore")
 USN_API_URL = os.getenv("USN_API_URL", "http://geocore_usn_api:5000")
 USN_API_KEY = os.getenv("USN_API_KEY", "")
 
+MAX_CSV_BYTES = int(os.getenv("MAX_CSV_BYTES", str(5 * 1024 * 1024)))
+MAX_CSV_ROWS = int(os.getenv("MAX_CSV_ROWS", "20000"))
+
 SMTP_HOST    = os.getenv("SMTP_HOST", "smtp.yandex.ru")
 SMTP_PORT    = int(os.getenv("SMTP_PORT", "587"))
 SMTP_USER    = os.getenv("SMTP_USER", "")   # noreply@geocore-academy.ru
@@ -1162,20 +1165,47 @@ async def health():
     return {"status": "ok", "service": "GeoCore Lab API"}
 
 
+async def _read_limited_csv(file: UploadFile) -> pd.DataFrame:
+    """Read a public CSV upload with bounded memory and row count."""
+    filename = file.filename or ""
+    if not filename.lower().endswith(".csv"):
+        raise HTTPException(400, "Требуется CSV файл")
+
+    content = await file.read(MAX_CSV_BYTES + 1)
+    if len(content) > MAX_CSV_BYTES:
+        max_mb = MAX_CSV_BYTES / 1024 / 1024
+        raise HTTPException(413, f"CSV слишком большой. Максимум: {max_mb:.1f} MB")
+
+    try:
+        text = content.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        raise HTTPException(400, "CSV должен быть в кодировке UTF-8")
+
+    data_rows = max(0, len(text.splitlines()) - 1)
+    if data_rows > MAX_CSV_ROWS:
+        raise HTTPException(413, f"Слишком много строк в CSV. Максимум: {MAX_CSV_ROWS}")
+
+    try:
+        df = pd.read_csv(io.StringIO(text))
+    except Exception as e:
+        raise HTTPException(400, f"Ошибка чтения CSV: {str(e)}")
+
+    if len(df) > MAX_CSV_ROWS:
+        raise HTTPException(413, f"Слишком много строк в CSV. Максимум: {MAX_CSV_ROWS}")
+    return df
+
+
+def _require_positive(value: float, name: str) -> None:
+    if value <= 0:
+        raise HTTPException(400, f"{name} должен быть больше 0")
+
+
 @app.post("/api/validate")
 async def validate(
     file: UploadFile = File(..., description="CSV файл с данными опробования")
 ):
     """Только валидация CSV файла"""
-    if not file.filename.endswith('.csv'):
-        raise HTTPException(400, "Требуется CSV файл")
-    
-    content = await file.read()
-    try:
-        df = pd.read_csv(io.StringIO(content.decode('utf-8')))
-    except Exception as e:
-        raise HTTPException(400, f"Ошибка чтения CSV: {str(e)}")
-    
+    df = await _read_limited_csv(file)
     result = validate_csv(df)
     return result
 
@@ -1191,14 +1221,18 @@ async def process(
     block_size: float = Form(5.0, description="Размер блока модели (м)")
 ):
     """Полная обработка данных"""
-    if not file.filename.endswith('.csv'):
-        raise HTTPException(400, "Требуется CSV файл")
-    
-    content = await file.read()
-    try:
-        df = pd.read_csv(io.StringIO(content.decode('utf-8')))
-    except Exception as e:
-        raise HTTPException(400, f"Ошибка чтения CSV: {str(e)}")
+    _require_positive(composite_length, "composite_length")
+    _require_positive(block_size, "block_size")
+    if cutoff < 0:
+        raise HTTPException(400, "cutoff должен быть >= 0")
+    if decluster_method not in {"none", "cell", "polygon", "distance"}:
+        raise HTTPException(400, "Недопустимый decluster_method")
+    if wireframe_method not in {"convex_hull", "alpha_shape", "sections"}:
+        raise HTTPException(400, "Недопустимый wireframe_method")
+    if mac_style not in {"standard", "simple", "variogram", "coal", "porphyry"}:
+        raise HTTPException(400, "Недопустимый mac_style")
+
+    df = await _read_limited_csv(file)
     
     # 1. Валидация
     validation = validate_csv(df)
@@ -1269,11 +1303,12 @@ async def generate_wireframe_only(
     method: str = Form("convex_hull")
 ):
     """Только построение каркаса OBJ"""
-    content = await file.read()
-    try:
-        df = pd.read_csv(io.StringIO(content.decode('utf-8')))
-    except Exception as e:
-        raise HTTPException(400, f"Ошибка чтения CSV: {str(e)}")
+    if cutoff < 0:
+        raise HTTPException(400, "cutoff должен быть >= 0")
+    if method not in {"convex_hull", "alpha_shape", "sections"}:
+        raise HTTPException(400, "Недопустимый method")
+
+    df = await _read_limited_csv(file)
     
     validation = validate_csv(df)
     if not validation["valid"]:
@@ -1299,11 +1334,13 @@ async def generate_mac_only(
     style: str = Form("standard")
 ):
     """Только генерация .mac скрипта"""
-    content = await file.read()
-    try:
-        df = pd.read_csv(io.StringIO(content.decode('utf-8')))
-    except Exception as e:
-        raise HTTPException(400, f"Ошибка чтения CSV: {str(e)}")
+    _require_positive(composite_length, "composite_length")
+    if cutoff < 0:
+        raise HTTPException(400, "cutoff должен быть >= 0")
+    if style not in {"standard", "simple", "variogram", "coal", "porphyry"}:
+        raise HTTPException(400, "Недопустимый style")
+
+    df = await _read_limited_csv(file)
     
     validation = validate_csv(df)
     if not validation["valid"]:
