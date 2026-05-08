@@ -479,8 +479,8 @@ tr:hover td{background:var(--dark-3);}
 
 <script>
 const API = 'https://api.geocore-academy.ru';
-let token    = localStorage.getItem('gc_admin_token') || '';
-let username = localStorage.getItem('gc_admin_user')  || '';
+let token    = sessionStorage.getItem('gc_admin_token') || '';
+let username = sessionStorage.getItem('gc_admin_user')  || '';
 let currentFilter = 'all';
 let allRequests = [];
 let siteData = null;
@@ -512,8 +512,8 @@ async function tryLogin() {
     });
     if (!r.ok) throw new Error();
     token = t; username = u;
-    localStorage.setItem('gc_admin_token', token);
-    localStorage.setItem('gc_admin_user', username);
+    sessionStorage.setItem('gc_admin_token', token);
+    sessionStorage.setItem('gc_admin_user', username);
     showAdmin();
   } catch {
     document.getElementById('loginErr').style.display = 'block';
@@ -527,8 +527,8 @@ function showAdmin() {
 }
 
 function logout() {
-  localStorage.removeItem('gc_admin_token');
-  localStorage.removeItem('gc_admin_user');
+  sessionStorage.removeItem('gc_admin_token');
+  sessionStorage.removeItem('gc_admin_user');
   token = ''; username = '';
   document.getElementById('adminApp').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
