@@ -160,6 +160,8 @@ services:
       - usn_data:/app/data
     environment:
       USN_API_KEY: ${USN_API_KEY:-}
+      GEOCORE_API_URL: ${GEOCORE_API_URL:-https://api.geocore-academy.ru}
+      GEOCORE_ADMIN_TOKEN: ${ADMIN_TOKEN:-}
     networks:
       - geocore_net
     healthcheck:
