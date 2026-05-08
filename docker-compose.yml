@@ -162,6 +162,7 @@ services:
       USN_API_KEY: ${USN_API_KEY:-}
       GEOCORE_API_URL: ${GEOCORE_API_URL:-https://api.geocore-academy.ru}
       GEOCORE_ADMIN_TOKEN: ${ADMIN_TOKEN:-}
+      GEOCORE_ADMIN_USER: ${ADMIN_USERNAME:-}
     networks:
       - geocore_net
     healthcheck:
