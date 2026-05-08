@@ -7,6 +7,22 @@
  *   planned — только в планах, некликабельные, самые блёклые
  */
 
+function esc(s) {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function safeHref(href) {
+  const value = String(href ?? '').trim();
+  if (!value) return '#';
+  if (/^(https?:|mailto:|#|\/|\.\/|\.\.\/)/i.test(value)) return value;
+  return '#';
+}
+
 export async function loadSiteData() {
   const resp = await fetch('/js/data/site.json');
   return resp.json();
@@ -16,23 +32,23 @@ export function renderNav(data) {
   const navLinks = document.querySelector('.nav-links');
   if (!navLinks) return;
   navLinks.innerHTML = data.nav.links
-    .map(l => `<li><a href="${l.href}">${l.label}</a></li>`)
+    .map(l => `<li><a href="${esc(safeHref(l.href))}">${esc(l.label)}</a></li>`)
     .join('');
   const cta = document.querySelector('.nav-cta');
-  if (cta) { cta.href = data.nav.cta.href; cta.textContent = data.nav.cta.label; }
+  if (cta) { cta.href = safeHref(data.nav.cta.href); cta.textContent = data.nav.cta.label; }
 }
 
 // ── Карточки ────────────────────────────────────────────────────────────────
 
 function cardInner(c) {
   return `
-    <div class="cc-num">${c.num}</div>
-    <span class="cc-icon">${c.icon}</span>
-    <div class="cc-tag">${c.tag}</div>
-    <h3 class="cc-t">${c.title}</h3>
-    <p class="cc-d">${c.desc}</p>
+    <div class="cc-num">${esc(c.num)}</div>
+    <span class="cc-icon">${esc(c.icon)}</span>
+    <div class="cc-tag">${esc(c.tag)}</div>
+    <h3 class="cc-t">${esc(c.title)}</h3>
+    <p class="cc-d">${esc(c.desc)}</p>
     <div class="cc-meta">
-      ${c.meta.map(m => `<div class="cc-m">${m.icon} <strong>${m.text}</strong></div>`).join('')}
+      ${(c.meta || []).map(m => `<div class="cc-m">${esc(m.icon)} <strong>${esc(m.text)}</strong></div>`).join('')}
     </div>`;
 }
 
@@ -108,13 +124,13 @@ function showModal(html) {
 function openLiveModal(c) {
   const m = c.modal || {};
   const highlights = (m.highlights || [])
-    .map(h => `<li class="modal-hi">${h}</li>`).join('');
+    .map(h => `<li class="modal-hi">${esc(h)}</li>`).join('');
 
   showModal(`
-    <div class="modal-tag">${c.tag}</div>
-    <h2 class="modal-title">${c.title}</h2>
-    ${m.tagline ? `<p class="modal-tagline">${m.tagline}</p>` : ''}
-    ${m.description ? `<p class="modal-desc">${m.description}</p>` : `<p class="modal-desc">${c.desc}</p>`}
+    <div class="modal-tag">${esc(c.tag)}</div>
+    <h2 class="modal-title">${esc(c.title)}</h2>
+    ${m.tagline ? `<p class="modal-tagline">${esc(m.tagline)}</p>` : ''}
+    ${m.description ? `<p class="modal-desc">${esc(m.description)}</p>` : `<p class="modal-desc">${esc(c.desc)}</p>`}
     ${highlights ? `
       <div class="modal-section">
         <div class="modal-section-label">ЧТО ИЗУЧИТЕ</div>
@@ -122,9 +138,9 @@ function openLiveModal(c) {
       </div>` : ''}
     ${(m.audience || m.duration || m.format) ? `
       <div class="modal-meta-row">
-        ${m.audience ? `<div class="modal-meta-item"><div class="modal-meta-label">АУДИТОРИЯ</div><div class="modal-meta-val">${m.audience}</div></div>` : ''}
-        ${m.duration ? `<div class="modal-meta-item"><div class="modal-meta-label">ДЛИТЕЛЬНОСТЬ</div><div class="modal-meta-val">${m.duration}</div></div>` : ''}
-        ${m.format   ? `<div class="modal-meta-item"><div class="modal-meta-label">ФОРМАТ</div><div class="modal-meta-val">${m.format}</div></div>` : ''}
+        ${m.audience ? `<div class="modal-meta-item"><div class="modal-meta-label">АУДИТОРИЯ</div><div class="modal-meta-val">${esc(m.audience)}</div></div>` : ''}
+        ${m.duration ? `<div class="modal-meta-item"><div class="modal-meta-label">ДЛИТЕЛЬНОСТЬ</div><div class="modal-meta-val">${esc(m.duration)}</div></div>` : ''}
+        ${m.format   ? `<div class="modal-meta-item"><div class="modal-meta-label">ФОРМАТ</div><div class="modal-meta-val">${esc(m.format)}</div></div>` : ''}
       </div>` : ''}
     <button class="modal-cta" id="gc-enroll-btn" style="border:none;cursor:pointer">Записаться на курс →</button>
   `);
@@ -134,13 +150,12 @@ function openLiveModal(c) {
 }
 
 function openRequestForm(courseTitle) {
-  const safeTitle = courseTitle.replace(/"/g, '&quot;');
   showModal(`
     <div class="modal-tag">КОРПОРАТИВНОЕ ОБУЧЕНИЕ</div>
     <h2 class="modal-title">Заявка на курс</h2>
-    <p class="modal-desc" style="margin-bottom:8px">${courseTitle}</p>
+    <p class="modal-desc" style="margin-bottom:8px">${esc(courseTitle)}</p>
     <form class="req-form" id="gc-req-form" novalidate>
-      <input type="hidden" name="course_name" value="${safeTitle}">
+      <input type="hidden" name="course_name" value="${esc(courseTitle)}">
       <label>Название компании *</label>
       <input type="text" name="company_name" required placeholder="ООО Геология Северо-Запада">
       <label>ИНН компании *</label>
