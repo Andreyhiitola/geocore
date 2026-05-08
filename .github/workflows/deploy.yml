@@ -198,3 +198,15 @@ jobs:
             exit 1
           fi
           echo "✓ Moodle OK ($STATUS)"
+
+      - name: Проверка USN /health
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" -u "${USN_BASIC_USER}:${USN_BASIC_PASS}" https://usn.geocore-academy.ru/health)
+          if [ "$STATUS" != "200" ]; then
+            echo "✗ USN health вернул $STATUS (ожидали 200)" >&2
+            exit 1
+          fi
+          echo "✓ USN /health OK ($STATUS)"
+        env:
+          USN_BASIC_USER: ${{ secrets.USN_BASIC_USER }}
+          USN_BASIC_PASS: ${{ secrets.USN_BASIC_PASS }}
