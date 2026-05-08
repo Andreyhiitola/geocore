@@ -159,7 +159,7 @@ jobs:
             git pull origin main
             sed -i "s/MOODLE_VERSION=.*/MOODLE_VERSION=${{ env.MOODLE_VERSION }}/" /opt/geocore/.env
             docker compose pull
-            docker compose up -d frontend backend moodle --remove-orphans
+            docker compose up -d frontend backend moodle usn_backend usn_frontend --remove-orphans
             docker compose up -d --build bot backup --remove-orphans
             docker image prune -f
             echo "==> Задеплоено: $(date)"
