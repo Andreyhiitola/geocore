@@ -691,7 +691,7 @@ if (originalRun) {
     originalRun.querySelector("#prepRunText").textContent = "⚙ Обработка...";
     
     try {
-      const response = await fetch("http://localhost:8000/api/process", { method: "POST", body: formData });
+      const response = await fetch("https://api.geocore-academy.ru/api/process", { method: "POST", body: formData });
       const result = await response.json();
       
       if (result.wireframe && result.wireframe.content) {
