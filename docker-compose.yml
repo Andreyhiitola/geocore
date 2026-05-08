@@ -77,6 +77,8 @@ services:
         condition: service_healthy
     ports:
       - "127.0.0.1:8000:8000"
+    volumes:
+      - backend_static:/app/static
     environment:
       MOODLE_URL: ${MOODLE_WWWROOT:-https://courses.geocore-academy.ru}
       MOODLE_TOKEN: ${MOODLE_TOKEN}
@@ -214,4 +216,5 @@ volumes:
   mariadb_data:
   moodle_data:
   backup_logs:
+  backend_static:
   usn_data:

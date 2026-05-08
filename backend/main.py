@@ -814,6 +814,7 @@ async def create_request(request: CourseRequest, background_tasks: BackgroundTas
         print("[DB] Заявка сохранена")
     except Exception as e:
         print(f"[DB] Ошибка сохранения: {e}")
+        raise HTTPException(status_code=500, detail="Ошибка сохранения заявки, попробуйте позже")
 
     background_tasks.add_task(_send_request_emails, request)
     return {"success": True, "message": "Request received"}

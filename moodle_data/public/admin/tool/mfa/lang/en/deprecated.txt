@@ -1,6 +1,0 @@
-inputrequired,tool_mfa
-setuprequired,tool_mfa
-cancellogin,tool_mfa
-verification,tool_mfa
-verification_desc,tool_mfa
-verifyalt,tool_mfa
