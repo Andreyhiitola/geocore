@@ -1,5 +1,5 @@
 # backend/main.py
-from fastapi import FastAPI, UploadFile, File, HTTPException, Form, BackgroundTasks, Depends, Header
+from fastapi import FastAPI, UploadFile, File, HTTPException, Form, BackgroundTasks, Depends, Header, Response, Cookie
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, PlainTextResponse
 from pydantic import BaseModel
@@ -154,7 +154,8 @@ async def startup():
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://geocore-academy.ru"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -825,16 +826,50 @@ async def create_request(request: CourseRequest, background_tasks: BackgroundTas
 
 # ── Admin auth ───────────────────────────────────────────────────────────────
 
+class AdminLoginRequest(BaseModel):
+    username: str
+    token: str
+
+
 async def require_admin(
     authorization: Optional[str] = Header(None),
     x_admin_user: Optional[str] = Header(None),
+    gc_admin_token: Optional[str] = Cookie(None),
+    gc_admin_user: Optional[str] = Cookie(None),
 ):
     if not ADMIN_TOKEN:
         raise HTTPException(500, "ADMIN_TOKEN не задан на сервере")
+    if gc_admin_token is not None:
+        if ADMIN_USERNAME and gc_admin_user != ADMIN_USERNAME:
+            raise HTTPException(401, "Неверный логин или токен")
+        if gc_admin_token != ADMIN_TOKEN:
+            raise HTTPException(401, "Неверный логин или токен")
+        return
     if ADMIN_USERNAME and x_admin_user != ADMIN_USERNAME:
         raise HTTPException(401, "Неверный логин или токен")
     if authorization != f"Bearer {ADMIN_TOKEN}":
         raise HTTPException(401, "Неверный логин или токен")
+
+
+@app.post("/api/admin/login")
+async def admin_login(body: AdminLoginRequest, response: Response):
+    if not ADMIN_TOKEN:
+        raise HTTPException(500, "ADMIN_TOKEN не задан на сервере")
+    if ADMIN_USERNAME and body.username != ADMIN_USERNAME:
+        raise HTTPException(401, "Неверный логин или токен")
+    if body.token != ADMIN_TOKEN:
+        raise HTTPException(401, "Неверный логин или токен")
+    _cookie_opts = dict(httponly=True, secure=True, samesite="none", max_age=86400)
+    response.set_cookie("gc_admin_token", body.token, **_cookie_opts)
+    response.set_cookie("gc_admin_user", body.username, **_cookie_opts)
+    return {"ok": True}
+
+
+@app.post("/api/admin/logout")
+async def admin_logout(response: Response):
+    response.delete_cookie("gc_admin_token", samesite="none", secure=True)
+    response.delete_cookie("gc_admin_user", samesite="none", secure=True)
+    return {"ok": True}
 
 
 # ── Admin: заявки ────────────────────────────────────────────────────────────

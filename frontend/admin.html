@@ -479,8 +479,6 @@ tr:hover td{background:var(--dark-3);}
 
 <script>
 const API = 'https://api.geocore-academy.ru';
-let token    = sessionStorage.getItem('gc_admin_token') || '';
-let username = sessionStorage.getItem('gc_admin_user')  || '';
 let currentFilter = 'all';
 let allRequests = [];
 let siteData = null;
@@ -494,7 +492,7 @@ function showToast(msg, type = 'ok') {
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 function h() {
-  return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, 'X-Admin-User': username };
+  return { 'Content-Type': 'application/json' };
 }
 function esc(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -507,13 +505,13 @@ async function tryLogin() {
   if (!u || !t) return;
   document.getElementById('loginErr').style.display = 'none';
   try {
-    const r = await fetch(`${API}/api/admin/requests`, {
-      headers: { 'Authorization': `Bearer ${t}`, 'X-Admin-User': u }
+    const r = await fetch(`${API}/api/admin/login`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: u, token: t }),
     });
     if (!r.ok) throw new Error();
-    token = t; username = u;
-    sessionStorage.setItem('gc_admin_token', token);
-    sessionStorage.setItem('gc_admin_user', username);
     showAdmin();
   } catch {
     document.getElementById('loginErr').style.display = 'block';
@@ -526,10 +524,8 @@ function showAdmin() {
   loadRequests();
 }
 
-function logout() {
-  sessionStorage.removeItem('gc_admin_token');
-  sessionStorage.removeItem('gc_admin_user');
-  token = ''; username = '';
+async function logout() {
+  await fetch(`${API}/api/admin/logout`, { method: 'POST', credentials: 'include' });
   document.getElementById('adminApp').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('tokenInput').value = '';
@@ -542,7 +538,7 @@ async function loadRequests() {
     const url = currentFilter === 'archive'
       ? `${API}/api/admin/requests/archive`
       : `${API}/api/admin/requests`;
-    const r = await fetch(url, { headers: h() });
+    const r = await fetch(url, { credentials: 'include', headers: h() });
     if (r.status === 401) { logout(); return; }
     const data = await r.json();
     allRequests = data.requests || [];
@@ -557,7 +553,7 @@ async function sendAccounts() {
   btn.disabled = true;
   try {
     const r = await fetch(`${API}/api/admin/requests/${currentModalId}/send-accounts`,
-      { method: 'POST', headers: h() });
+      { method: 'POST', credentials: 'include', headers: h() });
     const data = await r.json();
     if (!r.ok) { showToast(data.detail || 'Ошибка', 'err'); return; }
     showToast(`Письмо отправлено → ${data.sent_to}`);
@@ -648,7 +644,7 @@ async function updateStatus(sel) {
   const id = sel.dataset.id;
   try {
     const r = await fetch(`${API}/api/admin/requests/${id}`, {
-      method: 'PATCH', headers: h(), body: JSON.stringify({ status: sel.value })
+      method: 'PATCH', credentials: 'include', headers: h(), body: JSON.stringify({ status: sel.value })
     });
     if (!r.ok) throw new Error();
     const req = allRequests.find(x => x.id == id);
@@ -679,7 +675,7 @@ async function deleteSelected() {
   if (!ids.length) return;
   if (!confirm(`Удалить ${ids.length} заявок? Это действие нельзя отменить.`)) return;
   await Promise.all(ids.map(id =>
-    fetch(`${API}/api/admin/requests/${id}`, { method: 'DELETE', headers: h() })
+    fetch(`${API}/api/admin/requests/${id}`, { method: 'DELETE', credentials: 'include', headers: h() })
   ));
   showToast(`Удалено: ${ids.length}`);
   loadRequests();
@@ -687,7 +683,7 @@ async function deleteSelected() {
 
 async function archiveRequest(id) {
   try {
-    const r = await fetch(`${API}/api/admin/requests/${id}/archive`, { method: 'PATCH', headers: h() });
+    const r = await fetch(`${API}/api/admin/requests/${id}/archive`, { method: 'PATCH', credentials: 'include', headers: h() });
     if (!r.ok) throw new Error();
     showToast('Заявка перемещена в архив');
     loadRequests();
@@ -696,7 +692,7 @@ async function archiveRequest(id) {
 
 async function unarchiveRequest(id) {
   try {
-    const r = await fetch(`${API}/api/admin/requests/${id}/unarchive`, { method: 'PATCH', headers: h() });
+    const r = await fetch(`${API}/api/admin/requests/${id}/unarchive`, { method: 'PATCH', credentials: 'include', headers: h() });
     if (!r.ok) throw new Error();
     showToast('Заявка восстановлена');
     loadRequests();
@@ -706,7 +702,7 @@ async function unarchiveRequest(id) {
 async function deleteRequest(id) {
   if (!confirm('Удалить заявку навсегда?')) return;
   try {
-    const r = await fetch(`${API}/api/admin/requests/${id}`, { method: 'DELETE', headers: h() });
+    const r = await fetch(`${API}/api/admin/requests/${id}`, { method: 'DELETE', credentials: 'include', headers: h() });
     if (!r.ok) throw new Error();
     showToast('Заявка удалена');
     loadRequests();
@@ -747,7 +743,7 @@ document.querySelectorAll('.stab').forEach(t => {
 async function loadSiteJson() {
   document.getElementById('saveStatus').textContent = 'Загрузка...';
   try {
-    const r = await fetch(`${API}/api/admin/site-json`, { headers: h() });
+    const r = await fetch(`${API}/api/admin/site-json`, { credentials: 'include', headers: h() });
     if (r.status === 401) { logout(); return; }
     const data = await r.json();
     siteJsonSha = data.sha;
@@ -970,7 +966,7 @@ async function saveSiteJson() {
   try {
     const content = JSON.stringify(siteData, null, 2);
     const r = await fetch(`${API}/api/admin/site-json`, {
-      method: 'PUT', headers: h(),
+      method: 'PUT', credentials: 'include', headers: h(),
       body: JSON.stringify({ content, sha: siteJsonSha })
     });
     if (!r.ok) throw new Error();
@@ -998,7 +994,7 @@ function closeModal() {
 async function openRequestModal(id) {
   currentModalId = id;
   try {
-    const r = await fetch(`${API}/api/admin/requests/${id}`, { headers: h() });
+    const r = await fetch(`${API}/api/admin/requests/${id}`, { credentials: 'include', headers: h() });
     if (!r.ok) throw new Error();
     const req = await r.json();
     fillModal(req);
@@ -1064,9 +1060,9 @@ async function saveModalFields() {
     const hc = parseInt(document.getElementById('m-headcount').value) || 1;
     const pr = document.getElementById('m-price').value;
     await fetch(`${API}/api/admin/requests/${currentModalId}/headcount?headcount=${hc}`,
-      { method: 'PATCH', headers: h() });
+      { method: 'PATCH', credentials: 'include', headers: h() });
     if (pr) await fetch(`${API}/api/admin/requests/${currentModalId}/total_price?total_price=${pr}`,
-      { method: 'PATCH', headers: h() });
+      { method: 'PATCH', credentials: 'include', headers: h() });
     showToast('Сохранено');
     loadRequests();
   } catch { showToast('Ошибка', 'err'); }
@@ -1079,7 +1075,7 @@ async function generateContract() {
   btn.disabled = true;
   try {
     const r = await fetch(`${API}/api/admin/requests/${currentModalId}/generate-contract`,
-      { method: 'POST', headers: h() });
+      { method: 'POST', credentials: 'include', headers: h() });
     const data = await r.json();
     if (!r.ok) { showToast(data.detail || 'Ошибка', 'err'); return; }
     const linksDiv = document.getElementById('m-contract-links');
@@ -1098,7 +1094,7 @@ async function generateInvoice() {
   btn.disabled = true;
   try {
     const r = await fetch(`${API}/api/admin/requests/${currentModalId}/generate-invoice`,
-      { method: 'POST', headers: h() });
+      { method: 'POST', credentials: 'include', headers: h() });
     const data = await r.json();
     if (!r.ok) { showToast(data.detail || 'Ошибка', 'err'); return; }
     const qrUrl = data.invoice_url.replace('/invoices/invoice_', '/qr/qr_').replace('.pdf', '.png');
@@ -1118,7 +1114,7 @@ async function markPaid() {
   btn.disabled = true;
   try {
     const r = await fetch(`${API}/api/admin/requests/${currentModalId}/mark-paid`,
-      { method: 'POST', headers: h() });
+      { method: 'POST', credentials: 'include', headers: h() });
     const data = await r.json();
     if (!r.ok) { showToast(data.detail || 'Ошибка', 'err'); return; }
     document.getElementById('m-payment-status').textContent = '✓ оплачен';
@@ -1161,8 +1157,8 @@ applyTheme(localStorage.getItem('gc_admin_theme') || 'dark');
 async function loadAnalytics() {
   try {
     const [actRes, archRes] = await Promise.all([
-      fetch(`${API}/api/admin/requests`, { headers: h() }),
-      fetch(`${API}/api/admin/requests/archive`, { headers: h() }),
+      fetch(`${API}/api/admin/requests`, { credentials: 'include', headers: h() }),
+      fetch(`${API}/api/admin/requests/archive`, { credentials: 'include', headers: h() }),
     ]);
     const active  = (await actRes.json()).requests  || [];
     const archive = (await archRes.json()).requests || [];
@@ -1240,7 +1236,10 @@ async function loadAnalytics() {
   } catch(e) { console.error(e); }
 }
 
-if (token) showAdmin();
+(async () => {
+  const r = await fetch(`${API}/api/admin/requests`, { credentials: 'include', headers: h() });
+  if (r.ok) showAdmin();
+})();
 </script>
 </body>
 </html>
