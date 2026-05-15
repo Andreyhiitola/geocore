@@ -144,8 +144,9 @@ for course_dir in "${COURSES[@]}"; do
     log "  [1/4] rsync → VPS"
     rsync -aq --delete \
         --exclude="*.tmp" --exclude="*.log" \
-        --exclude="desktop.ini" --exclude=".DS_Store" \
-        "$course_dir/" "${SSH_VPS}:${VPS_COURSES_DIR}/${course_name}/"
+        --exclude="desktop.ini" --exclude=".DS_Store" --exclude="*.partial" \
+        "$course_dir/" "${SSH_VPS}:${VPS_COURSES_DIR}/${course_name}/" || \
+        { rc=$?; [[ $rc -eq 24 ]] || exit $rc; }  # 24 = vanished files, OK
     file_count=$(ssh -q "$SSH_VPS" "find '${VPS_COURSES_DIR}/${course_name}' -type f | wc -l")
     info "Файлов на VPS: $file_count"
 
