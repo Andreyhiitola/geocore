@@ -73,7 +73,7 @@
 - Переменные: `S3_BUCKET`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION=ru-3`
 - При успехе и ошибке → уведомление в Telegram
 
-⚠️ Selectel S3 (Ceph/RadosGW): bucket policy с `Principal: *` ломает write-доступ владельца — не применять без теста. Для публичного хостинга контента использовать nginx-проксирование (см. `decisions.md`).
+⚠️ Bucket policy с `Principal: *` ломает write-доступ на Selectel (Ceph). Для публичного контента — nginx, не bucket policy (см. [[decisions]]).
 
 ## Связанные разделы
 

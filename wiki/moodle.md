@@ -47,29 +47,14 @@
 
 ## Pipeline публикации CourseLab-курсов
 
-Источник: Google Drive `Эл_курсы/` → папки CourseLab HTML (не SCORM).  
-Контент хостится на диске VPS (`/opt/geocore/courses/`), nginx отдаёт через `/content/`.  
-S3 используется только для ZIP-архивов (не для раздачи).
-
 ```bash
-./scripts/publish-courses.sh "/путь/к/Эл_курсы"           # показывает diff, требует y/n
-./scripts/publish-courses.sh "/путь/к/Эл_курсы" --dry-run  # только план
-./scripts/publish-courses.sh "/путь/к/Эл_курсы" --yes      # без подтверждения
+./scripts/publish-courses.sh "/путь/к/Эл_курсы"  # --dry-run | --yes
 ```
 
-**Шаги (на каждый курс):**
-1. `rsync` → `/opt/geocore/courses/НАЗВАНИЕ/` на VPS
-2. ZIP → `s3://geocore-backups/courses/archives/НАЗВАНИЕ.zip`
-3. `docker exec geocore_moodle php moodle-create-course.php` — курс + URL-активность
-4. Обновляет `site.json` (moodleMeta) и `courses-state.json`
+Env подтягивается с VPS автоматически (`SSH_VPS=geocore`). После деплоя — добавить ID в `moodleCourseOrder` → `git push`.
 
-**Env автоматически с VPS** (`SSH_VPS=geocore`, путь `.env` = `/opt/geocore/.env`).
-
-**После деплоя:** добавить ID в `moodleCourseOrder` → `git push`.
-
-⚠️ Курсы создаются с `visible=0` — включить видимость в Moodle admin.  
-⚠️ `moodle-create-course.php` требует Moodle 4.2+ (использует `\core\cron::setup_user()`).  
-⚠️ Moodle `config.php` находится по пути `/var/www/moodle/config.php` (не `/var/www/html/`).
+⚠️ Курсы создаются с `visible=0` — включить в Moodle admin вручную.  
+⚠️ Moodle `config.php`: `/var/www/moodle/config.php` (не `/var/www/html/`).
 
 ## Обновление Moodle
 
