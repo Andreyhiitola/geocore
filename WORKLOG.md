@@ -1,5 +1,28 @@
 # WORKLOG
 
+### 2026-05-15 (сессия 2)
+
+**Сделано:**
+- Принудительная синхронизация всех 6 курсов через `rclone copy gdrive:` → локальный диск
+- Задеплоены 2 курса полностью (Геологическое моделирование, Геостатистика) — rsync + S3 ZIP + nginx
+- Исправлен URL Нейросетей в Moodle: `GeoChem/1/start.html` (нестандартная структура подпапки)
+- VPS перезагрузился после `apt install zip` (новое ядро) — контейнеры поднялись автоматически
+- Фикс скрипта: rsync exit 24 (vanished .partial files) больше не прерывает деплой
+- Обновлена wiki: moodle.md, decisions.md, infrastructure.md — сокращены, оставлена суть
+
+**Изменённые файлы:**
+- `scripts/publish-courses.sh` — фикс rsync exit 24, исключение `*.partial`
+- `wiki/moodle.md` — таблица курсов + pipeline (сокращено)
+- `wiki/decisions.md` — 2 новых решения: контент на VPS не в S3, Google Drive не GitHub
+- `wiki/infrastructure.md` — `/content/` в схеме nginx, предупреждение о Selectel bucket policy
+
+**Решения:**
+- Нейросети: структура `ПАПКА/GeoChem/1/start.html` — URL в Moodle пришлось исправлять вручную через PHP CLI
+
+**Открытые вопросы:**
+- 4 курса ещё не дозадеплоены (ID 17, 18, 19, 20) — прервано из-за нестабильного SSH
+- Команда готова: `bash scripts/publish-courses.sh "/path/Эл_курсы" --yes`
+
 ### 2026-05-15
 
 **Сделано:**
