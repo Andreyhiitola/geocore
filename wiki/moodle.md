@@ -29,13 +29,47 @@
 
 ## Курсы
 
-| ID | Название | SCORM |
-|----|----------|-------|
-| 10 | Паспортизация геологоразведочных проектов | ✅ |
-| 11 | Leapfrog Viewer для руководителей | ✅ |
+| ID | Название | Тип | Статус |
+|----|----------|-----|--------|
+| 10 | Паспортизация геологоразведочных проектов | SCORM | ✅ открыт |
+| 11 | Leapfrog Viewer для руководителей | SCORM | ✅ открыт |
+| 12 | Геологическое моделирование | CourseLab HTML | ✅ открыт |
+| 16 | Геостатистика | CourseLab HTML | ✅ открыт |
+| 17 | Комплексный кейс Тренажера | CourseLab HTML | ✅ открыт |
+| 18 | Нейросети для прогнозирования | CourseLab HTML | ✅ открыт |
+| 19 | Мат_методы анализа геохимии | CourseLab HTML | ✅ открыт |
+| 20 | Тренажер поисков и разведки | CourseLab HTML | ✅ открыт |
 
-- `moodleCourseOrder` в `site.json` определяет порядок отображения: `[11, 10]`
-- `moodleMeta` в `site.json` — иконка и тег для каждого курса
+- `moodleCourseOrder` в `site.json` — порядок и статус ОТКРЫТ: `[11, 10, 12, 16, 17, 18, 19, 20]`
+- `moodleMeta` в `site.json` — иконка, тег, описание для каждого курса
+- Метаданные курсов: `scripts/courses-meta.json`
+- State {name → moodle_id}: `scripts/courses-state.json`
+
+## Pipeline публикации CourseLab-курсов
+
+Источник: Google Drive `Эл_курсы/` → папки CourseLab HTML (не SCORM).  
+Контент хостится на диске VPS (`/opt/geocore/courses/`), nginx отдаёт через `/content/`.  
+S3 используется только для ZIP-архивов (не для раздачи).
+
+```bash
+./scripts/publish-courses.sh "/путь/к/Эл_курсы"           # показывает diff, требует y/n
+./scripts/publish-courses.sh "/путь/к/Эл_курсы" --dry-run  # только план
+./scripts/publish-courses.sh "/путь/к/Эл_курсы" --yes      # без подтверждения
+```
+
+**Шаги (на каждый курс):**
+1. `rsync` → `/opt/geocore/courses/НАЗВАНИЕ/` на VPS
+2. ZIP → `s3://geocore-backups/courses/archives/НАЗВАНИЕ.zip`
+3. `docker exec geocore_moodle php moodle-create-course.php` — курс + URL-активность
+4. Обновляет `site.json` (moodleMeta) и `courses-state.json`
+
+**Env автоматически с VPS** (`SSH_VPS=geocore`, путь `.env` = `/opt/geocore/.env`).
+
+**После деплоя:** добавить ID в `moodleCourseOrder` → `git push`.
+
+⚠️ Курсы создаются с `visible=0` — включить видимость в Moodle admin.  
+⚠️ `moodle-create-course.php` требует Moodle 4.2+ (использует `\core\cron::setup_user()`).  
+⚠️ Moodle `config.php` находится по пути `/var/www/moodle/config.php` (не `/var/www/html/`).
 
 ## Обновление Moodle
 

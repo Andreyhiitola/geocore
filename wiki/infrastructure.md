@@ -5,11 +5,12 @@
 ```
 Браузер → HTTPS
   → nginx (хост VPS, не в Docker)
-      ├── geocore-academy.ru        → geocore_frontend (nginx:alpine, порт 80)
-      ├── courses.geocore-academy.ru → geocore_moodle (PHP/Apache, порт 8080)
-      └── api.geocore-academy.ru    → geocore_api (FastAPI, порт 8000)
-                                          ↓
-                                    geocore_db (MariaDB 10.11)
+      ├── geocore-academy.ru          → geocore_frontend (nginx:alpine, порт 80)
+      ├── courses.geocore-academy.ru  → geocore_moodle (PHP/Apache, порт 8080)
+      │   └── /content/               → /opt/geocore/courses/ (CourseLab HTML-курсы, диск VPS)
+      └── api.geocore-academy.ru      → geocore_api (FastAPI, порт 8000)
+                                            ↓
+                                      geocore_db (MariaDB 10.11)
 ```
 
 ## VPS
@@ -63,12 +64,16 @@
 
 - Контейнер `geocore_backup` — alpine + mariadb-client + awscli + crond
 - Скрипт `scripts/backup.sh` запускается каждый день в 02:00
-- **Что бэкапит:** дамп MariaDB (mysqldump по сети к `mariadb:3306`) + архив volume `moodle_data`
-- **Где хранит:** Selectel S3 (`https://s3.selectel.ru`), bucket `geocore-backups`
-- **GFS-ротация:** 7 ежедневных / 4 еженедельных / 12 ежемесячных → ~17 GB/год
-- **Провайдер:** Selectel — VPS в той же сети, трафик бэкапов бесплатный, ~36₽/мес за 20 GB
-- Переменные: `S3_BUCKET`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION=ru-1`
+- **Что бэкапит:** дамп MariaDB + архив volume `moodle_data` + ZIP-архивы курсов
+- **Где хранит:** Selectel S3, bucket `geocore-backups` (endpoint `https://s3.ru-3.storage.selcloud.ru`)
+  - `daily/`, `weekly/`, `monthly/` — бэкапы БД и Moodle
+  - `courses/archives/*.zip` — ZIP-снапшоты CourseLab-курсов (загружает `publish-courses.sh`)
+- **GFS-ротация:** 7 ежедневных / 4 еженедельных / 12 ежемесячных
+- **Провайдер:** Selectel S3, регион `ru-3`
+- Переменные: `S3_BUCKET`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION=ru-3`
 - При успехе и ошибке → уведомление в Telegram
+
+⚠️ Selectel S3 (Ceph/RadosGW): bucket policy с `Principal: *` ломает write-доступ владельца — не применять без теста. Для публичного хостинга контента использовать nginx-проксирование (см. `decisions.md`).
 
 ## Связанные разделы
 
