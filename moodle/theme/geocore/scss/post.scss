@@ -3,40 +3,44 @@
 // Применяются поверх темы Boost
 // ============================================================
 
-// Переменные — светлая тема (по умолчанию)
-$gold:        #C9A84C;
-$gold-light:  #E8C97A;
-$gold-dim:    #7A6230;
-$page-bg:     #F5F4F0;
-$card-bg:     #FFFFFF;
-$input-bg:    #F8F7F3;
+$gold:           #C9A84C;
+$gold-light:     #E8C97A;
+$gold-dim:       #7A6230;
+$page-bg:        #F5F4F0;
+$card-bg:        #FFFFFF;
+$input-bg:       #F8F7F3;
 $input-bg-focus: #F0EFE9;
-$text:        #1A1A1F;
-$text-muted:  #6B6A65;
-$text-dim:    #9A9890;
-$border:      rgba(201, 168, 76, 0.25);
-$input-border: rgba(0, 0, 0, 0.12);
+$text:           #1A1A1F;
+$text-muted:     #6B6A65;
+$text-dim:       #9A9890;
+$border:         rgba(201, 168, 76, 0.25);
+$input-border:   rgba(0, 0, 0, 0.12);
 
-// Подключаем шрифты
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
 
-// ── СТРАНИЦА ВХОДА ──────────────────────────────────────────
+// ── СТРАНИЦА ВХОДА ────────────────────────────────────────────
 
 #page-login-index {
     background: $page-bg !important;
     font-family: 'IBM Plex Sans', sans-serif;
 
-    #page,
-    #page-wrapper,
-    .login-wrapper,
-    .loginbox {
+    // Убираем лишние обёртки Boost
+    #page, #page-wrapper, .login-wrapper, .loginbox {
         background: transparent !important;
         box-shadow: none !important;
         border: none !important;
     }
+
+    // Скрываем стандартный логотип Moodle над формой (оставляем только наш в карточке)
+    .login-wrapper .loginbox > a,
+    .login-wrapper .loginbox > img,
+    .login-logo,
+    .login-logo-wrapper {
+        display: none !important;
+    }
 }
 
-// Центрирование карточки входа
+// Центрирование
 .login-wrapper {
     min-height: 100vh;
     display: flex !important;
@@ -46,54 +50,38 @@ $input-border: rgba(0, 0, 0, 0.12);
     background: $page-bg !important;
 }
 
-// Карточка формы входа
-.loginbox,
-.login-container {
+// Карточка формы
+.loginbox {
     background: $card-bg !important;
     border: 1px solid $border !important;
     border-radius: 0 !important;
-    padding: 48px 44px !important;
+    padding: 40px 44px 44px !important;
     width: 100%;
     max-width: 440px;
     position: relative;
     box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08) !important;
 
+    // Золотая полоска сверху
     &::before {
         content: '';
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
+        top: 0; left: 0; right: 0;
         height: 3px;
         background: linear-gradient(90deg, transparent, $gold, transparent);
     }
-}
 
-// ── ЛОГОТИП ─────────────────────────────────────────────────
-
-.geocore-logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 8px;
-    text-decoration: none;
-
-    .logo-hex {
-        width: 36px;
-        height: 36px;
-        background: $gold;
-        clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-        flex-shrink: 0;
-    }
-
-    .logo-text {
-        font-family: 'Playfair Display', serif;
-        font-size: 20px;
-        font-weight: 700;
-        color: $text;
-        span { color: $gold; }
+    // Стандартный заголовок Moodle внутри loginbox — стилизуем как логотип
+    > h2, .login-heading {
+        font-family: 'Playfair Display', serif !important;
+        font-size: 20px !important;
+        font-weight: 700 !important;
+        color: $text !important;
+        margin-bottom: 4px !important;
+        line-height: 1.2;
     }
 }
+
+// ── ПОДЗАГОЛОВОК ─────────────────────────────────────────────
 
 .geocore-tagline {
     font-family: 'IBM Plex Mono', monospace;
@@ -101,80 +89,103 @@ $input-border: rgba(0, 0, 0, 0.12);
     letter-spacing: 0.22em;
     text-transform: uppercase;
     color: $text-dim;
-    margin-bottom: 32px;
+    margin-bottom: 28px;
     display: flex;
     align-items: center;
     gap: 8px;
 
-    &::before {
-        content: '';
+    .geocore-tagline-line {
         width: 28px;
         height: 1px;
         background: $gold-dim;
+        display: inline-block;
+        flex-shrink: 0;
     }
 }
 
-// ── ЗАГОЛОВОК ────────────────────────────────────────────────
+// ── ЗАГОЛОВОК ФОРМЫ ──────────────────────────────────────────
 
-.login-heading,
-h2.login-heading {
+#login > h2,
+.login-form h2,
+.login-heading {
     font-family: 'Playfair Display', serif !important;
     font-size: 26px !important;
     font-weight: 700 !important;
     color: $text !important;
-    margin-bottom: 28px !important;
+    margin-bottom: 24px !important;
     line-height: 1.2;
 }
 
 // ── ПОЛЯ ВВОДА ───────────────────────────────────────────────
 
-.login-form,
-#login {
-    .form-group,
-    .form-label-group {
-        margin-bottom: 20px;
+.geocore-field {
+    margin-bottom: 20px;
+}
+
+.geocore-field-password {
+    margin-bottom: 28px;
+}
+
+.geocore-label {
+    display: block;
+    font-family: 'IBM Plex Mono', monospace !important;
+    font-size: 10px !important;
+    letter-spacing: 0.16em !important;
+    text-transform: uppercase !important;
+    color: $text-muted !important;
+    margin-bottom: 8px;
+}
+
+.geocore-input-wrap {
+    position: relative;
+}
+
+.geocore-input {
+    width: 100%;
+    background: $input-bg !important;
+    border: 1px solid $input-border !important;
+    border-radius: 0 !important;
+    color: $text !important;
+    font-family: 'IBM Plex Sans', sans-serif !important;
+    font-size: 14px !important;
+    padding: 12px 16px !important;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+
+    &:focus {
+        background: $input-bg-focus !important;
+        border-color: $gold !important;
+        box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.12) !important;
     }
 
-    label {
-        font-family: 'IBM Plex Mono', monospace !important;
-        font-size: 10px !important;
-        letter-spacing: 0.16em !important;
-        text-transform: uppercase !important;
-        color: $text-muted !important;
-        margin-bottom: 8px;
-    }
+    &::placeholder { color: $text-dim !important; }
+}
 
-    input[type="text"],
-    input[type="password"],
-    input[type="email"] {
-        background: $input-bg !important;
-        border: 1px solid $input-border !important;
-        border-radius: 0 !important;
-        color: $text !important;
-        font-family: 'IBM Plex Sans', sans-serif !important;
-        font-size: 14px !important;
-        padding: 12px 16px !important;
-        width: 100%;
-        transition: border-color 0.2s, box-shadow 0.2s;
+// Поле пароля — отступ под кнопку глаза
+.geocore-field-password .geocore-input {
+    padding-right: 48px !important;
+}
 
-        &::placeholder {
-            color: $text-dim !important;
-        }
+.geocore-toggle-pw {
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: 44px;
+    background: none;
+    border: none;
+    color: $text-dim;
+    cursor: pointer;
+    font-size: 15px;
+    transition: color 0.2s;
 
-        &:focus {
-            background: $input-bg-focus !important;
-            border-color: $gold !important;
-            box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.12) !important;
-            outline: none !important;
-        }
-    }
+    &:hover { color: $gold; }
 }
 
 // ── КНОПКА ВХОДА ─────────────────────────────────────────────
 
-#loginbtn,
-.login-form .btn-primary,
-button[type="submit"].btn-primary {
+.geocore-btn,
+#loginbtn {
+    width: 100%;
     background: $gold !important;
     border: none !important;
     border-radius: 0 !important;
@@ -185,10 +196,9 @@ button[type="submit"].btn-primary {
     letter-spacing: 0.14em !important;
     text-transform: uppercase !important;
     padding: 14px 32px !important;
-    width: 100%;
     clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
-    transition: background 0.2s, transform 0.2s;
     cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
 
     &:hover {
         background: $gold-light !important;
@@ -198,32 +208,41 @@ button[type="submit"].btn-primary {
 
 // ── ССЫЛКИ ───────────────────────────────────────────────────
 
-.login-form a,
-.forgetpass a,
-a.forgetpass {
-    font-family: 'IBM Plex Mono', monospace !important;
-    font-size: 10px !important;
-    letter-spacing: 0.1em !important;
-    color: $text-dim !important;
-    text-decoration: none !important;
-    transition: color 0.2s;
+.geocore-forgot {
+    margin-top: 20px;
+    text-align: center;
 
-    &:hover {
-        color: $gold !important;
+    a {
+        font-family: 'IBM Plex Mono', monospace !important;
+        font-size: 10px !important;
+        letter-spacing: 0.1em !important;
+        color: $text-dim !important;
+        text-decoration: none !important;
+        transition: color 0.2s;
+
+        &:hover { color: $gold !important; }
     }
 }
 
 // ── СООБЩЕНИЯ ────────────────────────────────────────────────
 
-.loginerrors,
-.alert-danger {
-    background: rgba(201, 168, 76, 0.08) !important;
-    border: 1px solid rgba(201, 168, 76, 0.3) !important;
-    border-radius: 0 !important;
-    border-left: 3px solid $gold !important;
-    color: #8B6914 !important;
+.geocore-alert {
+    background: rgba(201, 168, 76, 0.08);
+    border: 1px solid rgba(201, 168, 76, 0.3);
+    border-left: 3px solid $gold;
+    color: #8B6914;
     font-size: 13px;
-    padding: 12px 16px !important;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+}
+
+.geocore-info {
+    background: rgba(42, 74, 107, 0.08);
+    border: 1px solid rgba(42, 74, 107, 0.2);
+    border-left: 3px solid #2A4A6B;
+    color: #2A4A6B;
+    font-size: 13px;
+    padding: 12px 16px;
     margin-bottom: 20px;
 }
 
