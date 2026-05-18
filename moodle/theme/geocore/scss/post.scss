@@ -3,19 +3,19 @@
 // Применяются поверх темы Boost
 // ============================================================
 
-// Переменные (совпадают с index.html)
+// Переменные — светлая тема (по умолчанию)
 $gold:        #C9A84C;
 $gold-light:  #E8C97A;
 $gold-dim:    #7A6230;
-$dark:        #0A0A0B;
-$dark-2:      #111114;
-$dark-3:      #18181D;
-$dark-4:      #1F1F26;
-$surface:     #252530;
-$text:        #E8E6DE;
-$text-muted:  #9A9890;
-$text-dim:    #5C5B56;
-$border:      rgba(201, 168, 76, 0.18);
+$page-bg:     #F5F4F0;
+$card-bg:     #FFFFFF;
+$input-bg:    #F8F7F3;
+$input-bg-focus: #F0EFE9;
+$text:        #1A1A1F;
+$text-muted:  #6B6A65;
+$text-dim:    #9A9890;
+$border:      rgba(201, 168, 76, 0.25);
+$input-border: rgba(0, 0, 0, 0.12);
 
 // Подключаем шрифты
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
@@ -23,21 +23,9 @@ $border:      rgba(201, 168, 76, 0.18);
 // ── СТРАНИЦА ВХОДА ──────────────────────────────────────────
 
 #page-login-index {
-    background: $dark !important;
+    background: $page-bg !important;
     font-family: 'IBM Plex Sans', sans-serif;
 
-    // Текстура шума поверх фона (как на сайте)
-    &::before {
-        content: '';
-        position: fixed;
-        inset: 0;
-        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height%3D'100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
-        pointer-events: none;
-        z-index: 9998;
-        opacity: 0.35;
-    }
-
-    // Убираем стандартный Boost фон
     #page,
     #page-wrapper,
     .login-wrapper,
@@ -55,22 +43,21 @@ $border:      rgba(201, 168, 76, 0.18);
     align-items: center;
     justify-content: center;
     padding: 40px 20px;
-    background: $dark !important;
+    background: $page-bg !important;
 }
 
 // Карточка формы входа
 .loginbox,
 .login-container {
-    background: $dark-2 !important;
+    background: $card-bg !important;
     border: 1px solid $border !important;
     border-radius: 0 !important;
     padding: 48px 44px !important;
     width: 100%;
     max-width: 440px;
     position: relative;
-    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6) !important;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08) !important;
 
-    // Золотая полоска сверху
     &::before {
         content: '';
         position: absolute;
@@ -160,8 +147,8 @@ h2.login-heading {
     input[type="text"],
     input[type="password"],
     input[type="email"] {
-        background: $dark-3 !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        background: $input-bg !important;
+        border: 1px solid $input-border !important;
         border-radius: 0 !important;
         color: $text !important;
         font-family: 'IBM Plex Sans', sans-serif !important;
@@ -175,7 +162,7 @@ h2.login-heading {
         }
 
         &:focus {
-            background: $dark-4 !important;
+            background: $input-bg-focus !important;
             border-color: $gold !important;
             box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.12) !important;
             outline: none !important;
@@ -191,7 +178,7 @@ button[type="submit"].btn-primary {
     background: $gold !important;
     border: none !important;
     border-radius: 0 !important;
-    color: $dark !important;
+    color: #0A0A0B !important;
     font-family: 'IBM Plex Mono', monospace !important;
     font-size: 11px !important;
     font-weight: 500 !important;
@@ -199,7 +186,6 @@ button[type="submit"].btn-primary {
     text-transform: uppercase !important;
     padding: 14px 32px !important;
     width: 100%;
-    // Срезанные углы как на сайте
     clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
     transition: background 0.2s, transform 0.2s;
     cursor: pointer;
@@ -218,7 +204,7 @@ a.forgetpass {
     font-family: 'IBM Plex Mono', monospace !important;
     font-size: 10px !important;
     letter-spacing: 0.1em !important;
-    color: $text-muted !important;
+    color: $text-dim !important;
     text-decoration: none !important;
     transition: color 0.2s;
 
@@ -227,7 +213,7 @@ a.forgetpass {
     }
 }
 
-// ── СООБЩЕНИЯ ОБ ОШИБКАХ ─────────────────────────────────────
+// ── СООБЩЕНИЯ ────────────────────────────────────────────────
 
 .loginerrors,
 .alert-danger {
@@ -235,7 +221,7 @@ a.forgetpass {
     border: 1px solid rgba(201, 168, 76, 0.3) !important;
     border-radius: 0 !important;
     border-left: 3px solid $gold !important;
-    color: $gold-light !important;
+    color: #8B6914 !important;
     font-size: 13px;
     padding: 12px 16px !important;
     margin-bottom: 20px;
@@ -243,14 +229,12 @@ a.forgetpass {
 
 // ── ГЛОБАЛЬНЫЕ СТИЛИ MOODLE ──────────────────────────────────
 
-// Навигационная панель
 .navbar {
-    background: rgba(10, 10, 11, 0.92) !important;
+    background: rgba(255, 255, 255, 0.92) !important;
     backdrop-filter: blur(20px);
     border-bottom: 1px solid $border !important;
 }
 
-// Цвет ссылок в навигации
 .navbar .nav-link {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
@@ -260,17 +244,15 @@ a.forgetpass {
     &:hover { color: $gold !important; }
 }
 
-// Основной фон сайта
 body {
-    background: $dark !important;
+    background: $page-bg !important;
     color: $text !important;
 }
 
-// Основные кнопки
 .btn-primary {
     background-color: $gold !important;
     border-color: $gold !important;
-    color: $dark !important;
+    color: #0A0A0B !important;
     border-radius: 0 !important;
     font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
