@@ -24,20 +24,25 @@ $input-border:   rgba(0, 0, 0, 0.12);
     background: $page-bg !important;
     font-family: 'IBM Plex Sans', sans-serif;
 
-    // Убираем лишние обёртки Boost
-    #page, #page-wrapper, .login-wrapper, .loginbox {
+    // Убираем все обёртки и фоны Boost
+    #page, #page-wrapper, .login-wrapper, .loginbox,
+    .login-container, #region-main, #region-main-box {
         background: transparent !important;
         box-shadow: none !important;
         border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
     }
 
-    // Скрываем стандартный логотип Moodle над формой (оставляем только наш в карточке)
-    .login-wrapper .loginbox > a,
-    .login-wrapper .loginbox > img,
-    .login-logo,
-    .login-logo-wrapper {
+    // Скрываем логотип Moodle — наш шаблон рендерит свой
+    .login-logo, .login-logo-wrapper,
+    .loginbox > a, .loginbox > img,
+    .card-img-top, .site-logo {
         display: none !important;
     }
+
+    // Убираем стандартный h2 Boost (у нас свой в шаблоне)
+    .loginbox > h2 { display: none !important; }
 }
 
 // Центрирование

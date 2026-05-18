@@ -14,62 +14,111 @@
     * forgotpasswordurl - ссылка восстановления пароля
 }}
 
-{{! Подзаголовок }}
-<div class="geocore-tagline">
-    <span class="geocore-tagline-line"></span>
-    ПЛАТФОРМА ОЦЕНКИ МЕСТОРОЖДЕНИЙ
-</div>
+<div style="
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    background: #F5F4F0;
+    font-family: 'IBM Plex Sans', sans-serif;
+    box-sizing: border-box;
+">
+    <div style="
+        background: #FFFFFF;
+        border: 1px solid rgba(201,168,76,0.25);
+        padding: 48px 44px;
+        width: 100%;
+        max-width: 440px;
+        position: relative;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.08);
+    ">
+        {{! Золотая полоска сверху }}
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,#C9A84C,transparent);"></div>
 
-{{! Ошибка }}
-{{#error}}
-<div class="geocore-alert">{{error}}</div>
-{{/error}}
-
-{{! Инфо }}
-{{#info}}
-<div class="geocore-info">{{info}}</div>
-{{/info}}
-
-{{! Форма }}
-<form action="{{loginurl}}" method="post" id="login" autocomplete="on">
-    <input type="hidden" name="logintoken" value="{{logintoken}}">
-    <input type="hidden" name="anchor" value="">
-
-    {{! Логин }}
-    <div class="geocore-field">
-        <label for="username" class="geocore-label">{{#str}}username{{/str}}</label>
-        <input type="text"
-               name="username"
-               id="username"
-               value="{{username}}"
-               autocomplete="username"
-               class="geocore-input"
-               {{#autofocusform}}autofocus{{/autofocusform}}>
-    </div>
-
-    {{! Пароль }}
-    <div class="geocore-field geocore-field-password">
-        <label for="password" class="geocore-label">{{#str}}password{{/str}}</label>
-        <div class="geocore-input-wrap">
-            <input type="password"
-                   name="password"
-                   id="password"
-                   autocomplete="current-password"
-                   class="geocore-input">
-            <button type="button" class="geocore-toggle-pw" tabindex="-1"
-                    onclick="var f=document.getElementById('password'); f.type=f.type==='password'?'text':'password'; this.textContent=f.type==='password'?'👁':'🙈';">👁</button>
+        {{! Логотип }}
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+            <div style="width:36px;height:36px;background:#C9A84C;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);flex-shrink:0;"></div>
+            <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#1A1A1F;">
+                Geo<span style="color:#C9A84C;">Core</span> Academy
+            </div>
         </div>
+
+        {{! Подзаголовок }}
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:0.22em;text-transform:uppercase;color:#9A9890;margin-bottom:32px;display:flex;align-items:center;gap:8px;">
+            <span style="width:28px;height:1px;background:#7A6230;display:inline-block;flex-shrink:0;"></span>
+            ПЛАТФОРМА ОЦЕНКИ МЕСТОРОЖДЕНИЙ
+        </div>
+
+        {{! Заголовок }}
+        <h2 style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:#1A1A1F;margin-bottom:28px;line-height:1.2;">
+            {{#str}}login{{/str}}
+        </h2>
+
+        {{! Ошибка }}
+        {{#error}}
+        <div style="background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.3);border-left:3px solid #C9A84C;color:#8B6914;font-size:13px;padding:12px 16px;margin-bottom:20px;">{{error}}</div>
+        {{/error}}
+
+        {{! Инфо }}
+        {{#info}}
+        <div style="background:rgba(42,74,107,0.08);border:1px solid rgba(42,74,107,0.2);border-left:3px solid #2A4A6B;color:#2A4A6B;font-size:13px;padding:12px 16px;margin-bottom:20px;">{{info}}</div>
+        {{/info}}
+
+        {{! Форма }}
+        <form action="{{loginurl}}" method="post" id="login" autocomplete="on">
+            <input type="hidden" name="logintoken" value="{{logintoken}}">
+            <input type="hidden" name="anchor" value="">
+
+            {{! Логин }}
+            <div style="margin-bottom:20px;">
+                <label for="username" style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:#6B6A65;margin-bottom:8px;">
+                    {{#str}}username{{/str}}
+                </label>
+                <input type="text" name="username" id="username" value="{{username}}"
+                       autocomplete="username" {{#autofocusform}}autofocus{{/autofocusform}}
+                       style="width:100%;background:#F8F7F3;border:1px solid rgba(0,0,0,0.12);color:#1A1A1F;font-family:'IBM Plex Sans',sans-serif;font-size:14px;padding:12px 16px;outline:none;box-sizing:border-box;transition:border-color 0.2s;"
+                       onfocus="this.style.borderColor='#C9A84C';this.style.boxShadow='0 0 0 3px rgba(201,168,76,0.12)'"
+                       onblur="this.style.borderColor='rgba(0,0,0,0.12)';this.style.boxShadow='none'">
+            </div>
+
+            {{! Пароль }}
+            <div style="margin-bottom:28px;">
+                <label for="password" style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:#6B6A65;margin-bottom:8px;">
+                    {{#str}}password{{/str}}
+                </label>
+                <div style="position:relative;">
+                    <input type="password" name="password" id="password"
+                           autocomplete="current-password"
+                           style="width:100%;background:#F8F7F3;border:1px solid rgba(0,0,0,0.12);color:#1A1A1F;font-family:'IBM Plex Sans',sans-serif;font-size:14px;padding:12px 48px 12px 16px;outline:none;box-sizing:border-box;transition:border-color 0.2s;"
+                           onfocus="this.style.borderColor='#C9A84C';this.style.boxShadow='0 0 0 3px rgba(201,168,76,0.12)'"
+                           onblur="this.style.borderColor='rgba(0,0,0,0.12)';this.style.boxShadow='none'">
+                    <button type="button" tabindex="-1"
+                            onclick="var f=document.getElementById('password');f.type=f.type==='password'?'text':'password';this.textContent=f.type==='password'?'👁':'🙈';"
+                            style="position:absolute;right:0;top:0;bottom:0;width:44px;background:none;border:none;color:#9A9890;cursor:pointer;font-size:15px;">👁</button>
+                </div>
+            </div>
+
+            {{! Кнопка входа }}
+            <button type="submit" id="loginbtn"
+                    style="width:100%;background:#C9A84C;border:none;color:#0A0A0B;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;padding:14px 32px;clip-path:polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%);cursor:pointer;transition:background 0.2s;"
+                    onmouseover="this.style.background='#E8C97A'"
+                    onmouseout="this.style.background='#C9A84C'">
+                {{#str}}login{{/str}}
+            </button>
+        </form>
+
+        {{! Забыл пароль }}
+        {{#forgotpasswordurl}}
+        <div style="margin-top:20px;text-align:center;">
+            <a href="{{forgotpasswordurl}}"
+               style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.1em;color:#9A9890;text-decoration:none;"
+               onmouseover="this.style.color='#C9A84C'"
+               onmouseout="this.style.color='#9A9890'">
+                {{#str}}forgotten{{/str}}
+            </a>
+        </div>
+        {{/forgotpasswordurl}}
+
     </div>
-
-    {{! Кнопка входа }}
-    <button type="submit" id="loginbtn" class="geocore-btn">
-        {{#str}}login{{/str}}
-    </button>
-</form>
-
-{{! Ссылка забыл пароль }}
-{{#forgotpasswordurl}}
-<div class="geocore-forgot">
-    <a href="{{forgotpasswordurl}}">{{#str}}forgotten{{/str}}</a>
 </div>
-{{/forgotpasswordurl}}
