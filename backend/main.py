@@ -1431,15 +1431,20 @@ async def chat_endpoint(req: ChatRequest):
     for m in req.history[-6:]:
         messages.append({"role": m.role, "content": m.content})
     messages.append({"role": "user", "content": req.message})
-    async with httpx.AsyncClient(timeout=30) as client:
-        r = await client.post(
-            "https://openrouter.ai/api/v1/chat/completions",
-            headers={"Authorization": f"Bearer {OPENROUTER_API_KEY}", "Content-Type": "application/json"},
-            json={"model": "meta-llama/llama-3.3-70b-instruct:free", "messages": messages, "max_tokens": 350},
-        )
-    if r.status_code != 200:
-        raise HTTPException(502, "Ошибка AI-сервиса")
-    reply = r.json()["choices"][0]["message"]["content"]
+    try:
+        async with httpx.AsyncClient(timeout=60) as client:
+            r = await client.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers={"Authorization": f"Bearer {OPENROUTER_API_KEY}", "Content-Type": "application/json"},
+                json={"model": "nvidia/nemotron-3-super-120b-a12b:free", "messages": messages, "max_tokens": 350},
+            )
+        if r.status_code != 200:
+            raise HTTPException(502, "Ошибка AI-сервиса")
+        reply = r.json()["choices"][0]["message"]["content"]
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(502, f"Ошибка AI-сервиса: {type(e).__name__}")
     return {"reply": reply}
 
 
