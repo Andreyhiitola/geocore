@@ -1460,7 +1460,7 @@ async def chat_endpoint(req: ChatRequest):
             r = await client.post(
                 "https://openrouter.ai/api/v1/chat/completions",
                 headers={"Authorization": f"Bearer {OPENROUTER_API_KEY}", "Content-Type": "application/json"},
-                json={"model": "nvidia/nemotron-3-super-120b-a12b:free", "messages": messages, "max_tokens": 350},
+                json={"model": "openai/gpt-4o-mini", "messages": messages, "max_tokens": 400},
             )
         if r.status_code != 200:
             raise HTTPException(502, "Ошибка AI-сервиса")
