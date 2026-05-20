@@ -618,7 +618,7 @@ body.light .nav-mobile{background:rgba(245,243,238,.97);}
     <div class="rv"><div class="sec-lbl">Экспертные консультации · AI-ассистент</div><h2 class="sec-t">Помощь по вашему<br>конкретному проекту</h2><p class="sec-d">Задавайте вопросы по Datamine, JORC, геостатистике или опишите свой проект для консультации.</p></div>
     <div class="chat-layout">
       <div class="consult-steps rv"><div class="cs"><div class="cs-connector"></div><div class="cs-num">01</div><div><div class="cs-t">Опишите проект</div><div class="cs-d">Тип месторождения, стадия, стандарт. Ассистент задаст уточняющие вопросы.</div></div></div><div class="cs"><div class="cs-connector"></div><div class="cs-num">02</div><div><div class="cs-t">Получите анализ</div><div class="cs-d">Рекомендации по методике, ПО, параметрам интерполяции.</div></div></div><div class="cs"><div class="cs-connector"></div><div class="cs-num">03</div><div><div class="cs-t">Запись к эксперту</div><div class="cs-d">Бот помогает сформировать бриф и предлагает удобное время.</div></div></div><div class="cs"><div class="cs-num">04</div><div><div class="cs-t">NDA и сессия</div><div class="cs-d">Для конфиденциальных проектов — соглашение о неразглашении.</div></div></div></div>
-      <div class="chat-box rv"><div class="chat-hd"><div class="ch-av">⛏</div><div><div class="ch-name">GeoCore Assistant</div><div class="ch-status">online · горное дело · оценка месторождений</div></div></div><div class="chat-msgs" id="chatMsgs"><div class="msg bot"><div class="msg-b">Здравствуйте! Задайте вопрос по Datamine, Surpac, Leapfrog, методике JORC/ГКЗ или геостатистике.</div><div class="msg-t">сейчас</div></div></div><div class="chat-inp"><input type="text" id="chatInput" placeholder="Вопрос по Datamine, JORC, геостатистике…"><button class="chat-send" id="chatSend">Отправить</button></div><div class="api-notice">Локальный ассистент · для AI-ответов подключите API-ключ</div></div>
+      <div class="chat-box rv"><div class="chat-hd"><div class="ch-av">⛏</div><div><div class="ch-name">GeoCore Assistant</div><div class="ch-status">online · горное дело · оценка месторождений</div></div></div><div class="chat-msgs" id="chatMsgs"><div class="msg bot"><div class="msg-b">Здравствуйте! Задайте вопрос по Datamine, Surpac, Leapfrog, методике JORC/ГКЗ или геостатистике.</div><div class="msg-t">сейчас</div></div></div><div class="chat-inp"><input type="text" id="chatInput" placeholder="Вопрос по Datamine, JORC, геостатистике…"><button class="chat-send" id="chatSend">Отправить</button></div><div class="api-notice">GeoCore Assistant — AI. Ответы носят образовательный характер и могут содержать ошибки.</div></div>
     </div>
   </div>
 </section>
@@ -739,7 +739,7 @@ body.light .nav-mobile{background:rgba(245,243,238,.97);}
 
 <script type="module">
 import { initSite } from './js/data/siteRenderer.js';
-import { botReply } from './js/ui/chat.js';
+import { fetchBotReply } from './js/ui/chat.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   initSite({ showPlanned: true, showSoon: false });
@@ -789,12 +789,22 @@ document.addEventListener('DOMContentLoaded', () => {
     chatMsgs?.scrollTo(0, chatMsgs.scrollHeight);
   }
 
-  chatSend?.addEventListener('click', () => {
+  chatSend?.addEventListener('click', async () => {
     const q = chatInput?.value.trim();
     if (!q) return;
     chatInput.value = '';
+    chatSend.disabled = true;
     addChatMsg('user', q);
-    setTimeout(() => addChatMsg('bot', botReply(q)), 500);
+    const typing = document.createElement('div');
+    typing.className = 'msg bot';
+    typing.id = 'chatTyping';
+    typing.innerHTML = '<div class="msg-b" style="color:var(--text-dim)">…</div>';
+    chatMsgs?.appendChild(typing);
+    chatMsgs?.scrollTo(0, chatMsgs.scrollHeight);
+    const reply = await fetchBotReply(q);
+    typing.remove();
+    addChatMsg('bot', reply);
+    chatSend.disabled = false;
   });
   chatInput?.addEventListener('keypress', e => { if (e.key === 'Enter') chatSend?.click(); });
 

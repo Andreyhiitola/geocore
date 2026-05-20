@@ -198,6 +198,7 @@ ADMIN_TOKEN    = os.getenv("ADMIN_TOKEN", "")
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "")
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "")
 GITHUB_REPO  = os.getenv("GITHUB_REPO", "Andreyhiitola/geocore")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
 
 USN_API_URL = os.getenv("USN_API_URL", "http://geocore_usn_api:5000")
 USN_API_KEY = os.getenv("USN_API_KEY", "")
@@ -1395,6 +1396,51 @@ async def generate_mac_only(
         mac = generate_mac(df, composite_length, cutoff, value_field)
     
     return PlainTextResponse(mac, media_type="text/plain")
+
+
+_CHAT_SYSTEM_PROMPT = """Ты — GeoCore Assistant, образовательный AI-ассистент платформы GeoCore Academy (geocore-academy.ru). Платформа обучает геологов, горных инженеров и специалистов по оценке месторождений.
+
+РОЛЬ: Ты помогаешь разобраться в концепциях и методологии, направляешь к обучению. Не пишешь готовые пошаговые инструкции или шпаргалки, которые подменяют курс. Объясняешь суть и принципы, а не технику нажатий кнопок.
+
+ОТВЕЧАЙ кратко (2–4 предложения), по-русски. Если тема охвачена курсом — упомяни: «Подробнее — в курсе "Название"».
+
+КУРСЫ GEOCORE ACADEMY:
+- Leapfrog Viewer для руководителей — чтение 3D-моделей месторождений, анализ данных бурения без опыта моделирования
+- Геологическое моделирование (Базовый) — структурное и литологическое моделирование, интерпретация скважин в Datamine/Leapfrog
+- Геостатистика (Базовый) — вариограммный анализ, кригинг, оценка ресурсов МПИ
+- Комплексный кейс Тренажёра — полный цикл ГРР на виртуальном месторождении, JORC/CRIRSCO
+- Нейросети для прогнозирования — ML для геологических параметров и оценки ресурсов
+- Математические методы анализа геохимии — кластеризация, факторный анализ, геохимические аномалии
+- Тренажёр поисков и разведки — планирование поисковых работ, методы опробования
+
+НЕ ДЕЛАЙ: не пиши полные инструкции по ПО (это задача курса), не давай конкретные параметры для чужих проектов без оговорки."""
+
+class ChatMessage(BaseModel):
+    role: str
+    content: str
+
+class ChatRequest(BaseModel):
+    message: str
+    history: list[ChatMessage] = []
+
+@app.post("/api/chat")
+async def chat_endpoint(req: ChatRequest):
+    if not OPENROUTER_API_KEY:
+        raise HTTPException(503, "AI-ассистент временно недоступен")
+    messages = [{"role": "system", "content": _CHAT_SYSTEM_PROMPT}]
+    for m in req.history[-6:]:
+        messages.append({"role": m.role, "content": m.content})
+    messages.append({"role": "user", "content": req.message})
+    async with httpx.AsyncClient(timeout=30) as client:
+        r = await client.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers={"Authorization": f"Bearer {OPENROUTER_API_KEY}", "Content-Type": "application/json"},
+            json={"model": "meta-llama/llama-3.3-70b-instruct:free", "messages": messages, "max_tokens": 350},
+        )
+    if r.status_code != 200:
+        raise HTTPException(502, "Ошибка AI-сервиса")
+    reply = r.json()["choices"][0]["message"]["content"]
+    return {"reply": reply}
 
 
 if __name__ == "__main__":
