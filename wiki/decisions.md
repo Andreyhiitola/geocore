@@ -77,6 +77,29 @@
 
 ---
 
+## DR стратегия: active-passive, не active-active
+
+**Решение:** Primary VPS + Standby VPS (active-passive). Failover = смена DNS.  
+**Почему:** Moodle плохо работает в active-active — нужна репликация MariaDB + shared moodledata (NFS) + sticky sessions. Для текущего масштаба это избыточно.  
+**Фазы по росту:**
+- До 100 учеников: Primary + S3 бэкапы. RTO 30-60 мин.
+- 100-500: + Standby VPS с `restore.sh --auto`. RTO 5 мин (DNS switch).
+- 500+: MariaDB master→slave + rsync moodledata. RPO минуты.
+- 1000+: Galera Cluster + load balancer.
+
+**DNS TTL держать 300s** — тогда смена IP применяется за 5 минут.  
+**Когда принято:** 2026-05-22.
+
+---
+
+## .env: загружать через while+export, не source
+
+**Решение:** Вместо `source .env` использовать `while IFS= read -r line; do export "$line"; done`.  
+**Почему:** `source` выполняет файл как скрипт. Строка `MOODLE_SITE_NAME=GeoCore Academy` (пробел в значении) вызывает `bash: Academy: command not found` и прерывает загрузку.  
+**Когда принято:** 2026-05-22.
+
+---
+
 ## Связанные разделы
 
 - [[infrastructure]] — детали реализации

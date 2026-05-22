@@ -1,6 +1,6 @@
 # GeoCore Academy — Бэкапы и восстановление
 
-> Последнее обновление: 2026-04-25
+> Последнее обновление: 2026-05-22
 
 ---
 
@@ -84,36 +84,56 @@ aws --endpoint-url https://s3.ru-3.storage.selcloud.ru s3 ls s3://geocore-backup
 
 ## Восстановление
 
-Используй `scripts/restore.sh` — он работает напрямую с этими файлами.
+**Полный runbook → [`RECOVERY.md`](../RECOVERY.md)** (открывай во время инцидента).
+
+Быстрые команды:
 
 ```bash
 cd /opt/geocore
-set -a && source .env && set +a
 
-./scripts/restore.sh --dry-run   # проверить что файлы есть
-./scripts/restore.sh             # восстановить (интерактивный выбор точки)
-./scripts/restore.sh 2026-04-24  # конкретная дата
+# Загрузить .env безопасно (source ломается на значениях с пробелами)
+while IFS= read -r line; do [[ "$line" =~ ^[^#=]*= ]] && export "$line" 2>/dev/null; done < .env
+
+bash scripts/restore.sh --dry-run   # проверить что файлы есть в S3
+bash scripts/restore.sh             # восстановить (интерактивный выбор точки)
+bash scripts/restore.sh 2026-04-24  # конкретная дата
+bash scripts/restore.sh weekly/2026-W15  # конкретная неделя
 ```
 
-Подробнее — см. заголовок `scripts/restore.sh`.
+---
+
+## Bootstrap новой машины (Сценарий 1 — полная потеря VPS)
+
+Одна команда на чистой Ubuntu 22.04:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Andreyhiitola/geocore/main/scripts/bootstrap-vps.sh \
+  -o /tmp/bootstrap.sh && bash /tmp/bootstrap.sh --prod
+```
+
+Скрипт сам: установит Docker, swap, склонирует репо, запросит `.env` из Bitwarden, запустит restore.
+
+**Флаги:**
+- `--prod` — production: полный restore + напоминание настроить nginx/SSL
+- `--local` — тест на локальной VM: только dry-run S3 (не качает данные)
+- `--local --full` — тест с реальным restore (осторожно: качает всё)
 
 ---
 
 ## Тренировка на локальной VM
 
 ```bash
-set -a && source /opt/geocore/.env && set +a  # взять S3-ключи
+# Безопасная загрузка .env (без source — он ломается на пробелах в значениях)
+set +H  # отключить history expansion для символа !
+while IFS= read -r line; do
+    [[ "$line" =~ ^[^#=]*= ]] && [[ ! "$line" =~ PROXY ]] && export "$line" 2>/dev/null
+done < /opt/geocore/.env
 
-COMPOSE_DIR=$(pwd) \
-COMPOSE_FILE=docker-compose.test.yml \
-MOODLE_SERVICE=moodle-test \
-MARIADB_SERVICE=mariadb-test \
-MOODLE_DB_NAME=moodle_test \
-MOODLE_DB_USER=moodle \
-MOODLE_DB_PASSWORD=testpass \
-MOODLE_URL=http://localhost:8082 \
-./scripts/restore.sh --dry-run
+COMPOSE_DIR=/opt/geocore MOODLE_URL=http://192.168.1.122:8080 \
+  bash /opt/geocore/scripts/restore.sh --dry-run
 ```
+
+⚠️ Для полного теста нужен диск **40+ ГБ** (moodledata ~16 ГБ на текущем объёме). На Proxmox: Hardware → Disk Action → Resize, потом `sudo growpart /dev/sda 3 && sudo lvextend -l +100%FREE /dev/ubuntu-vg/ubuntu-lv && sudo resize2fs /dev/ubuntu-vg/ubuntu-lv`.
 
 ---
 
@@ -130,19 +150,19 @@ aws --endpoint-url https://s3.ru-3.storage.selcloud.ru \
 
 ---
 
-## Runbook: поднять с нуля
+## Оптимизация размера бэкапа
 
-```
-1. Новый VPS: установить Docker + Compose + nginx + certbot
-2. git clone https://github.com/Andreyhiitola/geocore /opt/geocore
-3. cp .env.example .env && nano .env
-4. docker compose up -d
-5. ./scripts/restore.sh
-6. certbot + nginx (см. wiki/MIGRATION.md)
-7. Проверить courses.geocore-academy.ru
-```
+`backup.sh` исключает временные папки Moodle из архива — они пересоздаются автоматически:
 
-Время восстановления: ~20–30 минут.
+| Исключено | Что там | Безопасно? |
+|-----------|---------|-----------|
+| `cache/` | сгенерированный кэш | да |
+| `localcache/` | кэш плагинов | да |
+| `temp/` | незавершённые загрузки | да |
+| `trashdir/` | удалённые файлы | да |
+| `filedir/` | **курсы, SCORM, загрузки** | ❌ не исключать |
+
+Бэкапы инкрементальными **не являются** — каждый раз полный tar + mysqldump.
 
 ---
 
