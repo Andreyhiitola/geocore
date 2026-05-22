@@ -152,6 +152,9 @@ while IFS= read -r line; do
     [[ "$line" =~ ^[^#=]*= ]] && export "$line" 2>/dev/null || true
 done < "$DEPLOY_DIR/.env"
 
+# .env может содержать прокси-переменные — убираем, они блокируют S3/Docker Hub
+unset HTTPS_PROXY HTTP_PROXY https_proxy http_proxy NO_PROXY no_proxy
+
 for var in S3_BUCKET MOODLE_DB_PASSWORD AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY; do
     [[ -z "${!var:-}" ]] && fail "В .env не задана переменная: $var"
 done
