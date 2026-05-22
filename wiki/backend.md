@@ -15,6 +15,11 @@
 | POST | `/api/requests` | Заявка на корпоративное обучение |
 | GET | `/api/admin/requests` | Список заявок (требует ADMIN_TOKEN) |
 | PATCH | `/api/admin/requests/{id}` | Изменить статус заявки |
+| POST | `/api/admin/requests/{id}/mark-paid` | Подтвердить оплату → создать аккаунты Moodle + email |
+| POST | `/api/admin/requests/{id}/extend-access` | Продлить доступ: обновить дату в БД и timeend в Moodle |
+| POST | `/api/admin/requests/{id}/send-accounts` | Повторно отправить credentials клиенту |
+| POST | `/api/admin/requests/{id}/generate-invoice` | Сформировать PDF счёт |
+| POST | `/api/admin/requests/{id}/generate-contract` | Сформировать PDF договор |
 | GET | `/api/admin/site-json` | Получить site.json из GitHub |
 | PUT | `/api/admin/site-json` | Сохранить site.json → запускает CI/CD деплой |
 | POST | `/api/validate` | Валидация CSV |
@@ -65,13 +70,25 @@ DB_PASSWORD=
 ## Moodle API
 
 - URL: `{MOODLE_URL}/webservice/rest/server.php` (без s в webservice!)
-- Функция: `core_course_get_courses`
+- Функции: `core_course_get_courses`, `core_user_create_users`, `enrol_manual_enrol_users`
+- Зачисление: `roleid=5` (student), `timeend` = Unix timestamp в **UTC** (`calendar.timegm`, не `time.mktime`)
+- Доступ к курсу: только через зачисление — незачисленные курсы заблокированы Moodle автоматически
+- Ответ API всегда проверяется на `exception` в теле (HTTP 200 + JSON с ошибкой — норма для Moodle)
+
+## Pipeline выдачи доступа
+
+```
+mark-paid → _create_moodle_accounts → core_user_create_users + enrol_manual_enrol_users
+          → _send_accounts_email (прямая ссылка /course/view.php?id=X)
+```
+
+Продление: `extend-access?expiry_date=YYYY-MM-DD` → обновляет БД + `enrol_manual_enrol_users` с новым `timeend`.
 
 ## Email
 
 - Библиотека: `smtplib` (стандартная)
 - Отправка через `BackgroundTasks` — не блокирует ответ API
-- Логика: уведомление на NOTIFY_EMAIL + авто-ответ клиенту
+- Письмо с credentials содержит прямую ссылку на курс (не корень платформы)
 
 ## Docker
 
