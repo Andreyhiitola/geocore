@@ -188,7 +188,20 @@ fi
 
 notify "⏳ *GeoCore Restore запущен*\n$(date '+%d.%m.%Y %H:%M')\nТочка: ${RESTORE_POINT}"
 
-# ── 7. Скачивание и проверка целостности ───────────────────────────────────────
+# ── 7. Проверка свободного места ДО скачивания ────────────────────────────────
+log "Проверка свободного места..."
+DB_S3_SIZE=$(s3 ls "s3://${S3_BUCKET}/${DB_KEY}" 2>/dev/null | awk '{print $3}' || echo 0)
+MOODLE_S3_SIZE=$(s3 ls "s3://${S3_BUCKET}/${MOODLE_KEY}" 2>/dev/null | awk '{print $3}' || echo 0)
+# Оцениваем нужное место: сжатые файлы + распакованные (DB *5, moodle *3) + буфер 10%
+NEEDED=$(( (DB_S3_SIZE + MOODLE_S3_SIZE) + (DB_S3_SIZE * 5) + (MOODLE_S3_SIZE * 3) ))
+NEEDED=$(( NEEDED * 11 / 10 ))
+AVAILABLE=$(df -k "${COMPOSE_DIR}" | awk 'NR==2 {print $4 * 1024}')
+if (( NEEDED > AVAILABLE )); then
+    fail "Недостаточно места: нужно ~$(( NEEDED/1024/1024/1024 )) ГБ, доступно $(( AVAILABLE/1024/1024/1024 )) ГБ. Расширь диск и повтори."
+fi
+log "Место на диске: ок (нужно ~$(( NEEDED/1024/1024/1024 )) ГБ, доступно $(( AVAILABLE/1024/1024/1024 )) ГБ)"
+
+# ── 8. Скачивание и проверка целостности ───────────────────────────────────────
 log "Скачивание ${DB_KEY}..."
 s3 cp "s3://${S3_BUCKET}/${DB_KEY}" "${TMPDIR_WORK}/db.sql.gz" \
     || fail "Ошибка загрузки БД из S3"
@@ -204,18 +217,6 @@ tar -tzf "${TMPDIR_WORK}/moodle.tar.gz" >/dev/null \
 DB_SIZE=$(du -sh "${TMPDIR_WORK}/db.sql.gz" | cut -f1)
 MOODLE_SIZE=$(du -sh "${TMPDIR_WORK}/moodle.tar.gz" | cut -f1)
 log "Скачано: БД — ${DB_SIZE}, moodledata — ${MOODLE_SIZE}"
-
-# ── 8. Проверка свободного места ───────────────────────────────────────────────
-# gzip -l col2 = uncompressed size; SQL-дампы сжимаются в 5–10x, поэтому оценка консервативная
-UNCOMPRESSED_DB=$(gzip -l "${TMPDIR_WORK}/db.sql.gz" | awk 'NR==2 {print $2}')
-MOODLE_ESTIMATED=$(( $(stat -c%s "${TMPDIR_WORK}/moodle.tar.gz") * 3 ))
-NEEDED=$(( UNCOMPRESSED_DB + MOODLE_ESTIMATED ))
-AVAILABLE=$(df -k "${COMPOSE_DIR}" | awk 'NR==2 {print $4 * 1024}')
-
-if (( NEEDED > AVAILABLE )); then
-    fail "Недостаточно места: нужно ~$(( NEEDED/1024/1024 )) МБ, доступно $(( AVAILABLE/1024/1024 )) МБ"
-fi
-log "Место на диске: ок (доступно $(( AVAILABLE/1024/1024 )) МБ)"
 
 # ── 9. Остановка Moodle ────────────────────────────────────────────────────────
 log "Остановка ${MOODLE_SERVICE}..."
