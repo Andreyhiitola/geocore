@@ -54,9 +54,14 @@ mysqldump \
 log "БД: $(du -sh "$DB_FILE" | cut -f1)"
 
 # ── 2. Архив moodledata ──────────────────────────────────────────────────────
-log "Архивирование moodledata..."
+log "Архивирование moodledata (исключаем cache/temp/trash)..."
 MOODLE_FILE="$BACKUP_DIR/moodle-${DATE}.tar.gz"
-tar -czf "$MOODLE_FILE" /moodledata \
+tar -czf "$MOODLE_FILE" \
+    --exclude='/moodledata/cache' \
+    --exclude='/moodledata/localcache' \
+    --exclude='/moodledata/temp' \
+    --exclude='/moodledata/trashdir' \
+    /moodledata \
     || fail "Ошибка архивирования moodledata"
 log "moodledata: $(du -sh "$MOODLE_FILE" | cut -f1)"
 
