@@ -470,6 +470,11 @@ tr:hover td{background:var(--dark-3);}
           <button class="btn-invoice" id="m-resend-btn" onclick="sendAccounts()" style="margin-right:0">Отправить клиенту ✉</button>
         </div>
         <div id="m-accounts-list"></div>
+        <div style="margin-top:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <div class="ms-label" style="margin-bottom:0;flex-shrink:0">Продлить до:</div>
+          <input type="date" class="modal-inp" id="m-extend-date" style="width:160px;flex-shrink:0">
+          <button class="btn-modal-save" id="m-extend-btn" onclick="extendAccess()">Продлить доступ</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1047,6 +1052,10 @@ function fillModal(req) {
       `<table class="accounts-tbl"><tr><td style="color:var(--text-dim)">Логин</td><td style="color:var(--text-dim)">Пароль</td></tr>` +
       req.accounts.map(a => `<tr><td>${esc(a.username)}</td><td>${esc(a.password)}</td></tr>`).join('') +
       `</table>`;
+    // Предзаполняем дату продления: текущий срок + 30 дней (или сегодня + 30)
+    const base = req.access_expiry_date ? new Date(req.access_expiry_date) : new Date();
+    base.setDate(base.getDate() + 30);
+    document.getElementById('m-extend-date').value = base.toISOString().slice(0, 10);
   } else {
     accSection.style.display = 'none';
   }
@@ -1130,6 +1139,25 @@ async function markPaid() {
     showToast('Оплата подтверждена, аккаунты созданы');
     loadRequests();
   } catch { showToast('Ошибка', 'err'); }
+  finally { btn.disabled = false; }
+}
+
+async function extendAccess() {
+  if (!currentModalId) return;
+  const date = document.getElementById('m-extend-date').value;
+  if (!date) { showToast('Укажите дату', 'err'); return; }
+  const btn = document.getElementById('m-extend-btn');
+  btn.disabled = true;
+  try {
+    const r = await fetch(`${API}/api/admin/requests/${currentModalId}/extend-access?expiry_date=${date}`,
+      { method: 'POST', credentials: 'include', headers: h() });
+    const data = await r.json();
+    if (!r.ok) { showToast(data.detail || 'Ошибка', 'err'); return; }
+    showToast(`Доступ продлён до ${data.access_expiry_date}`);
+    if (data.moodle_warnings?.length) showToast('Moodle: ' + data.moodle_warnings.join('; '), 'err');
+    loadRequests();
+    openRequestModal(currentModalId);
+  } catch { showToast('Ошибка продления', 'err'); }
   finally { btn.disabled = false; }
 }
 
