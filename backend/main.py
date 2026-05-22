@@ -1118,6 +1118,75 @@ async def admin_mark_paid(request_id: int,
     return {"ok": True, "accounts": accounts}
 
 
+@app.post("/api/admin/requests/{request_id}/extend-access")
+async def admin_extend_access(request_id: int,
+                              expiry_date: str,
+                              _=Depends(require_admin)):
+    """Продлить доступ к курсу: обновить дату в БД и timeend в Moodle для всех аккаунтов заявки."""
+    try:
+        new_expiry = date_type.fromisoformat(expiry_date)
+    except ValueError:
+        raise HTTPException(400, "expiry_date должен быть в формате YYYY-MM-DD")
+    if new_expiry <= date_type.today():
+        raise HTTPException(400, "expiry_date должен быть в будущем")
+
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        async with conn.cursor(aiomysql.DictCursor) as cur:
+            await cur.execute("SELECT * FROM requests WHERE id=%s", (request_id,))
+            req = await cur.fetchone()
+            if not req:
+                raise HTTPException(404, "Заявка не найдена")
+            await cur.execute(
+                "SELECT username, moodle_user_id FROM moodle_accounts WHERE request_id=%s",
+                (request_id,)
+            )
+            accounts = await cur.fetchall()
+
+    if not accounts:
+        raise HTTPException(400, "Аккаунты для этой заявки ещё не созданы")
+
+    expiry_ts = int(time.mktime(new_expiry.timetuple()))
+    course_id = await _get_moodle_course_id(req["course_name"])
+    moodle_errors = []
+
+    if MOODLE_TOKEN and course_id:
+        async with httpx.AsyncClient(timeout=15) as client:
+            for acc in accounts:
+                uid = acc.get("moodle_user_id", 0)
+                if not uid:
+                    continue
+                params = {
+                    "wstoken": MOODLE_TOKEN,
+                    "wsfunction": "enrol_manual_enrol_users",
+                    "moodlewsrestformat": "json",
+                    "enrolments[0][roleid]": 5,
+                    "enrolments[0][userid]": uid,
+                    "enrolments[0][courseid]": course_id,
+                    "enrolments[0][timeend]": expiry_ts,
+                }
+                try:
+                    await client.get(f"{MOODLE_URL}/webservice/rest/server.php", params=params)
+                except Exception as e:
+                    moodle_errors.append(str(e))
+    elif not MOODLE_TOKEN:
+        moodle_errors.append("MOODLE_TOKEN не задан")
+    elif not course_id:
+        moodle_errors.append(f"Курс «{req['course_name']}» не найден в Moodle")
+
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                "UPDATE requests SET access_expiry_date=%s WHERE id=%s",
+                (expiry_date, request_id)
+            )
+
+    result = {"ok": True, "access_expiry_date": expiry_date, "accounts_updated": len(accounts)}
+    if moodle_errors:
+        result["moodle_warnings"] = moodle_errors
+    return result
+
+
 @app.post("/api/admin/requests/{request_id}/send-accounts")
 async def admin_send_accounts(request_id: int, background_tasks: BackgroundTasks,
                               _=Depends(require_admin)):
