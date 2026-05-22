@@ -687,15 +687,16 @@ def _record_income_in_usn(course_name: str, amount: float, company_name: str) ->
 
 
 def _send_accounts_email(to_email: str, accounts: list, course_name: str,
-                         expiry_date) -> None:
+                         expiry_date, course_url: str = "") -> None:
     if not all([SMTP_HOST, SMTP_USER, SMTP_PASS]):
         return
     rows = "\n".join(f"  Логин: {a['username']}\n  Пароль: {a['password']}" for a in accounts)
+    link = course_url or MOODLE_URL
     body = (
         f"Здравствуйте!\n\n"
         f"Ваша оплата подтверждена. Доступ к курсу «{course_name}» предоставлен.\n\n"
         f"Данные для входа:\n{rows}\n\n"
-        f"Ссылка: {MOODLE_URL}\n"
+        f"Ссылка на курс: {link}\n"
         f"Доступ до: {expiry_date or 'не ограничен'}\n\n"
         f"С уважением,\nGeoCore Academy\ninfo@geocore-academy.ru"
     )
@@ -731,11 +732,11 @@ async def _get_moodle_course_id(course_name: str) -> Optional[int]:
     return None
 
 
-async def _create_moodle_accounts(req: dict) -> list:
+async def _create_moodle_accounts(req: dict) -> tuple:
     accounts = []
     if not MOODLE_TOKEN:
         print("[moodle] MOODLE_TOKEN не задан — аккаунты не созданы")
-        return accounts
+        return accounts, None
     course_id = await _get_moodle_course_id(req["course_name"])
     expiry_ts = 0
     if req.get("access_expiry_date"):
@@ -794,7 +795,7 @@ async def _create_moodle_accounts(req: dict) -> list:
                         (req["id"], username, password, moodle_id)
                     )
             accounts.append({"username": username, "password": password})
-    return accounts
+    return accounts, course_id
 
 
 @app.post("/api/requests")
@@ -1094,7 +1095,8 @@ async def admin_mark_paid(request_id: int,
                 )
                 existing = await cur.fetchall()
         return {"ok": True, "accounts": list(existing)}
-    accounts = await _create_moodle_accounts(req)
+    accounts, course_id = await _create_moodle_accounts(req)
+    course_url = f"{MOODLE_URL}/course/view.php?id={course_id}" if course_id else ""
     async with pool.acquire() as conn:
         async with conn.cursor() as cur:
             await cur.execute("UPDATE requests SET moodle_accounts_generated=1 WHERE id=%s", (request_id,))
@@ -1103,7 +1105,8 @@ async def admin_mark_paid(request_id: int,
         req.get("contact_email", ""),
         accounts,
         req.get("course_name", ""),
-        req.get("access_expiry_date")
+        req.get("access_expiry_date"),
+        course_url,
     )
     # Фиксируем доход в USN-app
     background_tasks.add_task(
@@ -1134,12 +1137,15 @@ async def admin_send_accounts(request_id: int, background_tasks: BackgroundTasks
     if not accounts:
         raise HTTPException(400, "Аккаунты для этой заявки ещё не созданы")
     expiry = str(req["access_expiry_date"]) if req.get("access_expiry_date") else None
+    course_id = await _get_moodle_course_id(req.get("course_name", ""))
+    course_url = f"{MOODLE_URL}/course/view.php?id={course_id}" if course_id else ""
     background_tasks.add_task(
         _send_accounts_email,
         req.get("contact_email", ""),
         accounts,
         req.get("course_name", ""),
-        expiry
+        expiry,
+        course_url,
     )
     return {"ok": True, "sent_to": req.get("contact_email")}
 
@@ -1414,7 +1420,11 @@ _CHAT_SYSTEM_PROMPT = """Ты — GeoCore Assistant, образовательн�
 - Математические методы анализа геохимии — кластеризация, факторный анализ, геохимические аномалии
 - Тренажёр поисков и разведки — планирование поисковых работ, методы опробования
 
-ЗАПИСЬ НА КУРС: через форму на сайте geocore-academy.ru или письмом на info@geocore-academy.ru.
+ЗАПИСЬ И УСЛОВИЯ:
+- Записаться: форма на сайте geocore-academy.ru или письмо на info@geocore-academy.ru
+- Стоимость: по запросу (уточнять через форму или email)
+- Темп: свободный, дедлайнов нет
+- По окончании курса выдаётся сертификат
 
 НЕ ДЕЛАЙ: не показывай процесс рассуждений, не пиши «Давайте рассмотрим», «Итак», «Хорошо»."""
 
