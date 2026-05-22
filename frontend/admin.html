@@ -1053,9 +1053,12 @@ function fillModal(req) {
       req.accounts.map(a => `<tr><td>${esc(a.username)}</td><td>${esc(a.password)}</td></tr>`).join('') +
       `</table>`;
     // Предзаполняем дату продления: текущий срок + 30 дней (или сегодня + 30)
-    const base = req.access_expiry_date ? new Date(req.access_expiry_date) : new Date();
+    // Парсим как полдень локального времени, чтобы избежать UTC-сдвига в UTC+ зонах
+    const baseStr = req.access_expiry_date || new Date().toISOString().slice(0, 10);
+    const base = new Date(baseStr + 'T12:00:00');
     base.setDate(base.getDate() + 30);
-    document.getElementById('m-extend-date').value = base.toISOString().slice(0, 10);
+    const y = base.getFullYear(), m = String(base.getMonth()+1).padStart(2,'0'), d = String(base.getDate()).padStart(2,'0');
+    document.getElementById('m-extend-date').value = `${y}-${m}-${d}`;
   } else {
     accSection.style.display = 'none';
   }
@@ -1153,9 +1156,11 @@ async function extendAccess() {
       { method: 'POST', credentials: 'include', headers: h() });
     const data = await r.json();
     if (!r.ok) { showToast(data.detail || 'Ошибка', 'err'); return; }
-    showToast(`Доступ продлён до ${data.access_expiry_date}`);
-    if (data.moodle_warnings?.length) showToast('Moodle: ' + data.moodle_warnings.join('; '), 'err');
-    loadRequests();
+    const msg = data.moodle_warnings?.length
+      ? `Продлён до ${data.access_expiry_date} (обновлено: ${data.accounts_updated}). Moodle: ${data.moodle_warnings.join('; ')}`
+      : `Доступ продлён до ${data.access_expiry_date} (${data.accounts_updated} аккаунтов)`;
+    showToast(msg, data.moodle_warnings?.length ? 'err' : 'ok');
+    await loadRequests();
     openRequestModal(currentModalId);
   } catch { showToast('Ошибка продления', 'err'); }
   finally { btn.disabled = false; }

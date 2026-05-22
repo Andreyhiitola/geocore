@@ -744,7 +744,8 @@ async def _create_moodle_accounts(req: dict) -> tuple:
             exp = req["access_expiry_date"]
             if isinstance(exp, str):
                 exp = date_type.fromisoformat(exp)
-            expiry_ts = int(time.mktime(exp.timetuple()))
+            import calendar
+            expiry_ts = calendar.timegm(exp.timetuple())
         except Exception:
             expiry_ts = 0
     pool = await get_pool()
@@ -1146,15 +1147,18 @@ async def admin_extend_access(request_id: int,
     if not accounts:
         raise HTTPException(400, "Аккаунты для этой заявки ещё не созданы")
 
-    expiry_ts = int(time.mktime(new_expiry.timetuple()))
+    import calendar
+    expiry_ts = calendar.timegm(new_expiry.timetuple())
     course_id = await _get_moodle_course_id(req["course_name"])
     moodle_errors = []
+    moodle_updated = 0
 
     if MOODLE_TOKEN and course_id:
         async with httpx.AsyncClient(timeout=15) as client:
             for acc in accounts:
                 uid = acc.get("moodle_user_id", 0)
                 if not uid:
+                    moodle_errors.append(f"Аккаунт {acc.get('username')} не имеет Moodle ID — пропущен")
                     continue
                 params = {
                     "wstoken": MOODLE_TOKEN,
@@ -1166,9 +1170,14 @@ async def admin_extend_access(request_id: int,
                     "enrolments[0][timeend]": expiry_ts,
                 }
                 try:
-                    await client.get(f"{MOODLE_URL}/webservice/rest/server.php", params=params)
+                    resp = await client.get(f"{MOODLE_URL}/webservice/rest/server.php", params=params)
+                    body = resp.json() if resp.headers.get("content-type", "").startswith("application/json") else {}
+                    if isinstance(body, dict) and body.get("exception"):
+                        moodle_errors.append(f"{acc.get('username')}: {body.get('message', body.get('exception'))}")
+                    else:
+                        moodle_updated += 1
                 except Exception as e:
-                    moodle_errors.append(str(e))
+                    moodle_errors.append(f"{acc.get('username')}: {e}")
     elif not MOODLE_TOKEN:
         moodle_errors.append("MOODLE_TOKEN не задан")
     elif not course_id:
@@ -1181,7 +1190,7 @@ async def admin_extend_access(request_id: int,
                 (expiry_date, request_id)
             )
 
-    result = {"ok": True, "access_expiry_date": expiry_date, "accounts_updated": len(accounts)}
+    result = {"ok": True, "access_expiry_date": expiry_date, "accounts_updated": moodle_updated}
     if moodle_errors:
         result["moodle_warnings"] = moodle_errors
     return result
