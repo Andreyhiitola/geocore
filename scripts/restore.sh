@@ -92,7 +92,12 @@ RESTORE_POINT=""
 # в конкретные S3-ключи DB_KEY и MOODLE_KEY
 resolve_keys() {
     local point="$1"
-    if [[ "$point" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+    if [[ "$point" =~ ^daily/([0-9]{4}-[0-9]{2}-[0-9]{2})$ ]]; then
+        local id="${BASH_REMATCH[1]}"
+        DB_KEY="daily/db-${id}.sql.gz"
+        MOODLE_KEY="daily/moodle-${id}.tar.gz"
+        RESTORE_POINT="daily/${id}"
+    elif [[ "$point" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
         DB_KEY="daily/db-${point}.sql.gz"
         MOODLE_KEY="daily/moodle-${point}.tar.gz"
         RESTORE_POINT="daily/${point}"
