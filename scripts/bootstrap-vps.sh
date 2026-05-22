@@ -2,14 +2,19 @@
 # ╔══════════════════════════════════════════════════════════════════════════════╗
 # ║  GeoCore Academy — Bootstrap новой машины + восстановление из S3           ║
 # ║                                                                            ║
-# ║  Запуск (одна команда на чистой Ubuntu 22.04):                             ║
-# ║    curl -fsSL https://raw.githubusercontent.com/Andreyhiitola/geocore/main/scripts/bootstrap-vps.sh | bash
+# ║  Production (новый VPS у провайдера):                                      ║
+# ║    curl -fsSL https://raw.githubusercontent.com/Andreyhiitola/geocore/main/scripts/bootstrap-vps.sh -o /tmp/bootstrap.sh && bash /tmp/bootstrap.sh --prod
 # ║                                                                            ║
-# ║  Или локально:                                                             ║
-# ║    bash bootstrap-vps.sh [--dry-run] [--skip-restore]                     ║
+# ║  Локальный тест (только проверяет S3, не качает данные):                   ║
+# ║    bash bootstrap-vps.sh --local                                           ║
+# ║                                                                            ║
+# ║  Локальный тест с реальным restore (осторожно — качает все данные):        ║
+# ║    bash bootstrap-vps.sh --local --full                                    ║
 # ║                                                                            ║
 # ║  Флаги:                                                                    ║
-# ║    --dry-run       проверить S3 без реального восстановления               ║
+# ║    --prod          production режим (restore + nginx шаги)                 ║
+# ║    --local         локальный тест: dry-run по умолчанию                    ║
+# ║    --full          с --local: делает реальный restore вместо dry-run       ║
 # ║    --skip-restore  только окружение, без restore.sh                        ║
 # ╚══════════════════════════════════════════════════════════════════════════════╝
 set -euo pipefail
@@ -21,10 +26,13 @@ COMPOSE_DIR="$DEPLOY_DIR"
 SWAP_SIZE="2G"
 DRY_RUN=false
 SKIP_RESTORE=false
+MODE="prod"  # prod | local
 
 for arg in "$@"; do
     case "$arg" in
-        --dry-run)      DRY_RUN=true ;;
+        --prod)         MODE="prod" ;;
+        --local)        MODE="local"; DRY_RUN=true ;;
+        --full)         DRY_RUN=false ;;  # переопределяет --local dry-run
         --skip-restore) SKIP_RESTORE=true ;;
     esac
 done
@@ -52,6 +60,7 @@ OS=$(. /etc/os-release && echo "$ID $VERSION_ID")
 log "ОС: $OS"
 log "Пользователь: $USER"
 log "Директория деплоя: $DEPLOY_DIR"
+log "Режим: ${MODE}$([ "$DRY_RUN" = true ] && echo ' (dry-run — данные не качаются)' || true)"
 
 # ── 2. Swap ───────────────────────────────────────────────────────────────────
 step "2. Swap"
