@@ -183,6 +183,8 @@ tr:hover td{background:var(--dark-3);}
 .modal-link:hover{text-decoration:underline;}
 .accounts-tbl{width:100%;border-collapse:collapse;margin-top:8px;}
 .accounts-tbl td{font-family:'IBM Plex Mono',monospace;font-size:11px;padding:6px 8px;border-bottom:1px solid var(--border-dim);}
+.pwd-toggle{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:11px;padding:0 4px;vertical-align:middle;}
+.pwd-toggle:hover{color:var(--gold);}
 
 @media(max-width:768px){
   .tab-panel{padding:16px;}
@@ -1048,10 +1050,7 @@ function fillModal(req) {
   const accSection = document.getElementById('m-accounts-section');
   if (req.accounts && req.accounts.length) {
     accSection.style.display = 'block';
-    document.getElementById('m-accounts-list').innerHTML =
-      `<table class="accounts-tbl"><tr><td style="color:var(--text-dim)">Логин</td><td style="color:var(--text-dim)">Пароль</td></tr>` +
-      req.accounts.map(a => `<tr><td>${esc(a.username)}</td><td>${esc(a.password)}</td></tr>`).join('') +
-      `</table>`;
+    document.getElementById('m-accounts-list').innerHTML = accountsTable(req.accounts);
     // Предзаполняем дату продления: текущий срок + 30 дней (или сегодня + 30)
     // Парсим как полдень локального времени, чтобы избежать UTC-сдвига в UTC+ зонах
     const baseStr = req.access_expiry_date || new Date().toISOString().slice(0, 10);
@@ -1134,15 +1133,33 @@ async function markPaid() {
     btn.style.display = 'none';
     if (data.accounts && data.accounts.length) {
       document.getElementById('m-accounts-section').style.display = 'block';
-      document.getElementById('m-accounts-list').innerHTML =
-        `<table class="accounts-tbl"><tr><td style="color:var(--text-dim)">Логин</td><td style="color:var(--text-dim)">Пароль</td></tr>` +
-        data.accounts.map(a => `<tr><td>${esc(a.username)}</td><td>${esc(a.password)}</td></tr>`).join('') +
-        `</table>`;
+      document.getElementById('m-accounts-list').innerHTML = accountsTable(data.accounts);
     }
     showToast('Оплата подтверждена, аккаунты созданы');
     loadRequests();
   } catch { showToast('Ошибка', 'err'); }
   finally { btn.disabled = false; }
+}
+
+function accountsTable(accounts) {
+  const rows = accounts.map((a, i) => `
+    <tr>
+      <td>${esc(a.username)}</td>
+      <td>
+        <span id="pwd-${i}" style="letter-spacing:.1em">••••••••••••</span>
+        <button class="pwd-toggle" onclick="togglePwd(${i},'${esc(a.password)}')" title="Показать/скрыть">👁</button>
+      </td>
+    </tr>`).join('');
+  return `<table class="accounts-tbl">
+    <tr><td style="color:var(--text-dim)">Логин</td><td style="color:var(--text-dim)">Пароль</td></tr>
+    ${rows}</table>`;
+}
+function togglePwd(i, pwd) {
+  const el = document.getElementById(`pwd-${i}`);
+  if (!el) return;
+  const hidden = el.textContent.startsWith('•');
+  el.textContent = hidden ? pwd : '••••••••••••';
+  el.style.letterSpacing = hidden ? 'normal' : '.1em';
 }
 
 async function extendAccess() {
