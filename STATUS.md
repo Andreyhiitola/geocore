@@ -1,6 +1,6 @@
 # GeoCore Academy — Статус проекта
 
-> Последнее обновление: 25 апреля 2026  
+> Последнее обновление: 27 мая 2026  
 > Репозиторий: https://github.com/Andreyhiitola/geocore  
 > Домен: geocore-academy.ru
 
@@ -32,7 +32,7 @@ nginx (на VPS, хост)
 | GitHub Actions CI/CD | ✅ работает — автодеплой по git push |
 | FastAPI контейнер | ✅ работает |
 | api.geocore-academy.ru | ✅ отвечает |
-| Фронтенд (index/courses/lab/sandbox) | ✅ работает — geocore-academy.ru |
+| Фронтенд (index/courses/lab/sandbox) | ✅ работает — geocore-academy.ru (редизайн 27.05.2026) |
 | Форма заявки на корпоративное обучение | ✅ работает — БД + email полностью |
 | Email (транзакционный) | ✅ Gmail SMTP, уведомления → info@geocore-academy.ru |
 | Zoho Mail (info@geocore-academy.ru) | ✅ настроен, MX/SPF/DKIM зелёные |
@@ -42,7 +42,8 @@ nginx (на VPS, хост)
 | Конвертеры тестов (tools/) | ✅ в репозитории, GUI-лаунчер готов |
 | Мониторинг VPS + Telegram | ✅ работает — алерты, кнопки Статус/Бэкап/История |
 | Админка (admin.html) | ✅ авторизация логин+токен, архив, счета, оплаты, аккаунты Moodle |
-| Тема день/ночь | ✅ синхронна на всех страницах (единый ключ geocoreLight) |
+| Тема день/ночь | ✅ день по умолчанию, ключ `geocoreDark` в localStorage |
+| Sandbox (песочница) | ⚠️ скрыть из nav — сырые данные |
 | Бэкапы (Selectel S3, plain tar.gz) | ⚠️ Код исправлен (cron env, S3 таймауты, ротация), деплой на VPS нужен |
 | Скрипт восстановления из S3 | ✅ `scripts/restore.sh` — dry-run, --auto для cron, Telegram |
 | Watchtower (автообновление) | ✅ работает — исправлен DOCKER_API_VERSION=1.40 |

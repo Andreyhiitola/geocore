@@ -7,29 +7,37 @@
 | `index.html` | Главная — курсы, stats-strip, форма заявки |
 | `courses.html` | Все курсы — использует siteRenderer.js |
 | `lab.html` | Лаборатория данных (инструмент подготовки данных) |
-| `sandbox.html` | 3D песочница |
+| `sandbox.html` | 3D песочница ⚠️ сырые данные, скрыть из nav до готовности |
 
 ## Архитектура данных
 
 **`frontend/js/data/site.json`** — единый источник правды:
 - `nav` — навигация (все страницы)
-- `courses` — плановые курсы "В разработке"
-- `moodleCourseOrder` — порядок курсов из Moodle `[11, 10]`
-- `moodleMeta` — иконка и тег для каждого Moodle-курса
-- `footer` — данные футера
+- `courses` — 9 плановых направлений курсов (planned: true)
+- `moodleCourseOrder` — порядок live-курсов из Moodle `[12,16,17,18,19,20]`
+- `moodleMeta` — иконка, тег и modal-данные для каждого Moodle-курса
+- `footer` — данные футера (description + columns)
 
 **`frontend/js/data/siteRenderer.js`** — рендеринг:
-- Загружает курсы из `GET /api/courses` (FastAPI → Moodle)
-- Fallback на `site.json` если API недоступен
+- Загружает `site.json` через `fetch('./js/data/site.json')` (путь относительно `index.html`)
+- Загружает live-курсы из `GET /api/courses` (FastAPI → Moodle)
+- Fallback на `renderCourses([], [], planned)` если API недоступен
 - Параметры `showPlanned`, `showSoon` — управление видимостью типов курсов
+
+⚠️ **Локальная разработка:** `file://` блокирует ES-модули. Запускать через:
+```bash
+python3 -m http.server 8080 --directory frontend
+```
 
 ## Трёхуровневая система карточек курсов
 
 ```
-ОТКРЫТ     — курсы из Moodle с SCORM, кликабельные, первые в сетке
-СКОРО      — Moodle-курсы без SCORM, некликабельные
-В РАЗРАБОТКЕ — из site.json, блёклые
+ОТКРЫТ     — курсы из Moodle с SCORM, кликабельные → модалка + «Записаться»
+СКОРО      — Moodle-курсы без SCORM, кликабельные → модалка «запись откроется позже»
+В РАЗРАБОТКЕ — из site.json, кликабельные → модалка «в разработке» + email
 ```
+
+Все три типа используют одинаковую структуру `cardInner()` — одинаковый размер карточек.
 
 ## Дизайн-система
 
