@@ -53,13 +53,13 @@ h1.h-title em{font-style:italic;color:var(--gold);}
 .btn-p:hover{background:var(--gold-light);transform:translateY(-2px);}
 .btn-s{display:inline-flex;align-items:center;gap:9px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);border:1px solid var(--border);padding:14px 30px;text-decoration:none;transition:all .2s;}
 .btn-s:hover{border-color:var(--gold);color:var(--gold);}
-.h-stats{display:flex;gap:44px;margin-top:56px;padding-top:36px;border-top:1px solid var(--border-dim);flex-wrap:wrap;}
-.stat-n{font-family:'Playfair Display',serif;font-size:34px;font-weight:700;color:var(--gold);}
+.h-stats{display:flex;gap:28px;margin-top:56px;padding-top:36px;border-top:1px solid var(--border-dim);flex-wrap:nowrap;}
+.stat-n{font-family:'Playfair Display',serif;font-size:34px;font-weight:700;color:var(--gold);white-space:nowrap;}
 .stat-l{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--text-dim);margin-top:4px;}
 
 /* ── MARQUEE ── */
 .marquee-band{padding:24px 0;background:var(--dark-2);border-top:1px solid var(--border-dim);border-bottom:1px solid var(--border-dim);overflow:hidden;}
-.m-track{display:flex;gap:56px;animation:mq 22s linear infinite;white-space:nowrap;width:max-content;}
+.m-track{display:flex;gap:56px;animation:mq 40s linear infinite;white-space:nowrap;width:max-content;}
 @keyframes mq{from{transform:translateX(0);}to{transform:translateX(-50%);}}
 .m-item{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-dim);display:flex;align-items:center;gap:7px;}
 .m-item::before{content:'◆';color:var(--gold-dim);font-size:7px;}
@@ -372,8 +372,8 @@ h3.cc-t{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;line
 
 /* ── BLOG ── */
 .blog-sec{padding:110px 0;background:var(--dark-2);border-top:1px solid var(--border-dim);}
-.blog-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:2px;margin-top:56px;}
-.blog-card{background:var(--dark-3);padding:36px 32px;border:1px solid transparent;transition:all .3s;cursor:pointer;display:flex;flex-direction:column;gap:14px;}
+.blog-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px;margin-top:56px;}
+.blog-card{background:var(--dark-3);padding:36px 32px;border:1px solid transparent;transition:all .3s;cursor:pointer;display:flex;flex-direction:column;gap:14px;min-height:360px;}
 .blog-card:hover{background:var(--dark-4);border-color:var(--border);transform:translateY(-4px);}
 .blog-card--feat{background:var(--dark-4);border-color:var(--border);position:relative;}
 .blog-card--feat::before{content:'НОВОЕ';position:absolute;top:20px;right:20px;font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.14em;color:var(--dark);background:var(--gold);padding:3px 9px;clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);}
@@ -507,7 +507,7 @@ body.light .nav-mobile{background:rgba(245,243,238,.97);}
 }
 </style>
 </head>
-<body>
+<body class="light">
 
 <!-- ── NAVIGATION ── -->
 <nav>
@@ -544,16 +544,19 @@ body.light .nav-mobile{background:rgba(245,243,238,.97);}
 <section class="hero">
   <div class="hero-left">
     <div class="eyebrow">Mining Education Platform</div>
-    <h1 class="h-title">Оценка<br>месторождений.<br><em>На профессиональном уровне.</em></h1>
-    <p class="h-sub">Обучение работе с Datamine, Surpac, Leapfrog и другим горным ПО. Методика подсчёта запасов по JORC, ГКЗ, NAEN. Консультации по реальным проектам.</p>
+    <h1 class="h-title" style="font-size:clamp(22px,2.6vw,38px);letter-spacing:.02em;">ИНФОРМАЦИОННО-ОБРАЗОВАТЕЛЬНЫЙ ГОРНО-ГЕОЛОГИЧЕСКИЙ ПОРТАЛ</h1>
+    <ul class="h-sub" style="list-style:none;padding:0;display:flex;flex-direction:column;gap:12px;">
+      <li style="padding-left:18px;position:relative;"><span style="position:absolute;left:0;color:var(--gold);">●</span>ОБУЧЕНИЕ ПО ГОРНО-ГЕОЛОГИЧЕСКИМ ИНФОРМАЦИОННЫМ СИСТЕМАМ: DATAMINE●LEAPFROG●MICROMINE●DESWIK</li>
+      <li style="padding-left:18px;position:relative;"><span style="position:absolute;left:0;color:var(--gold);">●</span>КОНСУЛЬТАЦИИ ПО РЕАЛЬНЫМ ПРОЕКТАМ: МЕТОДЛОГИЯ●АНАЛИЗ●ОЦЕНКА●ПРОГНОЗИРОВАНИЕ●ОПТИМИЗАЦИЯ</li>
+    </ul>
     <div class="btn-row">
       <a href="lab.html" class="btn-p">🔬 Лаборатория данных</a>
       <a href="#courses" class="btn-s">Смотреть курсы</a>
     </div>
     <div class="h-stats">
       <div><div class="stat-n">12+</div><div class="stat-l">Программ ПО</div></div>
-      <div><div class="stat-n">JORC</div><div class="stat-l">ГКЗ · NAEN</div></div>
-      <div><div class="stat-n">3</div><div class="stat-l">Типа месторождений</div></div>
+      <div><div class="stat-n">Онлайн</div><div class="stat-l">Доступ 24 / 7</div></div>
+      <div><div class="stat-n">Сертификат</div><div class="stat-l">По окончании</div></div>
       <div><div class="stat-n">RU/EN</div><div class="stat-l">Два рынка</div></div>
     </div>
   </div>
@@ -561,8 +564,8 @@ body.light .nav-mobile{background:rgba(245,243,238,.97);}
 <!-- ── MARQUEE ── -->
 <div class="marquee-band">
   <div class="m-track">
-    <span class="m-item">Datamine Studio RM</span><span class="m-item">Surpac</span><span class="m-item">Leapfrog Geo</span><span class="m-item">Micromine Origin</span><span class="m-item">Vulcan Maptek</span><span class="m-item">MineSight</span><span class="m-item">GEMS</span><span class="m-item">Deswik Suite</span><span class="m-item">JORC Code</span><span class="m-item">NI 43-101</span><span class="m-item">ГКЗ России</span><span class="m-item">CRIRSCO</span>
-    <span class="m-item">Datamine Studio RM</span><span class="m-item">Surpac</span><span class="m-item">Leapfrog Geo</span><span class="m-item">Micromine Origin</span><span class="m-item">Vulcan Maptek</span><span class="m-item">MineSight</span><span class="m-item">GEMS</span><span class="m-item">Deswik Suite</span><span class="m-item">JORC Code</span><span class="m-item">NI 43-101</span><span class="m-item">ГКЗ России</span><span class="m-item">CRIRSCO</span>
+    <span class="m-item">Datamine</span><span class="m-item">Leapfrog</span><span class="m-item">Micromine</span><span class="m-item">Deswik</span><span class="m-item">Statistica</span><span class="m-item">CRIRSCO</span><span class="m-item">JORC</span><span class="m-item">ГКЗ</span><span class="m-item">KAZRC</span><span class="m-item">НАЭН</span><span class="m-item">Геологическое моделирование</span><span class="m-item">Геостатистика</span><span class="m-item">Оценка ресурсов и запасов</span><span class="m-item">Геолого-экономическая оценка</span><span class="m-item">Горное планирование и проектирование</span><span class="m-item">Многомерный анализ</span><span class="m-item">Машинное обучение</span><span class="m-item">Оценка минеральной перспективности</span><span class="m-item">Прогнозирование новых месторождений</span><span class="m-item">Анализ</span><span class="m-item">Экспертиза</span>
+    <span class="m-item">Datamine</span><span class="m-item">Leapfrog</span><span class="m-item">Micromine</span><span class="m-item">Deswik</span><span class="m-item">Statistica</span><span class="m-item">CRIRSCO</span><span class="m-item">JORC</span><span class="m-item">ГКЗ</span><span class="m-item">KAZRC</span><span class="m-item">НАЭН</span><span class="m-item">Геологическое моделирование</span><span class="m-item">Геостатистика</span><span class="m-item">Оценка ресурсов и запасов</span><span class="m-item">Геолого-экономическая оценка</span><span class="m-item">Горное планирование и проектирование</span><span class="m-item">Многомерный анализ</span><span class="m-item">Машинное обучение</span><span class="m-item">Оценка минеральной перспективности</span><span class="m-item">Прогнозирование новых месторождений</span><span class="m-item">Анализ</span><span class="m-item">Экспертиза</span>
   </div>
 </div>
 
@@ -572,7 +575,7 @@ body.light .nav-mobile{background:rgba(245,243,238,.97);}
     <div class="ch rv">
   <div>
     <div class="sec-lbl">Программы обучения</div>
-    <h2 class="sec-t">Курсы для<br>специалистов отрасли</h2>
+    <h2 class="sec-t">Направления курсов<br>для специалистов отрасли</h2>
   </div>
   <a href="courses.html" class="btn-s">Все курсы →</a>
 </div>
@@ -583,11 +586,9 @@ body.light .nav-mobile{background:rgba(245,243,238,.97);}
 <!-- ── STATS STRIP ── -->
 <div class="stats-strip">
   <div class="inner">
-    <div class="stat-item"><span class="stat-num">2</span><span class="stat-lbl">Курса открыто</span></div>
+    <div class="stat-item"><span class="stat-num">6</span><span class="stat-lbl">Курсов доступно</span></div>
     <div class="stat-divider"></div>
-    <div class="stat-item"><span class="stat-num">6</span><span class="stat-lbl">В разработке</span></div>
-    <div class="stat-divider"></div>
-    <div class="stat-item"><span class="stat-num">16</span><span class="stat-lbl">Уроков в Leapfrog</span></div>
+    <div class="stat-item"><span class="stat-num">9+</span><span class="stat-lbl">Направлений обучения</span></div>
     <div class="stat-divider"></div>
     <div class="stat-item"><span class="stat-num">SCORM</span><span class="stat-lbl">Проходите в браузере</span></div>
     <div class="stat-divider"></div>
@@ -601,10 +602,11 @@ body.light .nav-mobile{background:rgba(245,243,238,.97);}
     <div class="rv"><div class="sec-lbl">Аудитория</div><h2 class="sec-t">Для кого эта платформа</h2></div>
     <div class="who-g">
       <ul class="stg" style="list-style:none">
-        <li class="who-item"><div class="wi-num">01</div><div><div class="wi-t">Геологи и маркшейдеры</div><div class="wi-d">Практики, которым нужен конкретный навык в ПО или методике подсчёта запасов.</div></div></li>
-        <li class="who-item"><div class="wi-num">02</div><div><div class="wi-t">Горные инженеры</div><div class="wi-d">Специалисты по планированию горных работ, подсчёту запасов, ТЭО.</div></div></li>
-        <li class="who-item"><div class="wi-num">03</div><div><div class="wi-t">Инвесторы в добычу</div><div class="wi-d">Люди, принимающие решения о финансировании. Нужен язык геологических отчётов.</div></div></li>
-        <li class="who-item"><div class="wi-num">04</div><div><div class="wi-t">Студенты профильных вузов</div><div class="wi-d">МГРИ, СПбГИ, КазНТУ. Доступ к ПО и методике без дорогостоящих лицензий.</div></div></li>
+        <li class="who-item"><div class="wi-num">01</div><div><div class="wi-t">Геологи</div><div class="wi-d">Практики, кому необходимо владение знаниями программного обеспечения и сопряженными теоретическими знаниями для задач оптимальных поисков, разведки, прогнозирования месторождений, геологического моделирования, оценки минеральных ресурсов и извлекаемых рудных запасов, геолого-экономической оценки</div></div></li>
+        <li class="who-item"><div class="wi-num">02</div><div><div class="wi-t">Горняки</div><div class="wi-d">Практики, кому необходимо владение знаниями программного обеспечения и сопряженными теоретическими знаниями для задач оптимального горного проектирования и планирования, оценки извлекаемых рудных запасов, экономической оценки горных проектов</div></div></li>
+        <li class="who-item"><div class="wi-num">03</div><div><div class="wi-t">Маркшейдера</div><div class="wi-d">Практики, кому необходимо владение знаниями программного обеспечения и сопряженными теоретическими знаниями для задач маркшейдерского обеспечения добычи</div></div></li>
+        <li class="who-item"><div class="wi-num">04</div><div><div class="wi-t">Инвесторы в поиски, разведку и добычу месторождений</div><div class="wi-d">Топ-менеджеры инвестиционных институтов и их эксперты: общее представление по процессам поисков, разведки, моделирования, горного проектирования и планирования, управления добычей руд, сопряженные экономические моменты связанные с принятием оптимальных решений через Тренажер и общеознакомительные курсы.</div></div></li>
+        <li class="who-item"><div class="wi-num">05</div><div><div class="wi-t">Студенты профильных ВУЗов</div><div class="wi-d">Будущее геологии и горнодобывающей отрасли: подготовка к работе на реальных предприятиях, получение современных знаний по горно-геологическим информационным системам и сопряженному теоретическому бэкграунду.</div></div></li>
       </ul>
       <div class="who-viz rv"><div class="who-diag"><div class="d-ring"></div><div class="d-ring"></div><div class="d-ring"></div><div class="d-ring"></div><div class="d-center">⛏️</div></div></div>
     </div>
@@ -615,9 +617,9 @@ body.light .nav-mobile{background:rgba(245,243,238,.97);}
 <!-- ── CHAT ── -->
 <section class="chat-sec sec" id="consult">
   <div class="inner">
-    <div class="rv"><div class="sec-lbl">Экспертные консультации · AI-ассистент</div><h2 class="sec-t">Помощь по вашему<br>конкретному проекту</h2><p class="sec-d">Задавайте вопросы по Datamine, JORC, геостатистике или опишите свой проект для консультации.</p></div>
+    <div class="rv"><div class="sec-lbl">Экспертные консультации · AI-ассистент</div><h2 class="sec-t">Помощь по вашему<br>конкретному проекту</h2><p class="sec-d">Обучение и аттестация специалистов по горно-геологическим информационным системам, адаптация программного обеспечения, консультации по методологии, анализ, оценка, принятие решений, выполнение «под ключ»:</p><p class="sec-d" style="margin-top:8px">поиски и прогнозирование ● разведка месторождений ● моделирование месторождений ● геостатистика ● оценка минеральных ресурсов и запасов ● геологическая отчётность ● mining reconciliation ● оценка геологических рисков ● геолого-экономическая оценка ● горное проектирование и планирование ● оценка горного проекта ● Datamine ● Leapfrog ● Micromine ● многомерный анализ ● машинное обучение</p></div>
     <div class="chat-layout">
-      <div class="consult-steps rv"><div class="cs"><div class="cs-connector"></div><div class="cs-num">01</div><div><div class="cs-t">Опишите проект</div><div class="cs-d">Тип месторождения, стадия, стандарт. Ассистент задаст уточняющие вопросы.</div></div></div><div class="cs"><div class="cs-connector"></div><div class="cs-num">02</div><div><div class="cs-t">Получите анализ</div><div class="cs-d">Рекомендации по методике, ПО, параметрам интерполяции.</div></div></div><div class="cs"><div class="cs-connector"></div><div class="cs-num">03</div><div><div class="cs-t">Запись к эксперту</div><div class="cs-d">Бот помогает сформировать бриф и предлагает удобное время.</div></div></div><div class="cs"><div class="cs-num">04</div><div><div class="cs-t">NDA и сессия</div><div class="cs-d">Для конфиденциальных проектов — соглашение о неразглашении.</div></div></div></div>
+      <div class="consult-steps rv"><div class="cs"><div class="cs-connector"></div><div class="cs-num">01</div><div><div class="cs-t">Опишите проект и стоящие задачи</div><div class="cs-d">Ассистент задаст Вам уточняющие вопросы.</div></div></div><div class="cs"><div class="cs-connector"></div><div class="cs-num">02</div><div><div class="cs-t">Заявка к конкретному эксперту</div><div class="cs-d">По умолчанию заявка будет распределяться диспетчером между свободными экспертами, но у Вас есть возможность выбрать конкретного эксперта, ознакомившись с его резюме.</div></div></div><div class="cs"><div class="cs-connector"></div><div class="cs-num">03</div><div><div class="cs-t">Обратная связь</div><div class="cs-d">по заявке</div></div></div><div class="cs"><div class="cs-num">04</div><div><div class="cs-t">NDA и сессии</div><div class="cs-d">для конфиденциальных проектов</div></div></div></div>
       <div class="chat-box rv"><div class="chat-hd"><div class="ch-av">⛏</div><div><div class="ch-name">GeoCore Assistant</div><div class="ch-status">online · горное дело · оценка месторождений</div></div></div><div class="chat-msgs" id="chatMsgs"><div class="msg bot"><div class="msg-b">Здравствуйте! Задайте вопрос по Datamine, Surpac, Leapfrog, методике JORC/ГКЗ или геостатистике.</div><div class="msg-t">сейчас</div></div></div><div class="chat-inp"><input type="text" id="chatInput" placeholder="Вопрос по Datamine, JORC, геостатистике…"><button class="chat-send" id="chatSend">Отправить</button></div><div class="api-notice">GeoCore Assistant — AI. Ответы носят образовательный характер и могут содержать ошибки.</div></div>
     </div>
   </div>
@@ -625,11 +627,11 @@ body.light .nav-mobile{background:rgba(245,243,238,.97);}
 
 <section class="price-sec sec" id="pricing">
   <div class="inner">
-    <div class="rv" style="text-align:center"><div class="sec-lbl" style="justify-content:center">Стоимость</div><h2 class="sec-t">Форматы работы</h2><p class="sec-d" style="margin:0 auto">Выберите формат — узнайте стоимость у менеджера. Специальные условия для корпоративных клиентов.</p></div>
+    <div class="rv" style="text-align:center"><div class="sec-lbl" style="justify-content:center">Стоимость</div><h2 class="sec-t">Форматы и стоимость работ</h2><p class="sec-d" style="margin:0 auto">Выберите формат — узнайте стоимость у менеджера. Специальные условия для корпоративных клиентов.</p></div>
     <div class="pg stg">
-      <div class="pc"><div class="pt">Доступ к курсу</div><div class="pp-corp">Узнать стоимость</div><div class="pperiod">индивидуальный доступ · разовая оплата</div><ul class="pf"><li class="hl">Полный доступ к курсу</li><li>Практические задания</li><li>Шаблоны и файлы проектов</li><li>Сертификат об окончании</li><li>Поддержка куратора</li></ul><a href="#consult" class="pb out">Написать нам</a></div>
-      <div class="pc feat"><div class="pt">Корпоративный доступ</div><div class="pp-corp">По запросу</div><div class="pperiod">команда · договор · закрывающие документы</div><ul class="pf"><li class="hl">Курсы для всей команды</li><li class="hl">Счёт-фактура и акт</li><li class="hl">Корпоративный договор</li><li>Статистика прохождения</li><li>Персональный менеджер</li></ul><a href="#consult" class="pb fil">Обсудить условия</a></div>
-      <div class="pc"><div class="pt">Экспертная консультация</div><div class="pp-corp">По запросу</div><div class="pperiod">60–90 минут · разбор вашего проекта</div><ul class="pf"><li class="hl">Анализ геологической модели</li><li class="hl">Ревью отчёта / ТЭО</li><li>Запись сессии</li><li>NDA по запросу</li><li>Сопровождение проекта</li></ul><a href="#consult" class="pb out">Записаться</a></div>
+      <div class="pc"><div class="pt">Обучение по горно-геологическим системам</div><div class="pp-corp">По запросу</div><div class="pperiod">доступ к курсу · сертификация · подписка</div><ul class="pf"><li class="hl">Доступ к курсу</li><li class="hl">Сертификация пользователя</li><li>Полная подписка</li></ul><a href="mailto:info@geocore-academy.ru" class="pb out">Образец договора</a><a href="mailto:info@geocore-academy.ru" class="pb out" style="margin-top:8px">Обсудить условия</a></div>
+      <div class="pc feat"><div class="pt">Проекты</div><div class="pp-corp">По запросу</div><div class="pperiod">анализ · моделирование · оценка</div><ul class="pf"><li class="hl">Прогнозирование минеральной перспективности</li><li class="hl">Моделирование и оценка месторождений</li></ul><a href="mailto:info@geocore-academy.ru" class="pb out">Образец договора</a><a href="mailto:info@geocore-academy.ru" class="pb fil" style="margin-top:8px">Обсудить условия</a></div>
+      <div class="pc"><div class="pt">Консультации и экспертиза</div><div class="pp-corp">По запросу</div><div class="pperiod">разбор вашего проекта · NDA по запросу</div><ul class="pf"><li class="hl">Анализ геологической модели</li><li class="hl">Ревью отчёта / ТЭО</li><li>Сопровождение проекта</li></ul><a href="mailto:info@geocore-academy.ru" class="pb out">Образец договора</a><a href="mailto:info@geocore-academy.ru" class="pb out" style="margin-top:8px">Обсудить условия</a></div>
     </div>
   </div>
 </section>
@@ -641,6 +643,7 @@ body.light .nav-mobile{background:rgba(245,243,238,.97);}
   <div class="sec-lbl">Блог · Методика</div>
   <h2 class="sec-t">Статьи для специалистов</h2>
   <p class="sec-d">Практические материалы по методике оценки, ПО и стандартам подсчёта запасов. Новые статьи от экспертов отрасли.</p>
+  <p class="sec-d" style="margin-top:8px;font-style:italic">Знание – сила!</p>
 </div>
    <div class="blog-grid stg">
   <article class="blog-card blog-card--feat" onclick="window.open('articles/article_sections_vs_datamine.html','_blank')">
@@ -667,6 +670,22 @@ body.light .nav-mobile{background:rgba(245,243,238,.97);}
     <div class="bc-footer"><span class="bc-read">Читать статью →</span><span class="bc-time">10 мин</span></div>
   </article>
   
+  <article class="blog-card">
+    <div class="bc-label">Геология рисков</div>
+    <h3 class="bc-title">Оценка геологических рисков для горных проектов</h3>
+    <p class="bc-desc">Теория и практический кейс.</p>
+    <div class="bc-meta"><span class="bc-tag">Геология</span><span class="bc-tag">Риски</span></div>
+    <div class="bc-footer"><span class="bc-read">Читать статью →</span><span class="bc-time">—</span></div>
+  </article>
+
+  <article class="blog-card">
+    <div class="bc-label">Прогнозирование</div>
+    <h3 class="bc-title">Моделирование минеральной перспективности для прогнозирования месторождений</h3>
+    <p class="bc-desc">Теория и практический кейс.</p>
+    <div class="bc-meta"><span class="bc-tag">Моделирование</span><span class="bc-tag">Прогнозирование</span></div>
+    <div class="bc-footer"><span class="bc-read">Читать статью →</span><span class="bc-time">—</span></div>
+  </article>
+
   <!-- НОВАЯ СТАТЬЯ: Эпитермальное золото от Борцова -->
   <article class="blog-card" onclick="window.open('articles/bortsov_epithermal_gold.html','_blank')">
     <div class="bc-label">Кейс · Эпитермальное золото</div>
@@ -746,15 +765,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Тема ──────────────────────────────────────────────────
   const themeBtn = document.getElementById('themeBtn');
-  let dark = !localStorage.getItem('geocoreLight');
+  let dark = localStorage.getItem('geocoreDark') === '1';
   function applyTheme() {
     document.body.classList.toggle('light', !dark);
-    if (themeBtn) themeBtn.textContent = dark ? '🌙' : '☀️';
+    if (themeBtn) themeBtn.textContent = dark ? '☀️' : '🌙';
   }
   applyTheme();
   themeBtn?.addEventListener('click', () => {
     dark = !dark;
-    localStorage.setItem('geocoreLight', dark ? '' : '1');
+    localStorage.setItem('geocoreDark', dark ? '1' : '');
     applyTheme();
   });
 

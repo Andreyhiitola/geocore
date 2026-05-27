@@ -24,7 +24,7 @@ function safeHref(href) {
 }
 
 export async function loadSiteData() {
-  const resp = await fetch('/js/data/site.json');
+  const resp = await fetch('./js/data/site.json');
   return resp.json();
 }
 
@@ -60,14 +60,12 @@ function renderSoonCard(c, idx) {
   return `<div class="cc cc-soon" data-modal="soon" data-idx="${idx}" role="button" tabindex="0">${cardInner(c)}</div>`;
 }
 
-function renderPlannedCard(c) {
-  return `
-    <div class="cc cc-planned">
-      <span class="cc-icon">${esc(c.icon)}</span>
-      <div class="cc-tag">${esc(c.tag)}</div>
-      <h3 class="cc-t">${esc(c.title)}</h3>
-      <p class="cc-d">${esc(c.desc)}</p>
-    </div>`;
+function renderPlannedCard(c, idx, total) {
+  const card = Object.assign({}, c, {
+    num: `${String(idx + 1).padStart(2, '0')} / ${String(total).padStart(2, '0')}`,
+    meta: c.meta || [],
+  });
+  return `<div class="cc cc-planned" data-modal="planned" data-idx="${idx}" role="button" tabindex="0" style="cursor:pointer">${cardInner(card)}</div>`;
 }
 
 export function renderCourses(live, soon, planned) {
@@ -76,7 +74,7 @@ export function renderCourses(live, soon, planned) {
   grid.innerHTML =
     live.map(renderLiveCard).join('') +
     soon.map(renderSoonCard).join('') +
-    planned.map(renderPlannedCard).join('');
+    planned.map((c, i) => renderPlannedCard(c, i, planned.length)).join('');
 
   ensureModal();
 
@@ -84,8 +82,9 @@ export function renderCourses(live, soon, planned) {
     const handler = () => {
       const type = el.dataset.modal;
       const idx  = parseInt(el.dataset.idx);
-      if (type === 'live') openLiveModal(live[idx]);
-      if (type === 'soon') openSoonModal(soon[idx]);
+      if (type === 'live')    openLiveModal(live[idx]);
+      if (type === 'soon')    openSoonModal(soon[idx]);
+      if (type === 'planned') openPlannedModal(planned[idx]);
     };
     el.addEventListener('click', handler);
     el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') handler(); });
@@ -238,6 +237,21 @@ function openSoonModal(c) {
       <div>
         <div class="modal-soon-label">ЗАПИСЬ ОТКРОЕТСЯ ПОЗЖЕ</div>
         <div class="modal-soon-text">Курс находится в подготовке. Следите за обновлениями на платформе.</div>
+      </div>
+    </div>
+  `);
+}
+
+function openPlannedModal(c) {
+  showModal(`
+    <div class="modal-tag">${esc(c.tag)}</div>
+    <h2 class="modal-title">${esc(c.title)}</h2>
+    <p class="modal-desc">${esc(c.desc || 'Подробная программа курса готовится.')}</p>
+    <div class="modal-soon-note">
+      <div class="modal-soon-icon">📋</div>
+      <div>
+        <div class="modal-soon-label">В РАЗРАБОТКЕ</div>
+        <div class="modal-soon-text">Курс запланирован. Чтобы узнать о запуске первыми — напишите нам на <a href="mailto:info@geocore-academy.ru" style="color:var(--gold)">info@geocore-academy.ru</a></div>
       </div>
     </div>
   `);
