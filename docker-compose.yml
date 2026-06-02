@@ -116,6 +116,7 @@ services:
       dockerfile: bot/Dockerfile
     container_name: geocore_bot
     restart: always
+    network_mode: host
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /:/rootfs:ro
@@ -127,8 +128,6 @@ services:
       RAM_WARN: ${RAM_WARN:-90}
       CPU_WARN: ${CPU_WARN:-95}
       HTTPS_PROXY: ${HTTPS_PROXY:-}
-    networks:
-      - geocore_net
 
   backup:
     build:
