@@ -44,7 +44,7 @@ nginx (на VPS, хост)
 | Админка (admin.html) | ✅ авторизация логин+токен, архив, счета, оплаты, аккаунты Moodle |
 | Тема день/ночь | ✅ день по умолчанию, ключ `geocoreDark` в localStorage |
 | Sandbox (песочница) | ⚠️ скрыть из nav — сырые данные |
-| Бэкапы (Selectel S3, plain tar.gz) | ⚠️ Код исправлен (cron env, S3 таймауты, ротация), деплой на VPS нужен |
+| Бэкапы (Selectel S3, гибридная схема) | ✅ moodledata-mirror (s3 sync) + monthly snapshot, versioning+lifecycle — задеплоено 11.06.2026 |
 | Скрипт восстановления из S3 | ✅ `scripts/restore.sh` — dry-run, --auto для cron, Telegram |
 | Watchtower (автообновление) | ✅ работает — исправлен DOCKER_API_VERSION=1.40 |
 

@@ -1,5 +1,41 @@
 # WORKLOG
 
+### 2026-06-11 — Гибридная схема бэкапов S3 (авария + рефактор)
+
+**Сделано:**
+- Авария: bucket `geocore-backups` был случайно удалён вручную из Selectel (NoSuchBucket), бэкапы падали 3 дня (09-11.06)
+- Найден и исправлен баг ротации: `${key/db-/moodle-}` генерировал `db-DATE.sql.gz` вместо `moodle-DATE.tar.gz` → `s3 rm` молча падал, старые архивы moodledata (36.4 ГБ каждый) копились бесконечно — это и привело к раздутию бакета
+- Реализована гибридная схема бэкапов:
+  - moodledata → `s3 sync --delete` в `moodledata-mirror/` ежедневно (инкрементально)
+  - moodledata → полный `tar.gz`-снапшот только 1-го числа месяца в `monthly/`
+  - БД и USN SQLite → без изменений, GFS-ротация (daily 7 / weekly 4 / monthly 12)
+- Новый `scripts/setup-bucket.sh` — включает versioning + lifecycle (`expire-noncurrent-versions`, `NONCURRENT_DAYS=14`) на бакете
+- `restore.sh`: для точек `daily`/`weekly` moodledata восстанавливается из текущего mirror, для `monthly` — из снапшота
+- Удалён неиспользуемый дубликат `backup/scripts/backup.sh`
+- Обновлены `wiki/BACKUP.md` и `RECOVERY.md`
+- Бакет пересоздан (старые S3-бэкапы НЕ восстанавливались — тестовый период), задеплоено на VPS (`git pull && docker compose up -d --build backup`), выполнен первый бэкап по новой схеме + `setup-bucket.sh`
+
+**Изменённые файлы:**
+- `scripts/backup.sh` — полная переработка под гибридную схему
+- `scripts/restore.sh` — ветвление mirror/snapshot для moodledata
+- `scripts/setup-bucket.sh` — новый файл (versioning + lifecycle)
+- `wiki/BACKUP.md`, `RECOVERY.md` — документация новой схемы
+- `backup/scripts/backup.sh` — удалён (дубликат)
+
+**Решения:**
+- `s3 sync` вместо ежедневного полного `tar.gz` для moodledata — статичные SCORM-курсы не требуют ежедневных полных копий
+- Versioning + lifecycle (14 дней) защищают mirror от случайного `--delete`, не раздувая хранилище старыми версиями
+- Старые S3-бэкапы решено не восстанавливать — тестовый период, приоритет оптимизации хранилища над историей
+
+**Оценка стоимости хранения:**
+- Сразу после пересоздания бакета: ~37 ГБ (~13-17 ₽/неделю по рыночному тарифу ~1.5-2 ₽/ГБ/мес)
+- Потолок через год (mirror ~36 ГБ + 12 monthly snapshots по 36 ГБ): ~468 ГБ (~160-220 ₽/неделю)
+- Точный тариф Selectel S3 не подтверждён напрямую — оценка по рыночным ставкам, для точности сверить с личным кабинетом
+
+**Открытые вопросы:**
+- Telegram bot token засветился в выводе терминала — нужно перевыпустить через @BotFather и обновить `.env` на VPS + Bitwarden
+- `geocore_backup` уведомления (`notify()`) могут не доходить — FirstVDS блокирует Telegram IP, нужен SOCKS5-туннель аналогично `geocore_bot` (не сделано)
+
 ### 2026-05-27 — Редизайн лендинга по GEOCORE.pdf
 
 **Сделано:**
