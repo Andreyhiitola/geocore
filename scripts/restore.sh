@@ -86,30 +86,37 @@ done
 
 DB_KEY=""
 MOODLE_KEY=""
+MOODLE_SOURCE=""   # "mirror" (moodledata-mirror/, текущее состояние) | "snapshot" (monthly tar.gz, точка во времени)
 RESTORE_POINT=""
 
 # Превращает строку "2024-04-20" / "weekly/2024-W15" / "monthly/2024-04"
-# в конкретные S3-ключи DB_KEY и MOODLE_KEY
+# в конкретные S3-ключи DB_KEY/MOODLE_KEY и источник moodledata
+#
+# daily/weekly: БД — точная точка из GFS; moodledata — из ТЕКУЩЕГО mirror
+#               (moodledata синкается инкрементально, отдельных daily/weekly
+#               снапшотов файлов больше нет — см. BACKUP.md)
+# monthly:      БД и moodledata — оба из точки месяца (холодный tar-снапшот)
 resolve_keys() {
     local point="$1"
     if [[ "$point" =~ ^daily/([0-9]{4}-[0-9]{2}-[0-9]{2})$ ]]; then
         local id="${BASH_REMATCH[1]}"
         DB_KEY="daily/db-${id}.sql.gz"
-        MOODLE_KEY="daily/moodle-${id}.tar.gz"
+        MOODLE_SOURCE="mirror"
         RESTORE_POINT="daily/${id}"
     elif [[ "$point" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
         DB_KEY="daily/db-${point}.sql.gz"
-        MOODLE_KEY="daily/moodle-${point}.tar.gz"
+        MOODLE_SOURCE="mirror"
         RESTORE_POINT="daily/${point}"
     elif [[ "$point" =~ ^weekly/(.+)$ ]]; then
         local id="${BASH_REMATCH[1]}"
         DB_KEY="weekly/db-${id}.sql.gz"
-        MOODLE_KEY="weekly/moodle-${id}.tar.gz"
+        MOODLE_SOURCE="mirror"
         RESTORE_POINT="weekly/${id}"
     elif [[ "$point" =~ ^monthly/(.+)$ ]]; then
         local id="${BASH_REMATCH[1]}"
         DB_KEY="monthly/db-${id}.sql.gz"
         MOODLE_KEY="monthly/moodle-${id}.tar.gz"
+        MOODLE_SOURCE="snapshot"
         RESTORE_POINT="monthly/${id}"
     else
         fail "Неизвестный формат: '${point}'. Примеры: 2024-04-20 | weekly/2024-W15 | monthly/2024-04"
@@ -161,14 +168,24 @@ fi
 
 log "Точка:  ${RESTORE_POINT}"
 log "DB:     s3://${S3_BUCKET}/${DB_KEY}"
-log "Data:   s3://${S3_BUCKET}/${MOODLE_KEY}"
+if [[ "$MOODLE_SOURCE" == "mirror" ]]; then
+    log "Data:   s3://${S3_BUCKET}/moodledata-mirror/ (текущее зеркало, не привязано к точке ${RESTORE_POINT})"
+else
+    log "Data:   s3://${S3_BUCKET}/${MOODLE_KEY}"
+fi
 
 # ── 6. Подтверждение или dry-run ───────────────────────────────────────────────
 if [[ "$DRY_RUN" == "true" ]]; then
     echo ""
     log "[DRY-RUN] Проверяем доступность файлов в S3..."
-    s3 ls "s3://${S3_BUCKET}/${DB_KEY}"     && log "  ✓ ${DB_KEY}" || warn "  ✗ ${DB_KEY} — НЕ НАЙДЕН"
-    s3 ls "s3://${S3_BUCKET}/${MOODLE_KEY}" && log "  ✓ ${MOODLE_KEY}" || warn "  ✗ ${MOODLE_KEY} — НЕ НАЙДЕН"
+    s3 ls "s3://${S3_BUCKET}/${DB_KEY}" && log "  ✓ ${DB_KEY}" || warn "  ✗ ${DB_KEY} — НЕ НАЙДЕН"
+    if [[ "$MOODLE_SOURCE" == "mirror" ]]; then
+        s3 ls "s3://${S3_BUCKET}/moodledata-mirror/" >/dev/null 2>&1 \
+            && log "  ✓ moodledata-mirror/ доступен" \
+            || warn "  ✗ moodledata-mirror/ — НЕ НАЙДЕН"
+    else
+        s3 ls "s3://${S3_BUCKET}/${MOODLE_KEY}" && log "  ✓ ${MOODLE_KEY}" || warn "  ✗ ${MOODLE_KEY} — НЕ НАЙДЕН"
+    fi
     log "[DRY-RUN] Реальное восстановление пропущено. Выход."
     exit 0
 fi
@@ -176,7 +193,11 @@ fi
 echo ""
 echo -e "${RED}⚠️  ВНИМАНИЕ: текущие данные будут ПЕРЕЗАПИСАНЫ!${NC}"
 printf "   БД:         %s\n" "$DB_NAME"
-printf "   moodledata: volume ($(docker volume ls --format '{{.Name}}' | grep 'moodle' | head -1 || echo '?'))\n"
+if [[ "$MOODLE_SOURCE" == "mirror" ]]; then
+    printf "   moodledata: volume ($(docker volume ls --format '{{.Name}}' | grep 'moodle' | head -1 || echo '?')) ← из ТЕКУЩЕГО mirror, не из точки %s\n" "$RESTORE_POINT"
+else
+    printf "   moodledata: volume ($(docker volume ls --format '{{.Name}}' | grep 'moodle' | head -1 || echo '?')) ← снапшот точки %s\n" "$RESTORE_POINT"
+fi
 printf "   Точка:      %s\n" "$RESTORE_POINT"
 echo ""
 if [[ "$AUTO" == "true" ]]; then
@@ -191,10 +212,18 @@ notify "⏳ *GeoCore Restore запущен*\n$(date '+%d.%m.%Y %H:%M')\nТоч�
 # ── 7. Проверка свободного места ДО скачивания ────────────────────────────────
 log "Проверка свободного места..."
 DB_S3_SIZE=$(s3 ls "s3://${S3_BUCKET}/${DB_KEY}" 2>/dev/null | awk '{print $3}' || echo 0)
-MOODLE_S3_SIZE=$(s3 ls "s3://${S3_BUCKET}/${MOODLE_KEY}" 2>/dev/null | awk '{print $3}' || echo 0)
-# Оцениваем нужное место: сжатые файлы + распакованные (DB *5, moodle *3) + буфер 10%
-NEEDED=$(( (DB_S3_SIZE + MOODLE_S3_SIZE) + (DB_S3_SIZE * 5) + (MOODLE_S3_SIZE * 3) ))
-NEEDED=$(( NEEDED * 11 / 10 ))
+if [[ "$MOODLE_SOURCE" == "mirror" ]]; then
+    MOODLE_S3_SIZE=$(s3 ls "s3://${S3_BUCKET}/moodledata-mirror/" --recursive --summarize 2>/dev/null \
+        | awk '/Total Size/ {print $3}')
+    [[ -z "$MOODLE_S3_SIZE" ]] && MOODLE_S3_SIZE=0
+    # sync пишет файлы как есть, без распаковки — DB всё равно *5 на распаковку дампа
+    NEEDED=$(( (DB_S3_SIZE * 6) + MOODLE_S3_SIZE ))
+else
+    MOODLE_S3_SIZE=$(s3 ls "s3://${S3_BUCKET}/${MOODLE_KEY}" 2>/dev/null | awk '{print $3}' || echo 0)
+    # Оцениваем нужное место: сжатые файлы + распакованные (DB *5, moodle *3)
+    NEEDED=$(( (DB_S3_SIZE + MOODLE_S3_SIZE) + (DB_S3_SIZE * 5) + (MOODLE_S3_SIZE * 3) ))
+fi
+NEEDED=$(( NEEDED * 11 / 10 ))  # буфер 10%
 AVAILABLE=$(df -k "${COMPOSE_DIR}" | awk 'NR==2 {print $4 * 1024}')
 if (( NEEDED > AVAILABLE )); then
     fail "Недостаточно места: нужно ~$(( NEEDED/1024/1024/1024 )) ГБ, доступно $(( AVAILABLE/1024/1024/1024 )) ГБ. Расширь диск и повтори."
@@ -207,16 +236,20 @@ s3 cp "s3://${S3_BUCKET}/${DB_KEY}" "${TMPDIR_WORK}/db.sql.gz" \
     || fail "Ошибка загрузки БД из S3"
 gzip -t "${TMPDIR_WORK}/db.sql.gz" \
     || fail "Дамп БД повреждён (gzip -t)"
-
-log "Скачивание ${MOODLE_KEY}..."
-s3 cp "s3://${S3_BUCKET}/${MOODLE_KEY}" "${TMPDIR_WORK}/moodle.tar.gz" \
-    || fail "Ошибка загрузки moodledata из S3"
-tar -tzf "${TMPDIR_WORK}/moodle.tar.gz" >/dev/null \
-    || fail "Архив moodledata повреждён"
-
 DB_SIZE=$(du -sh "${TMPDIR_WORK}/db.sql.gz" | cut -f1)
-MOODLE_SIZE=$(du -sh "${TMPDIR_WORK}/moodle.tar.gz" | cut -f1)
-log "Скачано: БД — ${DB_SIZE}, moodledata — ${MOODLE_SIZE}"
+log "Скачано: БД — ${DB_SIZE}"
+
+if [[ "$MOODLE_SOURCE" == "snapshot" ]]; then
+    log "Скачивание ${MOODLE_KEY}..."
+    s3 cp "s3://${S3_BUCKET}/${MOODLE_KEY}" "${TMPDIR_WORK}/moodle.tar.gz" \
+        || fail "Ошибка загрузки moodledata из S3"
+    tar -tzf "${TMPDIR_WORK}/moodle.tar.gz" >/dev/null \
+        || fail "Архив moodledata повреждён"
+    MOODLE_SIZE=$(du -sh "${TMPDIR_WORK}/moodle.tar.gz" | cut -f1)
+    log "Скачано: moodledata — ${MOODLE_SIZE}"
+else
+    log "moodledata будет синхронизирована из moodledata-mirror/ напрямую в volume (шаг 12)."
+fi
 
 # ── 9. Остановка Moodle ────────────────────────────────────────────────────────
 log "Остановка ${MOODLE_SERVICE}..."
@@ -278,17 +311,33 @@ fi
 [[ -z "${MOODLE_VOL:-}" ]] && fail "Не найден Docker volume для moodledata. Проверьте: docker volume ls"
 log "Volume moodledata: ${MOODLE_VOL}"
 
-log "Очистка и восстановление moodledata..."
-# Архив содержит пути вида "moodledata/..."; --strip-components=1 убирает префикс
-docker run --rm \
-    -v "${MOODLE_VOL}:/moodledata" \
-    -v "${TMPDIR_WORK}:/restore:ro" \
-    alpine \
-    sh -c '
-        find /moodledata -mindepth 1 -delete 2>/dev/null || true
-        tar -xzf /restore/moodle.tar.gz --strip-components=1 -C /moodledata
-        chown -R 33:33 /moodledata
-    ' || fail "Ошибка восстановления moodledata"
+if [[ "$MOODLE_SOURCE" == "mirror" ]]; then
+    log "Восстановление moodledata из moodledata-mirror/ (s3 sync)..."
+    [[ -z "${AWS_ACCESS_KEY_ID:-}" || -z "${AWS_SECRET_ACCESS_KEY:-}" ]] \
+        && fail "AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY не заданы — нужны для восстановления moodledata из mirror"
+    docker run --rm \
+        -v "${MOODLE_VOL}:/moodledata" \
+        -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY \
+        -e AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-ru-3}" \
+        --entrypoint /usr/local/bin/aws \
+        amazon/aws-cli \
+        --endpoint-url "$S3_ENDPOINT" s3 sync "s3://${S3_BUCKET}/moodledata-mirror/" /moodledata --delete \
+        || fail "Ошибка синхронизации moodledata из S3"
+    docker run --rm -v "${MOODLE_VOL}:/moodledata" alpine chown -R 33:33 /moodledata \
+        || fail "Ошибка chown moodledata"
+else
+    log "Очистка и восстановление moodledata из снапшота..."
+    # Архив содержит пути вида "moodledata/..."; --strip-components=1 убирает префикс
+    docker run --rm \
+        -v "${MOODLE_VOL}:/moodledata" \
+        -v "${TMPDIR_WORK}:/restore:ro" \
+        alpine \
+        sh -c '
+            find /moodledata -mindepth 1 -delete 2>/dev/null || true
+            tar -xzf /restore/moodle.tar.gz --strip-components=1 -C /moodledata
+            chown -R 33:33 /moodledata
+        ' || fail "Ошибка восстановления moodledata"
+fi
 log "moodledata восстановлена."
 
 # ── 13. Запуск всех сервисов ───────────────────────────────────────────────────

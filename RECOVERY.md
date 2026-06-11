@@ -9,7 +9,7 @@
 **Когда:** VPS недоступен, провайдер не может восстановить, нужна новая машина.
 
 ### Требования к новой машине
-- Ubuntu 22.04 LTS, минимум 4 CPU / 4 GB RAM / 40 GB диск
+- Ubuntu 22.04 LTS, минимум 4 CPU / 4 GB RAM / 80 GB диск (moodledata ~36 ГБ + место под скачивание/синхронизацию)
 - Пользователь с sudo (не root)
 - Интернет без прокси
 
@@ -21,6 +21,15 @@ curl -fsSL https://raw.githubusercontent.com/Andreyhiitola/geocore/main/scripts/
 
 Скрипт сам установит Docker, swap, склонирует репо и запустит restore из S3.  
 Когда попросит `.env` — вставить из **Bitwarden** (секция GeoCore / VPS .env).
+`.env` должен содержать `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` —
+moodledata теперь восстанавливается через `s3 sync` из `moodledata-mirror/`
+(см. [`BACKUP.md`](wiki/BACKUP.md)), для daily/weekly это обязательно.
+
+⚠️ Если бакет `geocore-backups` отсутствует (`NoSuchBucket`) — сначала
+пересоздать его и запустить `scripts/setup-bucket.sh` (versioning + lifecycle),
+см. "Настройка Selectel S3" в [`BACKUP.md`](wiki/BACKUP.md). Без этого restore
+из `moodledata-mirror/` падать не будет (бакет просто пуст), но восстановить
+данные будет неоткуда.
 
 ### Шаг 2 — Установить nginx
 
@@ -78,6 +87,14 @@ bash scripts/restore.sh
 
 Moodle остановится на время restore (~10-15 минут), потом поднимется автоматически.
 
+**Что восстанавливается из какой точки (гибридная схема):**
+- `daily/<date>` или `weekly/<id>` — БД на эту точку, moodledata —
+  из **текущего** `moodledata-mirror/` (не привязано к дате точки).
+- `monthly/<id>` — БД и moodledata из согласованного снапшота на 1-е число
+  месяца (`monthly/moodle-<id>.tar.gz`).
+
+Подробнее — [`BACKUP.md`](wiki/BACKUP.md#восстановление).
+
 ---
 
 ## Сценарий 3 — Плохой деплой / сломанный контейнер
@@ -107,7 +124,7 @@ MOODLE_VERSION=5.1.2 docker compose up -d moodle
 | Ресурс | Где |
 |--------|-----|
 | Секреты (.env) | Bitwarden → GeoCore / VPS .env |
-| Бэкапы S3 | Selectel Object Storage → geocore-backups |
+| Бэкапы S3 | Selectel Object Storage → geocore-backups (versioning + lifecycle, см. `scripts/setup-bucket.sh`) |
 | Docker Hub | hub.docker.com → andreysagurov |
 | DNS | FirstVDS DNS Manager |
 | Провайдер VPS | FirstVDS |
@@ -121,6 +138,11 @@ MOODLE_VERSION=5.1.2 docker compose up -d moodle
 | Полная потеря VPS | 30-60 минут | до 24 часов |
 | Повреждение данных | 10-15 минут | до 24 часов |
 | Плохой деплой | 2-5 минут | 0 |
+
+RPO для moodledata = время с последнего `s3 sync` (≤24ч, как и раньше).
+Дополнительно: случайно удалённые/перезаписанные файлы moodledata можно достать
+из старых версий объектов в `moodledata-mirror/` ещё `NONCURRENT_DAYS` (по
+умолчанию 14) дней после `s3 sync --delete` — versioning, см. `setup-bucket.sh`.
 
 ---
 
