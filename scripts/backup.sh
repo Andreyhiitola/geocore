@@ -56,6 +56,19 @@ notify() {
 
 s3() { aws --endpoint-url "$S3_ENDPOINT" --cli-connect-timeout 30 --cli-read-timeout 300 s3 "$@"; }
 
+# Оставляет последние $3 файлов с префиксом "$2-" в "$1/", остальные удаляет
+rotate() {
+    local path="$1" prefix="$2" keep="$3"
+    s3 ls "s3://${S3_BUCKET}/${path}/" \
+        | awk '{print $4}' \
+        | { grep "^${prefix}-" || true; } \
+        | sort \
+        | head -n "-${keep}" \
+        | while read -r key; do
+            s3 rm "s3://${S3_BUCKET}/${path}/${key}" || true
+        done || log "Ротация ${path}/${prefix}-*: пропущена (ошибка S3)"
+}
+
 # Уведомить в Telegram при неожиданных ошибках (set -e)
 trap 'fail "Неожиданная ошибка в строке $LINENO"' ERR
 
@@ -109,6 +122,7 @@ if [[ "$DAY_OF_WEEK" == "7" ]]; then
     WEEK=$(date +%Y-W%V)
     log "Еженедельный бэкап БД ($WEEK)..."
     s3 cp "$DB_FILE" "s3://${S3_BUCKET}/weekly/db-${WEEK}.sql.gz" || fail "Ошибка загрузки weekly db в S3"
+    [[ -n "$USN_FILE" ]] && { s3 cp "$USN_FILE" "s3://${S3_BUCKET}/weekly/usn-${WEEK}.db" || true; }
 fi
 
 # Ежемесячный (1-го числа): дамп БД + холодный полный снапшот moodledata
@@ -116,6 +130,7 @@ if [[ "$DAY_OF_MONTH" == "01" ]]; then
     MONTH=$(date +%Y-%m)
     log "Ежемесячный бэкап БД ($MONTH)..."
     s3 cp "$DB_FILE" "s3://${S3_BUCKET}/monthly/db-${MONTH}.sql.gz" || fail "Ошибка загрузки monthly db в S3"
+    [[ -n "$USN_FILE" ]] && { s3 cp "$USN_FILE" "s3://${S3_BUCKET}/monthly/usn-${MONTH}.db" || true; }
 
     log "Ежемесячный холодный снапшот moodledata ($MONTH)..."
     MOODLE_SNAPSHOT="$BACKUP_DIR/moodle-${MONTH}.tar.gz"
@@ -125,31 +140,20 @@ if [[ "$DAY_OF_MONTH" == "01" ]]; then
     s3 cp "$MOODLE_SNAPSHOT" "s3://${S3_BUCKET}/monthly/moodle-${MONTH}.tar.gz" || fail "Ошибка загрузки monthly moodle в S3"
 fi
 
-# ── 5. Ротация старых бэкапов БД ──────────────────────────────────────────────
+# ── 5. Ротация старых бэкапов БД и USN ────────────────────────────────────────
 # moodledata в ротации не нуждается: mirror живёт постоянно (старые версии — через
 # S3 versioning + lifecycle), а monthly-снапшоты ротируются вместе с db ниже.
 # Ротация некритична — ошибки не прерывают бэкап
 log "Ротация daily (оставляем 7)..."
-s3 ls "s3://${S3_BUCKET}/daily/" \
-    | awk '{print $4}' \
-    | { grep '^db-' || true; } \
-    | sort \
-    | head -n -7 \
-    | while read -r key; do
-        s3 rm "s3://${S3_BUCKET}/daily/${key}" || true
-    done || log "Ротация daily: пропущена (ошибка S3)"
+rotate daily db 7
+rotate daily usn 7
 
 log "Ротация weekly (оставляем 4)..."
-s3 ls "s3://${S3_BUCKET}/weekly/" \
-    | awk '{print $4}' \
-    | { grep '^db-' || true; } \
-    | sort \
-    | head -n -4 \
-    | while read -r key; do
-        s3 rm "s3://${S3_BUCKET}/weekly/${key}" || true
-    done || log "Ротация weekly: пропущена (ошибка S3)"
+rotate weekly db 4
+rotate weekly usn 4
 
 log "Ротация monthly (оставляем 12)..."
+rotate monthly usn 12
 s3 ls "s3://${S3_BUCKET}/monthly/" \
     | awk '{print $4}' \
     | { grep '^db-' || true; } \
