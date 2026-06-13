@@ -19,6 +19,13 @@ BACKUP_DIR="/tmp/geocore-backup-${DATE}"
 S3_ENDPOINT="${S3_ENDPOINT:-https://s3.selectel.ru}"
 S3_BUCKET="${S3_BUCKET:?Переменная S3_BUCKET не задана}"
 
+# Object Lock (COMPLIANCE) для daily/weekly/monthly db/usn — защищает от удаления
+# даже при компрометации этих же credentials (см. "Открытые вопросы" в wiki/BACKUP.md).
+# На moodledata-mirror не действует — там нет смысла (живой churn session-файлов
+# раздул бы старые залоченные версии, которые и так не чистятся lifecycle'ом)
+OBJECT_LOCK_RETAIN_DAYS="${OBJECT_LOCK_RETAIN_DAYS:-35}"
+RETAIN_UNTIL=$(python3 -c "import datetime; print((datetime.datetime.utcnow() + datetime.timedelta(days=${OBJECT_LOCK_RETAIN_DAYS})).strftime('%Y-%m-%dT%H:%M:%S.000Z'))")
+
 TELEGRAM_BOT_TOKEN="${TELEGRAM_BOT_TOKEN:-}"
 TELEGRAM_CHAT_ID="${TELEGRAM_CHAT_ID:-}"
 
@@ -55,6 +62,17 @@ notify() {
 }
 
 s3() { aws --endpoint-url "$S3_ENDPOINT" --cli-connect-timeout 30 --cli-read-timeout 300 s3 "$@"; }
+
+# Загрузка с Object Lock COMPLIANCE (см. OBJECT_LOCK_RETAIN_DAYS). `aws s3 cp`
+# не поддерживает --object-lock-*, поэтому s3api put-object (single PUT —
+# нормально для маленьких файлов БД/USN)
+s3_put_locked() {
+    local file="$1" key="$2"
+    aws --endpoint-url "$S3_ENDPOINT" --cli-connect-timeout 30 --cli-read-timeout 300 s3api put-object \
+        --bucket "$S3_BUCKET" --key "$key" --body "$file" \
+        --object-lock-mode COMPLIANCE --object-lock-retain-until-date "$RETAIN_UNTIL" \
+        > /dev/null
+}
 
 # Оставляет последние $3 файлов с префиксом "$2-" в "$1/", остальные удаляет
 rotate() {
@@ -112,25 +130,25 @@ if [ -f "/usn_data/usn.db" ]; then
     log "USN DB: $(du -sh "$USN_FILE" | cut -f1)"
 fi
 
-# ── 4. Загрузка БД в S3 (GFS) ─────────────────────────────────────────────────
+# ── 4. Загрузка БД в S3 (GFS, с Object Lock COMPLIANCE) ───────────────────────
 log "Загрузка ежедневного бэкапа БД в S3..."
-s3 cp "$DB_FILE" "s3://${S3_BUCKET}/daily/db-${DATE}.sql.gz" || fail "Ошибка загрузки db в S3"
-[[ -n "$USN_FILE" ]] && s3 cp "$USN_FILE" "s3://${S3_BUCKET}/daily/usn-${DATE}.db" || true
+s3_put_locked "$DB_FILE" "daily/db-${DATE}.sql.gz" || fail "Ошибка загрузки db в S3"
+[[ -n "$USN_FILE" ]] && { s3_put_locked "$USN_FILE" "daily/usn-${DATE}.db" || true; }
 
 # Еженедельный (каждое воскресенье)
 if [[ "$DAY_OF_WEEK" == "7" ]]; then
     WEEK=$(date +%Y-W%V)
     log "Еженедельный бэкап БД ($WEEK)..."
-    s3 cp "$DB_FILE" "s3://${S3_BUCKET}/weekly/db-${WEEK}.sql.gz" || fail "Ошибка загрузки weekly db в S3"
-    [[ -n "$USN_FILE" ]] && { s3 cp "$USN_FILE" "s3://${S3_BUCKET}/weekly/usn-${WEEK}.db" || true; }
+    s3_put_locked "$DB_FILE" "weekly/db-${WEEK}.sql.gz" || fail "Ошибка загрузки weekly db в S3"
+    [[ -n "$USN_FILE" ]] && { s3_put_locked "$USN_FILE" "weekly/usn-${WEEK}.db" || true; }
 fi
 
 # Ежемесячный (1-го числа): дамп БД + холодный полный снапшот moodledata
 if [[ "$DAY_OF_MONTH" == "01" ]]; then
     MONTH=$(date +%Y-%m)
     log "Ежемесячный бэкап БД ($MONTH)..."
-    s3 cp "$DB_FILE" "s3://${S3_BUCKET}/monthly/db-${MONTH}.sql.gz" || fail "Ошибка загрузки monthly db в S3"
-    [[ -n "$USN_FILE" ]] && { s3 cp "$USN_FILE" "s3://${S3_BUCKET}/monthly/usn-${MONTH}.db" || true; }
+    s3_put_locked "$DB_FILE" "monthly/db-${MONTH}.sql.gz" || fail "Ошибка загрузки monthly db в S3"
+    [[ -n "$USN_FILE" ]] && { s3_put_locked "$USN_FILE" "monthly/usn-${MONTH}.db" || true; }
 
     log "Ежемесячный холодный снапшот moodledata ($MONTH)..."
     MOODLE_SNAPSHOT="$BACKUP_DIR/moodle-${MONTH}.tar.gz"
