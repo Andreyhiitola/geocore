@@ -58,6 +58,10 @@ trap 'fail "Неожиданная ошибка в строке $LINENO"' ERR
 log "Старт бэкапа за $DATE"
 notify "⏳ *GeoCore Backup запущен*\n$(date '+%d.%m.%Y %H:%M')"
 mkdir -p "$BACKUP_DIR"
+# Чистим BACKUP_DIR при любом завершении (успех, fail() или ERR-trap) — иначе
+# при ошибке загрузки в S3 временные файлы (включая месячный tar.gz moodledata)
+# остаются в /tmp и забивают диск контейнера/хоста
+trap 'rm -rf "$BACKUP_DIR"' EXIT
 
 # ── 1. Дамп базы данных ──────────────────────────────────────────────────────
 log "Дамп MariaDB..."
@@ -153,6 +157,5 @@ s3 ls "s3://${S3_BUCKET}/monthly/" \
     done || log "Ротация monthly: пропущена (ошибка S3)"
 
 # ── 6. Финал ─────────────────────────────────────────────────────────────────
-rm -rf "$BACKUP_DIR"
 log "Бэкап завершён."
 notify "✅ *GeoCore Backup OK*\n$(date '+%d.%m.%Y %H:%M')\nDB: ${DB_SIZE} | moodledata: synced"

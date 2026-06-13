@@ -70,6 +70,22 @@ TELEGRAM_CHAT_ID=
      bash scripts/setup-bucket.sh
    ```
 
+⚠️ **Selectel ru-3 не поддерживает bucket lifecycle** (проверено 13.06.2026):
+`put-bucket-lifecycle-configuration` возвращает успех (exit 0), но
+`get-bucket-lifecycle-configuration` сразу после — `NoSuchLifecycleConfiguration`
+(в обоих форматах правила: с `Filter` и со старым `Prefix`). Конфигурация не
+сохраняется на стороне провайдера. Versioning при этом работает и включается
+нормально.
+
+**Следствие:** старые версии файлов в `moodledata-mirror/` (после `--delete`
+или перезаписи) не истекают автоматически — versioning без lifecycle может
+растить bucket бесконечно. На практике риск низкий — файлы moodledata (SCORM,
+загрузки) почти не удаляются/перезаписываются. Но в "Регулярная проверка"
+(см. ниже) стоит смотреть не только дату последнего файла, но и общий размер
+`moodledata-mirror/` — если растёт быстрее самого moodledata, версии копятся
+и нужно чистить вручную (`s3api list-object-versions` + `delete-object
+--version-id`).
+
 Проверить подключение:
 ```bash
 aws --endpoint-url https://s3.ru-3.storage.selcloud.ru s3 ls s3://geocore-backups/
@@ -262,3 +278,5 @@ Crontab: `. /tmp/docker_env.sh && /scripts/backup.sh`
 | Restore moodledata из mirror падает: `AWS_ACCESS_KEY_ID не задан` | `restore.sh` для `daily`/`weekly` синхронизирует moodledata из `moodledata-mirror/` через `amazon/aws-cli`, нужны ключи | Добавить `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` в `.env` на восстанавливаемом хосте |
 | Telegram-уведомления не приходят (`fail()`/`notify()`) | FirstVDS блокирует IP Telegram (та же проблема, что у `geocore_bot`) | Не исправлено для `geocore_backup` — нужен SOCKS5-туннель аналогично боту, либо проверять `docker logs`/`/var/log/backup.log` вручную |
 | Moodle не отвечает после restore | Идёт инициализация | Подождать 2–5 мин, `docker logs geocore_moodle` |
+| Диск VPS заполняется на ~36ГБ/день, бэкап падает на `ERROR: Ошибка загрузки db в S3` (`NoSuchBucket`) | (1) Бакет `geocore-backups` удалён/не пересоздан; (2) `BACKUP_DIR` не чистится при `fail()` → `exit 1` происходит ДО `rm -rf`, `/tmp/geocore-backup-<date>` (с tar.gz moodledata) копится в контейнере каждый день | (1) Пересоздать бакет (`aws s3 mb`) + `setup-bucket.sh`; (2) исправлено в `backup.sh` — `trap 'rm -rf "$BACKUP_DIR"' EXIT` чистит при любом исходе. Вручную почистить накопленное: `docker exec geocore_backup sh -c 'rm -rf /tmp/geocore-backup-2026-*'` |
+| `geocore_backup` молча работает по старой (не гибридной) схеме после обновления `backup.sh` | `backup:` собирается локально (`build:`, без `image:`) — Watchtower обновляет только образы из registry, локальные билды не трогает | После любого изменения `scripts/backup.sh`/`backup/Dockerfile`: `docker compose build backup && docker compose up -d backup` на VPS вручную |
