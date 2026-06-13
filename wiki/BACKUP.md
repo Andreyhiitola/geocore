@@ -1,6 +1,6 @@
 # GeoCore Academy — Бэкапы и восстановление
 
-> Последнее обновление: 2026-06-11
+> Последнее обновление: 2026-06-13
 
 ---
 
@@ -51,8 +51,12 @@ AWS_DEFAULT_REGION=ru-3
 TELEGRAM_BOT_TOKEN=
 TELEGRAM_CHAT_ID=
 
-# Если VPS за прокси
-# HTTPS_PROXY=http://host:port
+# SOCKS5-туннель до severen для notify() — FirstVDS блокирует Telegram.
+# По умолчанию docker-compose.yml сам ставит socks5h://172.19.0.1:1080
+# (gateway бриджа geocore_net), переопределять нужно только если изменился
+# адрес/порт туннеля. НЕ переименовывать в HTTPS_PROXY — его читает aws-cli
+# и s3 sync пойдёт через тот же туннель (см. "SOCKS5-туннель для Telegram" ниже)
+# BACKUP_TELEGRAM_PROXY=socks5h://172.19.0.1:1080
 ```
 
 ---
@@ -263,6 +267,45 @@ Crontab: `. /tmp/docker_env.sh && /scripts/backup.sh`
 
 ---
 
+## SOCKS5-туннель для Telegram (notify)
+
+С 13.06.2026 `geocore_backup` отправляет алерты в Telegram через тот же
+SOCKS5-туннель, что использует `geocore_bot` (FirstVDS блокирует IP Telegram
+напрямую).
+
+**Отличие от бота:** `geocore_bot` сидит на `network_mode: host` и стучится в
+`127.0.0.1:1080`. `geocore_backup` живёт на `geocore_net` (bridge), у него своего
+`127.0.0.1` нет — поэтому `autossh-telegram.service` на хосте слушает **две**
+привязки:
+
+```
+ExecStart=... -D 127.0.0.1:1080 -D 172.19.0.1:1080 ...
+```
+
+`172.19.0.1` — gateway-IP бриджа `geocore_geocore_net` (контейнеры стучатся в
+host через него). Дополнительно нужно правило ufw (по умолчанию `INPUT` —
+default-deny):
+
+```bash
+ufw allow from 172.19.0.0/16 to any port 1080 proto tcp comment 'geocore_net -> SOCKS5 tunnel (geocore_backup)'
+```
+
+**Важно — отдельная переменная `TELEGRAM_PROXY`, не `HTTPS_PROXY`:**
+`aws-cli` (botocore) автоматически читает `HTTPS_PROXY`/`https_proxy`. Если
+завести туда туннель до severen, `s3 sync`/`s3 cp` тоже попытаются идти через
+него и упадут (`Failed to connect to proxy URL`) — Selectel S3 доступен с VPS
+напрямую, проксировать его не нужно. Поэтому в `backup.sh` `notify()` явно
+использует `--proxy "$TELEGRAM_PROXY"`, а `docker-compose.yml` задаёт
+`TELEGRAM_PROXY` (не `HTTPS_PROXY`) для сервиса `backup`.
+
+Проверить туннель из контейнера:
+```bash
+docker exec geocore_backup curl -s --max-time 15 --proxy socks5h://172.19.0.1:1080 \
+  https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/getMe
+```
+
+---
+
 ## Возможные проблемы
 
 | Проблема | Причина | Решение |
@@ -276,7 +319,8 @@ Crontab: `. /tmp/docker_env.sh && /scripts/backup.sh`
 | `moodledata-mirror/` растёт быстрее, чем меняются файлы | Versioning включён, а lifecycle — нет (старые версии копятся бесконечно) | Запустить `setup-bucket.sh` — добавит правило `expire-noncurrent-versions` |
 | Старая ротация: `moodle-*.tar.gz` копится в `daily`/`weekly`/`monthly` без удаления | Баг в `${key/db-/moodle-}` — генерировал `.sql.gz` вместо `.tar.gz`, `s3 rm` молча падал | Исправлено в `backup.sh`; в гибридной схеме daily/weekly вообще не хранят moodle-tar — актуально только для `monthly/` |
 | Restore moodledata из mirror падает: `AWS_ACCESS_KEY_ID не задан` | `restore.sh` для `daily`/`weekly` синхронизирует moodledata из `moodledata-mirror/` через `amazon/aws-cli`, нужны ключи | Добавить `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` в `.env` на восстанавливаемом хосте |
-| Telegram-уведомления не приходят (`fail()`/`notify()`) | FirstVDS блокирует IP Telegram (та же проблема, что у `geocore_bot`) | Не исправлено для `geocore_backup` — нужен SOCKS5-туннель аналогично боту, либо проверять `docker logs`/`/var/log/backup.log` вручную |
+| Telegram-уведомления не приходят (`fail()`/`notify()`) | FirstVDS блокирует IP Telegram | Исправлено 13.06.2026 — SOCKS5-туннель через `TELEGRAM_PROXY` (см. "SOCKS5-туннель для Telegram" выше). Если снова не приходят — проверить `systemctl status autossh-telegram` и `docker exec geocore_backup curl --proxy socks5h://172.19.0.1:1080 https://api.telegram.org` |
+| `notify()` висит ~2 мин на каждом вызове | `curl` без `--max-time`, упирается в OS TCP timeout при заблокированном Telegram | Исправлено 13.06.2026 — `--max-time 15` в `notify()` |
 | Moodle не отвечает после restore | Идёт инициализация | Подождать 2–5 мин, `docker logs geocore_moodle` |
 | Диск VPS заполняется на ~36ГБ/день, бэкап падает на `ERROR: Ошибка загрузки db в S3` (`NoSuchBucket`) | (1) Бакет `geocore-backups` удалён/не пересоздан; (2) `BACKUP_DIR` не чистится при `fail()` → `exit 1` происходит ДО `rm -rf`, `/tmp/geocore-backup-<date>` (с tar.gz moodledata) копится в контейнере каждый день | (1) Пересоздать бакет (`aws s3 mb`) + `setup-bucket.sh`; (2) исправлено в `backup.sh` — `trap 'rm -rf "$BACKUP_DIR"' EXIT` чистит при любом исходе. Вручную почистить накопленное: `docker exec geocore_backup sh -c 'rm -rf /tmp/geocore-backup-2026-*'` |
 | `geocore_backup` молча работает по старой (не гибридной) схеме после обновления `backup.sh` | `backup:` собирается локально (`build:`, без `image:`) — Watchtower обновляет только образы из registry, локальные билды не трогает | После любого изменения `scripts/backup.sh`/`backup/Dockerfile`: `docker compose build backup && docker compose up -d backup` на VPS вручную |
