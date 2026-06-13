@@ -43,7 +43,12 @@ fail() { log "ERROR: $*"; notify "❌ *GeoCore Backup FAILED*\n$(date '+%d.%m.%Y
 notify() {
     local message="$1"
     [[ -z "$TELEGRAM_BOT_TOKEN" || -z "$TELEGRAM_CHAT_ID" ]] && return
-    curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+    # FirstVDS блокирует Telegram — нужен SOCKS5-туннель до severen (TELEGRAM_PROXY).
+    # НЕ используем HTTPS_PROXY: его читает и aws-cli, а S3 (Selectel) доступен
+    # напрямую — через туннель до severen он не пройдёт.
+    # curl без --max-time висел бы ~2 мин на каждый вызов
+    curl -s --max-time 15 ${TELEGRAM_PROXY:+--proxy "$TELEGRAM_PROXY"} \
+        -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
         -d chat_id="${TELEGRAM_CHAT_ID}" \
         -d parse_mode="Markdown" \
         -d text="${message}" > /dev/null || true

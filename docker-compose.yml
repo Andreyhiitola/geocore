@@ -151,6 +151,14 @@ services:
       AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-ru-3}
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
       TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
+      # SOCKS5-туннель до severen (autossh-telegram.service на хосте) для notify() —
+      # FirstVDS блокирует Telegram. В отличие от geocore_bot (network_mode: host,
+      # 127.0.0.1:1080), backup сидит на geocore_net и должен достучаться до хоста
+      # через gateway-IP бриджа geocore_geocore_net (172.19.0.1) — autossh там
+      # дополнительно забинден на -D 172.19.0.1:1080.
+      # Имя TELEGRAM_PROXY (не HTTPS_PROXY) специально — иначе aws-cli тоже
+      # пойдёт через этот туннель и s3 sync сломается (Selectel доступен напрямую)
+      TELEGRAM_PROXY: ${BACKUP_TELEGRAM_PROXY:-socks5h://172.19.0.1:1080}
     networks:
       - geocore_net
 
