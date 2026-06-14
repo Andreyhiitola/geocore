@@ -113,15 +113,7 @@ mysqldump \
 DB_SIZE=$(du -sh "$DB_FILE" | cut -f1)
 log "БД: ${DB_SIZE}"
 
-# ── 2. Синхронизация moodledata (инкрементальное зеркало) ────────────────────
-log "Синхронизация moodledata в S3 (mirror, исключаем cache/temp/trash)..."
-s3 sync /moodledata "s3://${S3_BUCKET}/moodledata-mirror/" \
-    "${SYNC_EXCLUDES[@]}" \
-    --delete \
-    || fail "Ошибка синхронизации moodledata"
-log "moodledata: синхронизировано"
-
-# ── 3. Бэкап USN-app SQLite ───────────────────────────────────────────────────
+# ── 2. Бэкап USN-app SQLite ───────────────────────────────────────────────────
 USN_FILE=""
 if [ -f "/usn_data/usn.db" ]; then
     log "Копирование USN-app базы..."
@@ -130,7 +122,11 @@ if [ -f "/usn_data/usn.db" ]; then
     log "USN DB: $(du -sh "$USN_FILE" | cut -f1)"
 fi
 
-# ── 4. Загрузка БД в S3 (GFS, с Object Lock COMPLIANCE) ───────────────────────
+# ── 3. Загрузка БД (+USN) в S3 (GFS, с Object Lock COMPLIANCE) ───────────────
+# Делаем это ДО синхронизации moodledata: это маленький и критичный бэкап, и
+# его успех не должен зависеть от большой/нестабильной синхронизации moodledata
+# ниже (Selectel периодически отдаёт 429 Too Many Requests на DeleteObject при
+# churn session-файлов — см. шаг 4).
 log "Загрузка ежедневного бэкапа БД в S3..."
 s3_put_locked "$DB_FILE" "daily/db-${DATE}.sql.gz" || fail "Ошибка загрузки db в S3"
 [[ -n "$USN_FILE" ]] && { s3_put_locked "$USN_FILE" "daily/usn-${DATE}.db" || true; }
@@ -143,13 +139,34 @@ if [[ "$DAY_OF_WEEK" == "7" ]]; then
     [[ -n "$USN_FILE" ]] && { s3_put_locked "$USN_FILE" "weekly/usn-${WEEK}.db" || true; }
 fi
 
-# Ежемесячный (1-го числа): дамп БД + холодный полный снапшот moodledata
+# Ежемесячный (1-го числа): дамп БД
 if [[ "$DAY_OF_MONTH" == "01" ]]; then
     MONTH=$(date +%Y-%m)
     log "Ежемесячный бэкап БД ($MONTH)..."
     s3_put_locked "$DB_FILE" "monthly/db-${MONTH}.sql.gz" || fail "Ошибка загрузки monthly db в S3"
     [[ -n "$USN_FILE" ]] && { s3_put_locked "$USN_FILE" "monthly/usn-${MONTH}.db" || true; }
+fi
 
+# ── 4. Синхронизация moodledata (инкрементальное зеркало) ────────────────────
+# Ошибка здесь НЕ прерывает бэкап (БД и USN уже в S3 с Object Lock, см. выше) —
+# точечные 429 Too Many Requests от Selectel на DeleteObject при churn
+# session-файлов не означают потерю данных, просто moodledata-mirror отстанет
+# на сутки до следующего прогона.
+log "Синхронизация moodledata в S3 (mirror, исключаем cache/temp/trash)..."
+MOODLE_SYNC_STATUS="ok"
+s3 sync /moodledata "s3://${S3_BUCKET}/moodledata-mirror/" \
+    "${SYNC_EXCLUDES[@]}" \
+    --delete \
+    || MOODLE_SYNC_STATUS="ошибка (см. /var/log/backup.log)"
+if [[ "$MOODLE_SYNC_STATUS" == "ok" ]]; then
+    log "moodledata: синхронизировано"
+else
+    log "WARNING: ошибка синхронизации moodledata — продолжаем (БД уже в S3)"
+fi
+
+# Ежемесячный (1-го числа): холодный полный снапшот moodledata
+if [[ "$DAY_OF_MONTH" == "01" ]]; then
+    MONTH=$(date +%Y-%m)
     log "Ежемесячный холодный снапшот moodledata ($MONTH)..."
     MOODLE_SNAPSHOT="$BACKUP_DIR/moodle-${MONTH}.tar.gz"
     tar -czf "$MOODLE_SNAPSHOT" "${TAR_EXCLUDES[@]}" /moodledata \
@@ -185,4 +202,8 @@ s3 ls "s3://${S3_BUCKET}/monthly/" \
 
 # ── 6. Финал ─────────────────────────────────────────────────────────────────
 log "Бэкап завершён."
-notify "✅ *GeoCore Backup OK*\n$(date '+%d.%m.%Y %H:%M')\nDB: ${DB_SIZE} | moodledata: synced"
+if [[ "$MOODLE_SYNC_STATUS" == "ok" ]]; then
+    notify "✅ *GeoCore Backup OK*\n$(date '+%d.%m.%Y %H:%M')\nDB: ${DB_SIZE} | moodledata: synced"
+else
+    notify "⚠️ *GeoCore Backup: БД OK, moodledata sync — ошибка*\n$(date '+%d.%m.%Y %H:%M')\nDB: ${DB_SIZE} | moodledata-mirror отстаёт, см. /var/log/backup.log"
+fi

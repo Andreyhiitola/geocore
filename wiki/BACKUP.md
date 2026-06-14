@@ -1,6 +1,6 @@
 # GeoCore Academy — Бэкапы и восстановление
 
-> Последнее обновление: 2026-06-13
+> Последнее обновление: 2026-06-14
 
 ---
 
@@ -391,3 +391,4 @@ helper `rotate()` в `backup.sh` (коммит `ce1cc577a`).
 | Moodle не отвечает после restore | Идёт инициализация | Подождать 2–5 мин, `docker logs geocore_moodle` |
 | Диск VPS заполняется на ~36ГБ/день, бэкап падает на `ERROR: Ошибка загрузки db в S3` (`NoSuchBucket`) | (1) Бакет `geocore-backups` удалён/не пересоздан; (2) `BACKUP_DIR` не чистится при `fail()` → `exit 1` происходит ДО `rm -rf`, `/tmp/geocore-backup-<date>` (с tar.gz moodledata) копится в контейнере каждый день | (1) Пересоздать бакет (`aws s3 mb`) + `setup-bucket.sh`; (2) исправлено в `backup.sh` — `trap 'rm -rf "$BACKUP_DIR"' EXIT` чистит при любом исходе. Вручную почистить накопленное: `docker exec geocore_backup sh -c 'rm -rf /tmp/geocore-backup-2026-*'` |
 | `geocore_backup` молча работает по старой (не гибридной) схеме после обновления `backup.sh` | `backup:` собирается локально (`build:`, без `image:`) — Watchtower обновляет только образы из registry, локальные билды не трогает | После любого изменения `scripts/backup.sh`/`backup/Dockerfile`: `docker compose build backup && docker compose up -d backup` на VPS вручную |
+| `daily/`/`weekly`/`monthly` в S3 пустые, бот `📋 История бэкапов` → "Не удалось получить данные", хотя `geocore_backup` зелёный и moodledata-mirror обновляется | **Исправлено 14.06.2026.** Старый порядок шагов: дамп БД → `s3 sync moodledata --delete` → загрузка db/usn в S3. Selectel периодически отдаёт `429 Too Many Requests` на `DeleteObject` при churn session-файлов moodledata → `s3 sync` возвращает ненулевой код → `\|\| fail(...)` делал `exit 1` ДО загрузки уже снятого дампа БД в `daily/` | Загрузка db/usn (Object Lock, GFS) теперь идёт сразу после дампа, ДО `s3 sync moodledata`; ошибка `s3 sync` больше не фатальна (warning + `⚠️` в Telegram, бэкап БД и ротация продолжаются) |
