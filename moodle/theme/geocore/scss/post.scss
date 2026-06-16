@@ -287,6 +287,8 @@ body {
 // Кнопка «Выход» фиксирована в углу, JS пересчитывает высоту iframe.
 body#page-mod-scorm-player {
     background: #fff !important;
+    height: 100vh !important;
+    overflow: hidden !important;
 
     .navbar,
     #page-header,
@@ -299,7 +301,13 @@ body#page-mod-scorm-player {
     #page-activity-header,
     .tertiary-navigation,
     header.activity-header,
-    #region-main > .d-flex.flex-row-reverse {
+    #region-main > .d-flex.flex-row-reverse,
+    #scorm_nav select,
+    #scorm_nav .singleselect,
+    .scorm-nav-select,
+    #page-mod-scorm-player > .announcements,
+    .block_news_items,
+    #page-content > .announcements {
         display: none !important;
     }
 
