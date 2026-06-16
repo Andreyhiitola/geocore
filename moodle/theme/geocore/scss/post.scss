@@ -362,3 +362,23 @@ body#page-mod-scorm-player {
         display: none !important;
     }
 }
+
+// В режиме fullscreen SCORM-дерево растягивается на весь экран
+:fullscreen body#page-mod-scorm-player,
+:-webkit-full-screen body#page-mod-scorm-player,
+:-moz-full-screen body#page-mod-scorm-player {
+    #scormpage, #tocbox, #scorm_layout, #scorm_content {
+        height: 100vh !important;
+    }
+    #scorm_object {
+        height: 100% !important;
+    }
+}
+
+// Когда сам #page — корень fullscreen-элемента
+#page:-webkit-full-screen,
+#page:fullscreen {
+    background: #fff !important;
+    height: 100vh !important;
+    width: 100vw !important;
+}
