@@ -333,8 +333,28 @@ body#page-mod-scorm-player {
         }
     }
 
-    #scormpage {
-        margin: 0;
-        padding: 0;
+    // Растягиваем всё дерево SCORM-плеера на весь viewport
+    // !important перебивает inline-стили от Moodle SCORM JS
+    #scormpage,
+    #tocbox,
+    #scorm_layout,
+    #scorm_content {
+        margin: 0 !important;
+        padding: 0 !important;
+        height: 100vh !important;
+        width: 100% !important;
+        overflow: hidden !important;
+    }
+
+    #scorm_object {
+        width: 100% !important;
+        height: 100% !important;
+        border: none !important;
+        display: block !important;
+    }
+
+    // Скрываем боковое меню TOC если оно есть
+    #scorm_toc {
+        display: none !important;
     }
 }
