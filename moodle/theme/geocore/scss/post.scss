@@ -282,10 +282,12 @@ body {
     text-transform: uppercase;
 }
 
-// ── SCORM-ПЛЕЕР: ПОЧТИ FULLSCREEN ─────────────────────────────
-// Скрываем хром Moodle на странице плеера, курс занимает весь
-// вьюпорт. Кнопка true-fullscreen — theme/geocore/javascript/scorm-fullscreen.js
+// ── SCORM-ПЛЕЕР: FULLSCREEN ────────────────────────────────────
+// Скрываем хром Moodle, SCORM-контент занимает весь viewport.
+// Кнопка «Выход» фиксирована в углу, JS пересчитывает высоту iframe.
 body#page-mod-scorm-player {
+    background: #fff !important;
+
     .navbar,
     #page-header,
     .secondary-navigation,
@@ -302,23 +304,18 @@ body#page-mod-scorm-player {
     #region-main {
         margin: 0 !important;
         padding: 0 !important;
-        max-width: none !important;
+        max-width: 100% !important;
+        width: 100% !important;
     }
 
-    #page-content,
-    #region-main-box,
-    #region-main {
-        min-height: 100vh;
-    }
-
-    // Панель выхода + кнопка fullscreen — плавающий оверлей в углу
-    .geocore-scorm-exitbar {
-        position: fixed;
+    // Кнопка «Выход из активности» — фиксирована в правом верхнем углу
+    // чтобы не занимать высоту и не смещать вниз #scorm_layout
+    #region-main > .d-flex.flex-row-reverse {
+        position: fixed !important;
         top: 8px;
         right: 8px;
         z-index: 10000;
         margin: 0 !important;
-        gap: 8px;
 
         .btn {
             border-radius: 0 !important;
@@ -326,16 +323,18 @@ body#page-mod-scorm-player {
             font-size: 11px;
             letter-spacing: 0.08em;
             text-transform: uppercase;
+            background: rgba(0, 0, 0, 0.6) !important;
+            border-color: transparent !important;
+            color: #fff !important;
+
+            &:hover {
+                background: rgba(0, 0, 0, 0.85) !important;
+            }
         }
     }
 
-    .geocore-scorm-fullscreen-btn {
-        background: $gold !important;
-        border-color: $gold !important;
-        color: #0A0A0B !important;
-
-        &:hover {
-            background: $gold-light !important;
-        }
+    #scormpage {
+        margin: 0;
+        padding: 0;
     }
 }
