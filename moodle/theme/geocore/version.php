@@ -1,7 +1,7 @@
 <?php
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2026061601;
+$plugin->version   = 2026061602;
 $plugin->requires  = 2023100900; // Moodle 4.3+
 $plugin->component = 'theme_geocore';
 $plugin->maturity  = MATURITY_STABLE;
