@@ -298,7 +298,8 @@ body#page-mod-scorm-player {
     .activity-header,
     #page-activity-header,
     .tertiary-navigation,
-    header.activity-header {
+    header.activity-header,
+    #region-main > .d-flex.flex-row-reverse {
         display: none !important;
     }
 
@@ -310,31 +311,6 @@ body#page-mod-scorm-player {
         padding: 0 !important;
         max-width: 100% !important;
         width: 100% !important;
-    }
-
-    // Кнопка «Выход из активности» — фиксирована в правом верхнем углу
-    // чтобы не занимать высоту и не смещать вниз #scorm_layout
-    #region-main > .d-flex.flex-row-reverse {
-        position: fixed !important;
-        top: 8px;
-        right: 8px;
-        z-index: 10000;
-        margin: 0 !important;
-
-        .btn {
-            border-radius: 0 !important;
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 11px;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            background: rgba(0, 0, 0, 0.6) !important;
-            border-color: transparent !important;
-            color: #fff !important;
-
-            &:hover {
-                background: rgba(0, 0, 0, 0.85) !important;
-            }
-        }
     }
 
     // Растягиваем всё дерево SCORM-плеера на весь viewport
