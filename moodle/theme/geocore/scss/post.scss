@@ -294,7 +294,11 @@ body#page-mod-scorm-player {
     .drawer-toggles,
     #page-footer,
     #theme_boost-drawers-courseindex,
-    #theme_boost-drawers-blocks {
+    #theme_boost-drawers-blocks,
+    .activity-header,
+    #page-activity-header,
+    .tertiary-navigation,
+    header.activity-header {
         display: none !important;
     }
 
