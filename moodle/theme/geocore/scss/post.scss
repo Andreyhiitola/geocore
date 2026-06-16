@@ -313,15 +313,21 @@ body#page-mod-scorm-player {
         width: 100% !important;
     }
 
-    // Растягиваем всё дерево SCORM-плеера на весь viewport
-    // !important перебивает inline-стили от Moodle SCORM JS
+    // SCORM-дерево: оставляем 44px снизу для #scorm_nav (в потоке, не fixed)
     #scormpage,
-    #tocbox,
+    #tocbox {
+        margin: 0 !important;
+        padding: 0 !important;
+        height: calc(100vh - 44px) !important;
+        width: 100% !important;
+        overflow: hidden !important;
+    }
+
     #scorm_layout,
     #scorm_content {
         margin: 0 !important;
         padding: 0 !important;
-        height: 100vh !important;
+        height: 100% !important;
         width: 100% !important;
         overflow: hidden !important;
     }
@@ -338,19 +344,15 @@ body#page-mod-scorm-player {
         display: none !important;
     }
 
-    // Нижняя панель навигации SCORM (НАЗАД / ДАЛЕЕ) — фиксируем внизу экрана,
-    // т.к. #tocbox с height:100vh выталкивает её за пределы viewport
+    // Нижняя панель НАЗАД/ДАЛЕЕ — в потоке (не fixed), занимает оставшиеся 44px
     #scorm_nav {
-        position: fixed !important;
-        bottom: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        z-index: 9998 !important;
-        background: rgba(0, 0, 0, 0.72) !important;
-        padding: 6px 16px !important;
+        position: static !important;
+        height: 44px !important;
+        background: rgba(0, 0, 0, 0.82) !important;
+        padding: 0 16px !important;
         display: flex !important;
-        justify-content: space-between !important;
         align-items: center !important;
+        justify-content: space-between !important;
 
         .btn {
             font-family: 'IBM Plex Mono', monospace !important;
@@ -364,12 +366,6 @@ body#page-mod-scorm-player {
 
             &:hover { background: rgba(255, 255, 255, 0.25) !important; }
         }
-    }
-
-    // Оставляем место для фиксированной панели навигации снизу
-    #scorm_layout,
-    #scorm_content {
-        height: calc(100vh - 44px) !important;
     }
 }
 
