@@ -283,3 +283,61 @@ body {
     letter-spacing: 0.1em;
     text-transform: uppercase;
 }
+
+// ── SCORM-ПЛЕЕР: ПОЧТИ FULLSCREEN ─────────────────────────────
+// Скрываем хром Moodle на странице плеера, курс занимает весь
+// вьюпорт. Кнопка true-fullscreen — theme/geocore/javascript/scorm-fullscreen.js
+body#page-mod-scorm-player {
+    .navbar,
+    #page-header,
+    .secondary-navigation,
+    .drawer-toggles,
+    #page-footer,
+    #theme_boost-drawers-courseindex,
+    #theme_boost-drawers-blocks {
+        display: none !important;
+    }
+
+    #page,
+    #page-content,
+    #region-main-box,
+    #region-main {
+        margin: 0 !important;
+        padding: 0 !important;
+        max-width: none !important;
+    }
+
+    #page-content,
+    #region-main-box,
+    #region-main {
+        min-height: 100vh;
+    }
+
+    // Панель выхода + кнопка fullscreen — плавающий оверлей в углу
+    .geocore-scorm-exitbar {
+        position: fixed;
+        top: 8px;
+        right: 8px;
+        z-index: 10000;
+        margin: 0 !important;
+        gap: 8px;
+
+        .btn {
+            border-radius: 0 !important;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+    }
+
+    .geocore-scorm-fullscreen-btn {
+        background: $gold !important;
+        border-color: $gold !important;
+        color: #0A0A0B !important;
+
+        &:hover {
+            background: $gold-light !important;
+        }
+    }
+}

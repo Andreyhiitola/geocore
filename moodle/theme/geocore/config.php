@@ -15,3 +15,6 @@ $THEME->rendererfactory = 'theme_overridden_renderer_factory';
 
 // Подключаем наш SCSS поверх Boost
 $THEME->extrascsscallback = 'theme_geocore_get_extra_scss';
+
+// Кнопка fullscreen для SCORM-плеера (theme/geocore/javascript/scorm-fullscreen.js)
+$THEME->javascripts_footer = ['scorm-fullscreen'];
