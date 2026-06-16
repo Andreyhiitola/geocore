@@ -311,6 +311,8 @@ body#page-mod-scorm-player {
         padding: 0 !important;
         max-width: 100% !important;
         width: 100% !important;
+        height: 100vh !important;
+        overflow: hidden !important;
     }
 
     // SCORM-дерево: оставляем 44px снизу для #scorm_nav (в потоке, не fixed)
