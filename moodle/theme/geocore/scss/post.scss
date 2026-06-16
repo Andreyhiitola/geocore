@@ -361,6 +361,40 @@ body#page-mod-scorm-player {
     #scorm_toc {
         display: none !important;
     }
+
+    // Нижняя панель навигации SCORM (НАЗАД / ДАЛЕЕ) — фиксируем внизу экрана,
+    // т.к. #tocbox с height:100vh выталкивает её за пределы viewport
+    #scorm_nav {
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        z-index: 9998 !important;
+        background: rgba(0, 0, 0, 0.72) !important;
+        padding: 6px 16px !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+
+        .btn {
+            font-family: 'IBM Plex Mono', monospace !important;
+            font-size: 11px !important;
+            letter-spacing: 0.1em !important;
+            text-transform: uppercase !important;
+            border-radius: 0 !important;
+            background: rgba(255, 255, 255, 0.12) !important;
+            border-color: transparent !important;
+            color: #fff !important;
+
+            &:hover { background: rgba(255, 255, 255, 0.25) !important; }
+        }
+    }
+
+    // Оставляем место для фиксированной панели навигации снизу
+    #scorm_layout,
+    #scorm_content {
+        height: calc(100vh - 44px) !important;
+    }
 }
 
 // В режиме fullscreen SCORM-дерево растягивается на весь экран
