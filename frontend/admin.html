@@ -1144,10 +1144,13 @@ async function markPaid() {
 function accountsTable(accounts) {
   const rows = accounts.map((a, i) => `
     <tr>
-      <td>${esc(a.username)}</td>
+      <td>${esc(a.username)}
+        <button class="pwd-toggle" onclick="copyText('${esc(a.username)}',this)" title="Копировать логин">📋</button>
+      </td>
       <td>
         <span id="pwd-${i}" style="letter-spacing:.1em">••••••••••••</span>
         <button class="pwd-toggle" onclick="togglePwd(${i},'${esc(a.password)}')" title="Показать/скрыть">👁</button>
+        <button class="pwd-toggle" onclick="copyText('${esc(a.password)}',this)" title="Копировать пароль">📋</button>
       </td>
     </tr>`).join('');
   return `<table class="accounts-tbl">
@@ -1160,6 +1163,13 @@ function togglePwd(i, pwd) {
   const hidden = el.textContent.startsWith('•');
   el.textContent = hidden ? pwd : '••••••••••••';
   el.style.letterSpacing = hidden ? 'normal' : '.1em';
+}
+function copyText(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = '✓';
+    setTimeout(() => { btn.textContent = orig; }, 1000);
+  }).catch(() => showToast('Не удалось скопировать', 'err'));
 }
 
 async function extendAccess() {
