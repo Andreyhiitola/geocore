@@ -36,6 +36,10 @@
 - После сборки — SSH деплой на VPS
 - Секреты в GitHub: 5 штук (DockerHub credentials + VPS SSH)
 
+**Гоча (обнаружено 22.06.2026) — зелёный CI ≠ задеплоено для образа Moodle:** `deploy`-job делает `docker compose pull` сразу (~20с) после того, как `build-moodle` запушил новый образ на Docker Hub под тегом `geocore-moodle:5.1.4` (версия, не `latest` — фиксируется в `env.MOODLE_VERSION` workflow-файла). `docker compose pull` может подтянуть СТАРЫЙ digest этого тега — похоже на задержку распространения свежего пуша по CDN Docker Hub (минута-две). Тогда `docker compose up -d moodle` решает, что пересоздавать контейнер не нужно (лог покажет `Container geocore_moodle Running`, а не `Recreate`), и прод остаётся на старой версии при полностью зелёном workflow.
+
+Проверка: сравнить `docker inspect geocore_moodle --format '{{.Image}}'` на VPS с полем `digest` из публичного API `https://hub.docker.com/v2/repositories/andreysagurov/geocore-moodle/tags/5.1.4` (без авторизации). Если не совпадают — подождать пару минут и повторить `docker compose pull moodle && docker compose up -d moodle --remove-orphans` вручную.
+
 ## SSL
 
 - Let's Encrypt через certbot на хосте VPS
