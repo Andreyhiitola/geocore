@@ -298,7 +298,16 @@ body#page-mod-scorm-player {
     .activity-header,
     #page-activity-header,
     .tertiary-navigation,
-    header.activity-header {
+    header.activity-header,
+    // Заголовок активности (<h2>) рисуется встроенной "embedded"-вёрсткой
+    // отдельно от .activity-header, который мы уже прячем выше — без этого
+    // правила он съедал ~37px над #scormpage, на которые height:100vh ниже
+    // не делает поправку, и низ SCORM-плеера всегда уезжал за экран.
+    section.embedded-main > h2,
+    // Кнопка-тоггл бокового меню "Содержание" — само меню (#scorm_toc)
+    // прячем ниже, но без скрытия тоггла он всё равно занимает ~34px и
+    // сдвигает #scorm_content вниз на то же расстояние.
+    #scorm_toc_toggle {
         display: none !important;
     }
 
