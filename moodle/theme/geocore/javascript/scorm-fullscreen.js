@@ -1,8 +1,8 @@
 // GeoCore Academy — fullscreen для SCORM-плеера.
-// CSS скрывает хром Moodle, JS пересчитывает высоту iframe и вписывает
-// контент CourseLab (фиксированная пиксельная вёрстка) в реальный размер
-// iframe — иначе нижний тулбар SCORM-курса уезжает за видимую область
-// на экранах, где он выше доступной высоты.
+// CSS скрывает хром Moodle, JS вписывает контент CourseLab (фиксированная
+// пиксельная вёрстка) в реальный размер iframe — иначе нижний тулбар
+// SCORM-курса уезжает за видимую область на экранах, где он выше
+// доступной высоты.
 (function() {
     if (document.body.id !== 'page-mod-scorm-player') {
         return;
@@ -10,27 +10,17 @@
 
     var lastIframe = null;
 
-    // scrollWidth/scrollHeight ненадёжны: у CourseLab часто overflow:hidden
-    // на body, и scrollHeight показывает обрезанный (видимый) размер, а не
-    // настоящую высоту вёрстки. Поэтому меряем по реальным координатам
-    // элементов — getBoundingClientRect не зависит от overflow родителя.
-    function measureNatural(doc) {
-        var maxRight = 0, maxBottom = 0;
-        var all = doc.body.getElementsByTagName('*');
-        for (var i = 0; i < all.length; i++) {
-            var r = all[i].getBoundingClientRect();
-            if (r.right > maxRight) { maxRight = r.right; }
-            if (r.bottom > maxBottom) { maxBottom = r.bottom; }
-        }
-        return [maxRight, maxBottom];
-    }
-
-    // CourseLab-курсы внутри одного SCO часто устроены как одна HTML-страница
-    // с десятками слайдов (показ/скрытие div'ов через JS), у каждого слайда
-    // может быть своя высота — поэтому "натуральный" размер нельзя смерить
-    // один раз и закэшировать навсегда, измеряем каждый раз заново. Чтобы не
-    // сбрасывать transform на 'none' (это даёт видимый мерцающий скачок),
-    // снимаем уже отмасштабированные координаты и делим на предыдущий scale.
+    // CourseLab верстает каждый слайд как .cl-container фиксированного
+    // размера (обычно 1440x900), который сам себя центрирует через
+    // position:absolute + отрицательный margin на 50%/50% относительно
+    // body — и это не меняется ни от слайда, ни от размера окна.
+    // offsetWidth/offsetHeight — это размер ДО применения transform (в
+    // отличие от getBoundingClientRect, который раньше использовался: он
+    // показывает экранные координаты ПОСЛЕ transform и центрирования, а
+    // те зависят от текущего размера body/iframe — на разных мониторах
+    // получался разный и порой завышенный "естественный" размер, из-за
+    // чего контент мог вылезать за пределы iframe вместо того, чтобы
+    // вписаться в него.
     function fitScoContent(iframe) {
         var doc;
         try {
@@ -38,14 +28,15 @@
         } catch (e) {
             return; // другой origin — не наш случай, но не должно ронять страницу
         }
-        if (!doc || !doc.body) {
+        if (!doc) {
             return;
         }
-        var body = doc.body;
-        var prevScale = parseFloat(body.dataset.geocoreScale) || 1;
-        var natural = measureNatural(doc);
-        var naturalW = natural[0] / prevScale;
-        var naturalH = natural[1] / prevScale;
+        var stage = doc.querySelector('.cl-container');
+        if (!stage) {
+            return;
+        }
+        var naturalW = stage.offsetWidth;
+        var naturalH = stage.offsetHeight;
         if (!naturalW || !naturalH) {
             return;
         }
@@ -53,15 +44,10 @@
         if (!isFinite(scale) || scale <= 0) {
             return;
         }
-        body.dataset.geocoreScale = scale;
-        body.style.transformOrigin = 'top center';
-        // Ширина в px (не в %) — чтобы сам пересчёт scale не меняв layout
-        // не вызывал реflow текста, а тот не менял naturalH на следующем тике
-        // (иначе scale и высота контента гоняют друг друга по кругу).
-        body.style.width = naturalW + 'px';
-        body.style.margin = '0 auto';
-        body.style.transform = 'scale(' + scale + ')';
-        body.style.overflow = 'hidden';
+        // .cl-container уже центрирован сам по себе (см. выше) — transform
+        // с дефолтным transform-origin (центр) масштабирует его на месте,
+        // без сдвигов и без правок body/margin.
+        stage.style.transform = 'scale(' + scale + ')';
     }
 
     function onResize() {
