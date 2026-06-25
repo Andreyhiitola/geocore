@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Инструменты Datamine для классификации минеральных ресурсов по JORC — GeoCore Academy</title>
+<meta name="description" content="Обзор инструментов Datamine для классификации минеральных ресурсов по кодексу JORC: от ручного оконтуривания разведочных сетей до геостатистических методов на основе Conditional Simulation.">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --gold:#C9A84C; --gold-light:#E8C97A; --gold-dim:#7A6230;
+  --dark:#0A0A0B; --dark-2:#111114; --dark-3:#18181D; --dark-4:#1F1F26;
+  --surface:#252530; --text:#E8E6DE; --text-muted:#9A9890; --text-dim:#5C5B56;
+  --border:rgba(201,168,76,0.18); --border-dim:rgba(255,255,255,0.07);
+  --red:#8B3A2A; --green:#2a5a2a;
+}
+html{scroll-behavior:smooth;}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--dark);color:var(--text);line-height:1.7;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.3;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:64px;background:rgba(10,10,11,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.logo-hex{width:28px;height:28px;background:var(--gold);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);}
+.logo-text{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--text);}
+.logo-text span{color:var(--gold);}
+.nav-back{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);text-decoration:none;display:flex;align-items:center;gap:8px;transition:color .2s;}
+.nav-back:hover{color:var(--gold);}
+.nav-cta{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dark);background:var(--gold);padding:9px 20px;text-decoration:none;clip-path:polygon(7px 0%,100% 0%,calc(100% - 7px) 100%,0% 100%);}
+.nav-cta:hover{background:var(--gold-light);}
+
+/* ARTICLE LAYOUT */
+.art-wrap{max-width:780px;margin:0 auto;padding:120px 24px 80px;}
+
+/* HEADER */
+.art-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:10px;margin-bottom:20px;}
+.art-label::before{content:'';width:32px;height:1px;background:var(--gold);}
+h1.art-title{font-family:'Playfair Display',serif;font-size:clamp(32px,4vw,52px);font-weight:900;line-height:1.1;margin-bottom:20px;}
+.art-sub{font-size:17px;font-weight:300;line-height:1.75;color:var(--text-muted);margin-bottom:40px;border-left:3px solid var(--gold);padding-left:20px;}
+.art-meta{display:flex;gap:24px;align-items:center;flex-wrap:wrap;padding:20px 0;border-top:1px solid var(--border-dim);border-bottom:1px solid var(--border-dim);margin-bottom:56px;}
+.art-meta-item{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);}
+.art-meta-item strong{color:var(--text-muted);}
+.art-tag{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold-dim);padding:3px 8px;}
+
+/* BODY */
+.art-body h2{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;line-height:1.2;margin:56px 0 20px;color:var(--text);}
+.art-body h3{font-family:'Playfair Display',serif;font-size:21px;font-weight:700;margin:40px 0 16px;color:var(--text);}
+.art-body h4{font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:.06em;font-weight:500;margin:32px 0 14px;color:var(--gold-light);}
+.art-body p{font-size:16px;font-weight:300;line-height:1.8;color:var(--text-muted);margin-bottom:20px;}
+.art-body strong{color:var(--text);font-weight:600;}
+.art-body em{color:var(--text-muted);font-style:italic;}
+.art-body ul,.art-body ol{margin:0 0 20px;padding-left:22px;color:var(--text-muted);font-size:16px;font-weight:300;line-height:1.8;}
+.art-body ul ul,.art-body ol ol,.art-body ul ol,.art-body ol ul{margin:8px 0 8px;}
+.art-body li{margin-bottom:8px;}
+.art-body li::marker{color:var(--gold-dim);}
+
+/* PROS/CONS GRID */
+.pc-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:28px 0;}
+.pc-card{background:var(--dark-3);border:1px solid var(--border-dim);padding:22px 24px;}
+.pc-card h4{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;margin:0 0 14px;color:var(--gold);letter-spacing:0;}
+.pc-card.plus{border-left:3px solid #5a8a5a;}
+.pc-card.minus{border-left:3px solid #8B3A2A;}
+.pc-card ul{margin:0;padding-left:18px;font-size:14px;}
+.pc-card li{margin-bottom:10px;}
+
+/* FIGURES */
+.art-fig{margin:32px 0;}
+.art-fig img{width:100%;display:block;background:#fff;border:1px solid var(--border-dim);border-radius:2px;}
+.art-fig figcaption{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.04em;color:var(--text-dim);margin-top:10px;text-align:center;}
+.fig-pair{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:32px 0;}
+.fig-pair .art-fig{margin:0;}
+
+/* INFO BOX */
+.info-box{background:var(--dark-3);border:1px solid var(--border-dim);padding:24px;margin:32px 0;position:relative;}
+.info-box::before{content:'JORC';position:absolute;top:-10px;left:20px;font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.15em;color:var(--text-dim);background:var(--dark-3);padding:0 8px;}
+.info-box p{margin:0;}
+
+/* HIGHLIGHT BOX */
+.highlight{background:var(--dark-3);border:1px solid var(--border);border-left:3px solid var(--gold);padding:24px 28px;margin:36px 0;}
+.highlight p{margin:0;color:var(--text-muted);}
+.highlight strong{color:var(--text);}
+
+/* CTA BOX */
+.cta-box{background:var(--dark-4);border:1px solid var(--border);padding:40px;margin:56px 0;text-align:center;}
+.cta-box h3{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;margin-bottom:16px;}
+.cta-box p{font-size:15px;font-weight:300;color:var(--text-muted);margin-bottom:28px;max-width:520px;margin-left:auto;margin-right:auto;}
+.cta-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+.btn-p{display:inline-flex;align-items:center;gap:9px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dark);background:var(--gold);padding:14px 30px;text-decoration:none;clip-path:polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%);transition:all .2s;}
+.btn-p:hover{background:var(--gold-light);}
+.btn-s{display:inline-flex;align-items:center;gap:9px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);border:1px solid var(--border);padding:14px 30px;text-decoration:none;transition:all .2s;}
+.btn-s:hover{border-color:var(--gold);color:var(--gold);}
+
+/* FOOTER */
+footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:40px 48px;display:flex;justify-content:space-between;align-items:center;}
+.f-copy{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.07em;color:var(--text-dim);}
+.f-back{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);text-decoration:none;}
+.f-back:hover{color:var(--gold-light);}
+
+/* REVEAL */
+.rv{opacity:0;transform:translateY(24px);transition:opacity .65s ease,transform .65s ease;}
+.rv.vis{opacity:1;transform:none;}
+
+body.light{--dark:#F5F4F0;--dark-2:#ECEAE3;--dark-3:#E4E2D9;--dark-4:#D9D7CE;--surface:#DEDAD0;--text:#1A1916;--text-muted:#4A4840;--text-dim:#8A8880;--border:rgba(201,168,76,0.30);--border-dim:rgba(0,0,0,0.10);}
+body.light nav{background:rgba(245,244,240,.92);}
+.theme-btn{background:none;border:1px solid var(--border-dim);color:var(--text-muted);width:34px;height:34px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;}
+.theme-btn:hover{border-color:var(--gold);color:var(--gold);}
+@media(max-width:768px){
+  nav{padding:0 20px;}.nav-back span{display:none;}
+  .pc-grid{grid-template-columns:1fr;}
+  .fig-pair{grid-template-columns:1fr;}
+  footer{flex-direction:column;gap:16px;text-align:center;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="../index.html" class="nav-logo">
+    <div class="logo-hex"></div>
+    <span class="logo-text">Geo<span>Core</span></span>
+  </a>
+  <a href="../index.html#blog" class="nav-back">← <span>Назад к статьям</span></a>
+  <button class="theme-btn" id="themeBtn">🌙</button>
+  <a href="../index.html#sandbox" class="nav-cta">Попробовать симулятор</a>
+</nav>
+
+<div class="art-wrap">
+
+  <!-- HEADER -->
+  <div class="rv">
+    <div class="art-label">Методика · Datamine · JORC</div>
+    <h1 class="art-title">Инструменты Datamine для классификации минеральных ресурсов согласно кодексу JORC</h1>
+    <p class="art-sub">От ручного оконтуривания разведочных сетей до геостатистических методов на основе Conditional Simulation — обзор подходов к классификации Measured / Indicated / Inferred, которые предлагает Datamine.</p>
+    <div class="art-meta">
+      <div class="art-meta-item"><strong>14</strong> мин чтения</div>
+      <div class="art-meta-item"><strong>К.В. Борцов</strong></div>
+      <div class="art-meta-item"><strong>2026</strong></div>
+      <span class="art-tag">Datamine</span>
+      <span class="art-tag">JORC</span>
+      <span class="art-tag">Блочная модель</span>
+      <span class="art-tag">Геостатистика</span>
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div class="art-body">
+
+    <p class="rv">Программное обеспечение Datamine — профессиональный комплекс решений для горнодобывающей промышленности и геологоразведки: трёхмерное моделирование месторождений, подсчёт запасов полезных ископаемых, проектирование и планирование горных работ. Сегодня Datamine — один из лидеров среди ПО для горнодобывающих компаний, в том числе для оценки минеральных ресурсов и рудных запасов.</p>
+
+    <h2 class="rv">Кодекс JORC и его ключевое слово</h2>
+    <p class="rv"><em>JORC — Объединённый комитет по рудным запасам Австралазии (Joint Ore Reserves Committee).</em> Австралазиатский кодекс отчётности о результатах разведки, минеральных ресурсах и запасах руды («Кодекс JORC») устанавливает минимальные стандарты, рекомендации и принципы публичной отчётности о результатах разведки, минеральных ресурсах и запасах руды в Австралазии. Комитет был учреждён в 1971 году, первое издание Кодекса опубликовано в 1989 году; переработанные издания выходили в 1992, 1996, 1999 и 2004 годах, действующее издание 2012 года замещает все предыдущие.</p>
+    <p class="rv">Кодекс принят Австралазиатским институтом горного дела и металлургии (AusIMM) и Австралийским институтом геологов и геофизиков (AIG), обязателен для членов этих организаций и включён в правила листинга Австралийской биржи ценных бумаг (ASX) и Новозеландской фондовой биржи (NZX). Сегодня JORC — общепризнанный в мире стандарт публичной отчётности, принимаемый на большинстве бирж.</p>
+    <p class="rv">Причина создания Кодекса — экономические потери инвесторов из-за использования некачественной, иногда сфальсифицированной отчётности о геологических запасах. Его цель — обеспечить приемлемый уровень достоверности отчётности для инвестирования в разработку месторождений твёрдых полезных ископаемых.</p>
+
+    <div class="highlight rv">
+      <p><strong>Основная цель Кодекса JORC:</strong> подготовка достоверной публичной отчётности о результатах разведки, минеральных ресурсах и запасах руды, не содержащей искажений, которые могут повлиять на мнение инвесторов и оценку месторождения. Ключевое слово — <strong>достоверность</strong>.</p>
+    </div>
+
+    <h2 class="rv">Достоверность оценки: от чего она зависит</h2>
+    <p class="rv">Достоверность оценки определяется двумя факторами:</p>
+    <ul class="rv">
+      <li><strong>детальностью разведочных работ</strong> — плотностью разведочной сети;</li>
+      <li><strong>сложностью морфологии месторождения</strong> и минерализации.</li>
+    </ul>
+
+    <figure class="art-fig rv">
+      <img src="img/datamine-jorc/fig01-dostovernost-sravnenie.png" alt="Сравнение разведочной сети простого и сложного месторождения" loading="lazy">
+      <figcaption>Слева — сложная морфология рудного тела при плотной сети скважин, справа — простая морфология при разреженной сети.</figcaption>
+    </figure>
+
+    <p class="rv">Степень достоверности оценки и категория по Кодексу JORC у обоих месторождений будет одинакова — <strong>Measured</strong> (оба разведаны настолько, что бурение дополнительных скважин не даст существенной новой информации), но для сложного месторождения это достигнуто гораздо более детальной разведочной сетью.</p>
+
+    <p class="rv"><strong>Классический классификационный признак достоверности оценки геологических запасов — соотношение сложности месторождения и плотности (шага) разведочной сети.</strong> Пример — рекомендации ГКЗ о том, какая разведочная сеть нужна для какой категории запасов при заданной категории сложности месторождения. В Кодексе JORC формальных рекомендаций нет, тот же принцип применяется через профессиональное суждение Компетентного Лица.</p>
+
+    <p class="rv"><strong>Идеальная метрика достоверности — погрешность оценки минеральных ресурсов.</strong> Она требует привлечения более сложных математических инструментов и сейчас является наиболее передовой практикой классификации по Кодексу JORC.</p>
+
+    <p class="rv">Datamine предоставляет широкий набор инструментов для классификации минеральных ресурсов по кодексу JORC:</p>
+
+    <figure class="art-fig rv">
+      <img src="img/datamine-jorc/fig02-datamine-metody-shema.png" alt="Схема методов классификации ресурсов по JORC в Datamine: по разведочной сети и по геостатистике" loading="lazy">
+      <figcaption>Дерево методов классификации в Datamine: по разведочной сети и по геостатистике.</figcaption>
+    </figure>
+
+    <h2 class="rv">Плюсы и минусы двух семейств подходов</h2>
+
+    <h3 class="rv">Методы, основанные на разведочной сети</h3>
+    <div class="pc-grid rv">
+      <div class="pc-card plus">
+        <h4>Плюсы</h4>
+        <ul>
+          <li>Более понятны геологу, не требуют подготовки в применении продвинутых математических методов</li>
+          <li>Богатая практика, апробированы десятилетиями</li>
+          <li>Проще в исполнении, меньше риска «заумных» ошибок от некорректного применения</li>
+          <li>Для геолога из стран СНГ есть «подсказка» — рекомендации ГКЗ, которые приветствуют и западные геологи</li>
+        </ul>
+      </div>
+      <div class="pc-card minus">
+        <h4>Минусы</h4>
+        <ul>
+          <li>Оценка категории сложности месторождения и выбор разведочной сети — довольно субъективный момент без математически обоснованных количественных критериев</li>
+          <li>Морально устаревший подход в эпоху продвинутых математических инструментов</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 class="rv">Методы, основанные на геостатистике</h3>
+    <div class="pc-grid rv">
+      <div class="pc-card plus">
+        <h4>Плюсы</h4>
+        <ul>
+          <li>Автоматически учитывают соотношение разведочной сети и сложности месторождения</li>
+          <li>Основаны на прямой количественной оценке показателей достоверности, меньше доля субъективных оценок</li>
+          <li>Классификация по погрешности оценки МР применима и для оценки экономических рисков на разных участках месторождения</li>
+          <li>Используют продвинутые математические инструменты — выше достоверность</li>
+        </ul>
+      </div>
+      <div class="pc-card minus">
+        <h4>Минусы</h4>
+        <ul>
+          <li>Требуют специальной подготовки геолога в геостатистике</li>
+          <li>Серьёзный риск некорректного применения — нужны опыт и мастерство</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="info-box rv">
+      <p>Методы по разведочной сети всё так же популярны, но обычно используют функции ГГИС — например, подход с количеством скважин и проб, попавших в эллипсоид поиска при интерполяции. Из геостатистических подходов наиболее распространена классификация по <strong>Slope of Regression</strong>, рассчитанному по KNA (Kriging Neighbourhood Analysis). Менее распространён, но наиболее перспективен метод на основе расчёта относительной погрешности — он применяется, например, на руднике Куяба (Бразилия). Способ компенсировать недостатки разных подходов — их сопоставление и комбинирование для итоговой классификации по Кодексу JORC.</p>
+    </div>
+
+    <h2 class="rv">1. Методы классификации по разведочной сети</h2>
+
+    <h3 class="rv">1.a. Ручное оконтуривание областей разных стадий разведки</h3>
+    <p class="rv">Обычно эксплуатационная разведка обеспечивает класс <strong>Measured</strong>, детальная разведка — класс <strong>Indicated</strong>, более ранние стадии разведки — класс <strong>Inferred</strong>. Это не всегда так, но к этому обычно стремятся.</p>
+    <p class="rv">Альтернативный геостатистический подход к определению разведочных сетей для классификации по JORC: расстояние между буровыми профилями 1/2–2/3 зоны влияния вариограммы соответствует классу Measured (наиболее высокая точность оценки содержаний в окрестных ячейках); расстояние, равное зоне влияния вариограммы, — классу Indicated (удовлетворительная точность); если расстояние больше, сеть регулярна и «так решил геолог» — классу Inferred (наименьший уровень достоверности).</p>
+    <p class="rv">Так или иначе, для каждого класса минеральных ресурсов по JORC (Measured, Indicated, Inferred) определяются разведочные сети, области разведки по этим сетям оконтуриваются вручную, строятся их каркасные модели, и ячейки внутри этих моделей получают соответствующий класс минеральных ресурсов.</p>
+
+    <h4 class="rv">Пример: геометризация зоны Measured</h4>
+    <p class="rv">Строим каркасы области эксплуатационной разведки: сперва по нескольким разрезам крутим стринги, потом линкуем их в замкнутый каркас. Делаем стринги — контура вокруг скважин и горных выработок.</p>
+
+    <figure class="art-fig rv">
+      <img src="img/datamine-jorc/fig03-stringi-kontury.png" alt="Стринги — контура вокруг скважин для зоны Measured" loading="lazy">
+      <figcaption>Контура (стринги) вокруг скважин и горных выработок зоны эксплуатационной разведки.</figcaption>
+    </figure>
+
+    <p class="rv">По контурам зон эксплуатационной разведки строим каркасные модели, по которым кодируем в блочной модели ячейки кодом класса Measured.</p>
+
+    <figure class="art-fig rv">
+      <img src="img/datamine-jorc/fig04-karkasy-measured.png" alt="Каркасные модели зоны Measured и кодирование ячеек блочной модели" loading="lazy">
+      <figcaption>Каркасная модель зоны Measured и кодирование ячеек блочной модели.</figcaption>
+    </figure>
+
+    <p class="rv">Аналогично строим каркасную модель для области разведочной сети детальной разведки (класс Indicated) и более ранних стадий разведки и оценочных работ (класс Inferred). В результате каждая ячейка блочной модели получает класс минеральных ресурсов согласно кодексу JORC:</p>
+
+    <figure class="art-fig rv">
+      <img src="img/datamine-jorc/fig05-blochnaya-model-klassy.png" alt="Итоговая блочная модель с классами Measured, Indicated, Inferred" loading="lazy">
+      <figcaption>Итоговая блочная модель с классами Measured / Indicated / Inferred.</figcaption>
+    </figure>
+
+    <h3 class="rv">1.b. Автоматическое формирование зон разных разведочных сетей</h3>
+    <p class="rv">Процесс распознавания разных разведочных сетей можно автоматизировать с использованием процесса <strong>ESTIMATE</strong> и специально настроенных параллелепипедов поиска. Основная идея: параллелепипед для конкретной разведочной сети должен иметь стороны, более чем в два раза превышающие расстояние между скважинами в соответствующем направлении.</p>
+
+    <figure class="art-fig rv">
+      <img src="img/datamine-jorc/fig06-parallelepiped-poiska.png" alt="Параллелепипед поиска для распознавания разведочной сети" loading="lazy">
+      <figcaption>Параллелепипед поиска, настроенный под конкретную разведочную сеть.</figcaption>
+    </figure>
+
+    <p class="rv">В параллелепипед попадает от 4 до 9 скважин/выработок данной разведочной сети. В процессе интерполяции считается число скважин, попавших в параллелепипед: если не менее четырёх — это целевая разведочная сеть или более плотная. Это позволяет для каждой ячейки определить, какая разведочная сеть в её окрестности, без ручной отрисовки зон, автоматически.</p>
+
+    <figure class="art-fig rv">
+      <img src="img/datamine-jorc/fig07-avtomaticheskoe-zonirovanie.png" alt="Пример результатов автоматического распознавания разведочных сетей" loading="lazy">
+      <figcaption>Пример результатов автоматического распознавания разных разведочных сетей.</figcaption>
+    </figure>
+
+    <h3 class="rv">1.c. По количеству скважин и проб, попавших в эллипсоид поиска при интерполяции</h3>
+    <p class="rv">Количество скважин и проб, попавших в эллипсоид при интерполяции, также даёт информацию о достоверности оценки содержаний в ячейках блочной модели и часто используется как критерий классификации по кодексу JORC.</p>
+
+    <figure class="art-fig rv">
+      <img src="img/datamine-jorc/fig08-kolichestvo-skvazhin.png" alt="Количество скважин и проб, попавших в эллипсоид поиска" loading="lazy">
+      <figcaption>Количество скважин и проб, попавших в эллипсоид поиска при интерполяции.</figcaption>
+    </figure>
+
+    <p class="rv">Пример обоснованных Компетентной Персоной правил классификации по кодексу JORC:</p>
+    <ul class="rv">
+      <li>Категория <strong>Measured</strong> — для интерполяции использовано не менее <strong>7 скважин</strong> и не менее <strong>15 проб</strong> в эллипсоиде. В Measured попадают верхние, хорошо разведанные эксплуатационной и детальной разведкой горизонты, где дополнительная детализация уже мало что добавит.</li>
+      <li>Категория <strong>Indicated</strong> — использовано от <strong>4 до 6 скважин</strong>, не менее 15 проб. Качество интерполяции приемлемо.</li>
+      <li>Категория <strong>Inferred</strong> — использовано <strong>3 и менее скважин</strong>. На таком количестве информации сложно провести достаточно достоверную интерполяцию; эти участки требуют доразведки.</li>
+    </ul>
+
+    <figure class="art-fig rv">
+      <img src="img/datamine-jorc/fig09-klassifikaciya-po-skvazhinam.png" alt="Пример классификации минеральных ресурсов по количеству скважин и проб" loading="lazy">
+      <figcaption>Пример классификации по количеству скважин и проб, попавших в эллипсоид поиска.</figcaption>
+    </figure>
+
+    <h2 class="rv">2. Методы классификации по геостатистике</h2>
+
+    <h3 class="rv">2.a. По номеру эллипсоида поиска</h3>
+    <p class="rv">В Datamine можно использовать три эллипсоида поиска:</p>
+    <ul class="rv">
+      <li><strong>Базовый</strong> — для класса Measured радиусы берутся равными 1/2–1/3 зон влияния по вариограммам по направлениям анизотропии. Так отбираются наиболее информативные пробы для интерполяции в ячейку блочной модели.</li>
+      <li><strong>Второй динамический</strong> — для класса Indicated радиусы равны зоне влияния по вариограммам по направлениям анизотропии. Отбираются пробы с удовлетворительной информативностью.</li>
+      <li><strong>Третий динамический</strong> — для класса Inferred радиусы равны 1.5–2 шага наиболее разреженной регулярной разведочной сети.</li>
+    </ul>
+
+    <figure class="art-fig rv">
+      <img src="img/datamine-jorc/fig10-tri-ellipsoida.png" alt="Три эллипсоида поиска для классов Measured, Indicated, Inferred" loading="lazy">
+      <figcaption>Три эллипсоида поиска, соответствующие классам Measured / Indicated / Inferred.</figcaption>
+    </figure>
+
+    <h3 class="rv">2.b. По параметрам Kriging Neighbourhood Analysis</h3>
+    <p class="rv">Основной параметр KNA для классификации по кодексу JORC — <strong>Slope of Regression</strong>, коэффициент регрессионного уравнения между исходными содержаниями в пробах и интерполированными значениями.</p>
+
+    <figure class="art-fig rv">
+      <img src="img/datamine-jorc/fig11-slope-of-regression.png" alt="Slope of Regression — коэффициент регрессии между фактическими и интерполированными содержаниями" loading="lazy">
+      <figcaption>Slope of Regression: коэффициент регрессии между фактическими и интерполированными содержаниями.</figcaption>
+    </figure>
+
+    <p class="rv">Методы линейной интерполяции содержаний основаны на формуле среднего взвешенного для проб, попавших в поисковый объём. Из-за этого наблюдается эффект завышения содержаний для бедных руд и занижения для богатых: в окрестности бедных руд есть руды с более высокими содержаниями (завышение при интерполяции), а в окрестности богатых руд — руды с более низкими содержаниями (занижение).</p>
+    <p class="rv">Коэффициент регрессионного уравнения между реальными и интерполированными содержаниями равен тангенсу угла наклона линии регрессии — отсюда термин Slope of Regression (или Line of Regression). Этот параметр можно рассчитать в Datamine при интерполяции.</p>
+
+    <div class="info-box rv">
+      <p>При отсутствии искажения содержаний при интерполяции Slope of Regression равен 1 (угол линии регрессии 45°). При искажении содержаний коэффициент меньше единицы — и чем он меньше, тем выше степень искажения. Существенные искажения приводят к серьёзным ошибкам в горном проектировании выемочных единиц: блочная модель покажет высокие содержания на участках бедной руды, а участки богатой руды небольшой мощности могут перейти в разряд рядовой или бедной руды.</p>
+    </div>
+
+    <p class="rv">Пример классификации минеральных ресурсов по Slope of Regression (границы параметра для классификации определены Компетентной Персоной):</p>
+
+    <figure class="art-fig rv">
+      <img src="img/datamine-jorc/fig12-klassifikaciya-sor.png" alt="Пример классификации минеральных ресурсов по Slope of Regression" loading="lazy">
+      <figcaption>Классификация минеральных ресурсов по границам параметра Slope of Regression.</figcaption>
+    </figure>
+
+    <h3 class="rv">2.c. По относительной погрешности оценки на основе Conditional Simulation</h3>
+    <p class="rv">Содержание в любой ячейке и минеральные ресурсы любого участка месторождения подсчитываются с определённой погрешностью. Фактически погрешность оценки минеральных ресурсов и является лучшей метрикой их достоверности и основой классификации по кодексу JORC.</p>
+    <p class="rv">Погрешность оценки — по ячейке, выемочной единице, рудной залежи, месторождению в целом или любому локальному объёму — можно оценить с помощью геостатистического стохастического <strong>Условного Моделирования (Conditional Simulation, CS)</strong>. Идея: в каждой ячейке блочной модели генерируются случайные содержания согласно дисперсии кригинга. Методом последовательного гауссова моделирования на основе Монте-Карло случайным образом генерируется набор (обычно от 21 до 101) эквивалентных по достоверности блочных моделей, отображающих возможную вариацию истинного распределения минерализации.</p>
+    <p class="rv">Для любого объёма мы получаем от 21 до 101 варианта оценки минеральных ресурсов, по которым можно посчитать погрешность оценки и использовать её как классификационный критерий категорий МР по Кодексу JORC — Measured, Indicated, Inferred (чем меньше относительная погрешность, тем выше категория), а также для расчётов относительной погрешности МР согласно положениям Кодекса JORC. Исходя из погрешности минеральных ресурсов можно оценить и погрешность ключевых экономических показателей проекта: NPV, IRR, чистую прибыль и другие.</p>
+
+    <figure class="art-fig rv">
+      <img src="img/datamine-jorc/fig13-conditional-simulation.png" alt="Две альтернативные блочные модели, полученные Условным Моделированием" loading="lazy">
+      <figcaption>Две альтернативные блочные модели, полученные Условным Моделированием (Conditional Simulation).</figcaption>
+    </figure>
+
+    <p class="rv">Данный подход используется на бразильском руднике Куяба для классификации минеральных ресурсов по кодексу JORC на базе погрешностей оценки минеральных ресурсов для квартальных и годовых объёмов добычи:</p>
+
+    <figure class="art-fig rv">
+      <img src="img/datamine-jorc/fig14-kuyaba-primer.png" alt="Классификация минеральных ресурсов по погрешности оценки на руднике Куяба" loading="lazy">
+      <figcaption>Рудник Куяба (Бразилия): классификация МР по погрешности оценки для квартальных и годовых объёмов добычи.</figcaption>
+    </figure>
+
+    <figure class="art-fig rv">
+      <img src="img/datamine-jorc/fig15-kuyaba-detail.png" alt="Детализация классификации по погрешности оценки на руднике Куяба" loading="lazy">
+      <figcaption>Детализация классификации по относительной погрешности оценки.</figcaption>
+    </figure>
+
+    <p class="rv">Пример классификации данным методом для рассматриваемого кейса:</p>
+
+    <figure class="art-fig rv">
+      <img src="img/datamine-jorc/fig16-itog-keysa.png" alt="Итоговый пример классификации минеральных ресурсов по относительной погрешности" loading="lazy">
+      <figcaption>Итоговый пример классификации минеральных ресурсов методом относительной погрешности.</figcaption>
+    </figure>
+
+    <div class="highlight rv">
+      <p><strong>Вывод:</strong> методы по разведочной сети и геостатистические методы не исключают друг друга, а дополняют. Современная практика — сопоставление и комбинирование подходов: формальные критерии (сеть, эллипсоиды поиска, Slope of Regression) дают быструю и понятную базовую классификацию, а расчёт относительной погрешности через Conditional Simulation — наиболее строгое и количественно обоснованное подтверждение категорий Measured / Indicated / Inferred по Кодексу JORC.</p>
+    </div>
+
+    <hr class="art-hr">
+
+    <!-- CTA: Simulator -->
+    <div class="cta-box rv">
+      <h3>Хотите попробовать классификацию на своих данных?</h3>
+      <p>Загрузите CSV опробования в 3D-песочницу — система автоматически покажет категории Indicated/Inferred на основе плотности данных и стандарта JORC. Экспортируйте отчёт в формате, близком к JORC.</p>
+      <div class="cta-btns">
+        <a href="../index.html#sandbox" class="btn-p">
+          ▶ Открыть песочницу
+        </a>
+        <a href="../index.html#consult" class="btn-s">Записаться на консультацию</a>
+      </div>
+    </div>
+
+  </div><!-- /art-body -->
+</div><!-- /art-wrap -->
+
+<footer>
+  <span class="f-copy">© 2026 GeoCore Academy</span>
+  <a href="../index.html#blog" class="f-back">← Все статьи блога</a>
+</footer>
+
+<script>
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('vis');});
+},{threshold:.08,rootMargin:'0px 0px -20px 0px'});
+document.querySelectorAll('.rv').forEach(el=>obs.observe(el));
+const themeBtn=document.getElementById('themeBtn');
+let dark=!localStorage.getItem('geocoreLight');
+function applyTheme(){document.body.classList.toggle('light',!dark);if(themeBtn)themeBtn.textContent=dark?'🌙':'☀️';}
+applyTheme();
+themeBtn?.addEventListener('click',()=>{dark=!dark;localStorage.setItem('geocoreLight',dark?'':'1');applyTheme();});
+</script>
+</body>
+</html>

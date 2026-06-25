@@ -149,10 +149,6 @@
         "href": "https://courses.geocore-academy.ru"
       },
       {
-        "label": "Песочница",
-        "href": "sandbox.html"
-      },
-      {
         "label": "Лаборатория",
         "href": "lab.html"
       },
@@ -270,10 +266,6 @@
       {
         "title": "Платформа",
         "links": [
-          {
-            "label": "Песочница",
-            "href": "sandbox.html"
-          },
           {
             "label": "Шаблоны",
             "href": "#lab"
