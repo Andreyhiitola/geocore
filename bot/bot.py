@@ -1,4 +1,5 @@
 import os
+import re
 import json
 import time
 import threading
@@ -119,7 +120,14 @@ TOKEN_KEYBOARD = {'inline_keyboard': [
 ]}
 
 
-def send(text, chat_id=None, keyboard=False, inline=None):
+CLIENT_KEYBOARD = {
+    'keyboard': [[{'text': '❓ Задать вопрос'}]],
+    'resize_keyboard': True,
+    'persistent': True,
+}
+
+
+def send(text, chat_id=None, keyboard=False, inline=None, reply_markup=None):
     try:
         payload = {
             'chat_id': chat_id or CHAT_ID,
@@ -128,6 +136,8 @@ def send(text, chat_id=None, keyboard=False, inline=None):
         }
         if keyboard:
             payload['reply_markup'] = REPLY_KEYBOARD
+        elif reply_markup:
+            payload['reply_markup'] = reply_markup
         if inline:
             payload['reply_markup'] = inline
         r = requests.post(f"{API}/sendMessage", json=payload, timeout=10)
@@ -359,6 +369,39 @@ def get_logs():
     return '\n\n'.join(lines) or 'Логи пусты.'
 
 
+def _handle_client(msg, cid, text):
+    if not cid or not text:
+        return
+    user = msg.get('from', {})
+    username = user.get('username', '')
+    first_name = user.get('first_name', '')
+    last_name  = user.get('last_name', '')
+    full_name  = f"{first_name} {last_name}".strip()
+    client_tag = f"@{username}" if username else full_name or f"ID:{cid}"
+
+    if text in ('/start', '/help', '❓ Задать вопрос'):
+        send(
+            "👋 *Здравствуйте!*\n\n"
+            "Задайте вопрос по *Datamine, ArcGIS, Leapfrog, Geobank*, "
+            "геологическому моделированию, геостатистике, JORC, "
+            "многомерному стат. анализу или машинному обучению для геологических задач.\n\n"
+            "Эксперт ответит вам в ближайшее время.",
+            cid,
+            reply_markup=CLIENT_KEYBOARD,
+        )
+        return
+
+    # Форвард вопроса администратору
+    send(
+        f"💬 *Вопрос от клиента*\n"
+        f"`[cid:{cid}]` {client_tag}\n\n"
+        f"{text}\n\n"
+        f"_Reply на это сообщение, чтобы ответить клиенту_",
+        CHAT_ID,
+    )
+    send("✅ Вопрос принят. Эксперт ответит вам в ближайшее время.", cid)
+
+
 def handle(upd):
     cb = upd.get('callback_query')
     mid_cb = None
@@ -376,8 +419,23 @@ def handle(upd):
         cid  = msg.get('chat', {}).get('id')
         text = msg.get('text', '').strip()
 
+    # ── Клиентский флоу (не-админ) ──────────────────────────────────────────────
     if cid != CHAT_ID:
+        if cb:
+            return
+        _handle_client(upd.get('message', {}), cid, text)
         return
+
+    # ── Проверка: admin отвечает клиенту через Reply ──────────────────────────
+    if not cb:
+        reply_to = upd.get('message', {}).get('reply_to_message', {})
+        if reply_to and text:
+            m = re.search(r'\[cid:(\d+)\]', reply_to.get('text', ''))
+            if m:
+                client_id = int(m.group(1))
+                send(f"💬 *Ответ эксперта GeoCore:*\n\n{text}", client_id)
+                send("✅ Ответ отправлен клиенту", CHAT_ID)
+                return
 
     if text == 'status_refresh' and mid_cb:
         try:
