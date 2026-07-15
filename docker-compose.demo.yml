@@ -1,0 +1,113 @@
+# GeoCore Academy — УРЕЗАННЫЙ стек для KZ-демо/зеркала.
+# Только ядро: mariadb + moodle + frontend + backend.
+# НЕ включает bot / backup / usn / watchtower — экономия RAM (4 ГБ бокс) и
+# главное: backup на зеркале запускать нельзя (коллизия S3 с RU-сервером).
+# Запуск:  docker compose -f docker-compose.demo.yml up -d
+# Volume-имена совпадают с docker-compose.yml (проект geocore) — данные общие.
+
+services:
+  mariadb:
+    image: mariadb:10.11
+    container_name: geocore_db
+    restart: always
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MOODLE_DB_NAME}
+      MYSQL_USER: ${MOODLE_DB_USER}
+      MYSQL_PASSWORD: ${MOODLE_DB_PASSWORD}
+    networks:
+      - geocore_net
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  moodle:
+    image: andreysagurov/geocore-moodle:${MOODLE_VERSION}
+    container_name: geocore_moodle
+    restart: always
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8080:80"
+    volumes:
+      - moodle_data:/var/moodledata
+    environment:
+      MOODLE_DB_HOST: mariadb
+      MOODLE_DB_NAME: ${MOODLE_DB_NAME}
+      MOODLE_DB_USER: ${MOODLE_DB_USER}
+      MOODLE_DB_PASSWORD: ${MOODLE_DB_PASSWORD}
+      MOODLE_WWWROOT: ${MOODLE_WWWROOT}
+      MOODLE_SITE_NAME: ${MOODLE_SITE_NAME}
+      MOODLE_SITE_SHORTNAME: ${MOODLE_SITE_SHORTNAME}
+      MOODLE_LANG: ${MOODLE_LANG:-ru}
+      MOODLE_ADMIN_USER: ${MOODLE_ADMIN_USER}
+      MOODLE_ADMIN_PASS: ${MOODLE_ADMIN_PASS}
+      MOODLE_ADMIN_EMAIL: ${MOODLE_ADMIN_EMAIL}
+    networks:
+      - geocore_net
+
+  frontend:
+    image: andreysagurov/geocore-frontend:latest
+    container_name: geocore_frontend
+    restart: always
+    ports:
+      - "127.0.0.1:3000:80"
+    networks:
+      - geocore_net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:80/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  backend:
+    image: andreysagurov/geocore-backend:latest
+    container_name: geocore_api
+    restart: always
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - backend_static:/app/static
+    environment:
+      MOODLE_URL: ${MOODLE_WWWROOT:-https://courses.geocore-academy.kz}
+      MOODLE_TOKEN: ${MOODLE_TOKEN}
+      DB_HOST: mariadb
+      DB_NAME: ${MOODLE_DB_NAME}
+      DB_USER: ${MOODLE_DB_USER}
+      DB_PASSWORD: ${MOODLE_DB_PASSWORD}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      NOTIFY_EMAIL: ${NOTIFY_EMAIL:-}
+      ADMIN_TOKEN: ${ADMIN_TOKEN:-}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-}
+      MAX_CSV_BYTES: ${MAX_CSV_BYTES:-5242880}
+      MAX_CSV_ROWS: ${MAX_CSV_ROWS:-20000}
+    networks:
+      - geocore_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+networks:
+  geocore_net:
+    driver: bridge
+
+volumes:
+  mariadb_data:
+  moodle_data:
+  backend_static:
