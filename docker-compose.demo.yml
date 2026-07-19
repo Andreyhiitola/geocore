@@ -1,7 +1,10 @@
-# GeoCore Academy — УРЕЗАННЫЙ стек для KZ-демо/зеркала.
-# Только ядро: mariadb + moodle + frontend + backend.
-# НЕ включает bot / backup / usn / watchtower — экономия RAM (4 ГБ бокс) и
-# главное: backup на зеркале запускать нельзя (коллизия S3 с RU-сервером).
+# GeoCore Academy — стек для KZ (становится основным регионом).
+# Ядро: mariadb + moodle + frontend + backend + backup.
+# НЕ включает bot / usn / watchtower — экономия RAM (4 ГБ бокс).
+#
+# ВАЖНО про backup: у KZ ОТДЕЛЬНЫЙ бакет (S3_BUCKET в .env). В общий бакет с RU
+# писать нельзя — ключи daily/monthly завязаны только на дату, а `s3 sync --delete`
+# в moodledata-mirror/ снесёт зеркало другого региона.
 # Запуск:  docker compose -f docker-compose.demo.yml up -d
 # Volume-имена совпадают с docker-compose.yml (проект geocore) — данные общие.
 
@@ -58,6 +61,13 @@ services:
     restart: always
     ports:
       - "127.0.0.1:3000:80"
+    environment:
+      # Переключает в статике домен целиком: courses.*, api.*, mailto:*
+      SITE_DOMAIN: ${SITE_DOMAIN:-geocore-academy.kz}
+      # Отдельный override на случай, если почта живёт не на домене сайта.
+      # С 19.07.2026 ящик info@geocore-academy.kz заведён в Zoho — заглушка на .ru
+      # больше не нужна.
+      CONTACT_EMAIL: ${CONTACT_EMAIL:-info@geocore-academy.kz}
     networks:
       - geocore_net
     healthcheck:
@@ -90,6 +100,9 @@ services:
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASS: ${SMTP_PASS:-}
       NOTIFY_EMAIL: ${NOTIFY_EMAIL:-}
+      CONTACT_EMAIL: ${CONTACT_EMAIL:-info@geocore-academy.kz}
+      CONTACT_SITE: ${CONTACT_SITE:-geocore-academy.kz}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://geocore-academy.kz}
       ADMIN_TOKEN: ${ADMIN_TOKEN:-}
       ADMIN_USERNAME: ${ADMIN_USERNAME:-}
       MAX_CSV_BYTES: ${MAX_CSV_BYTES:-5242880}
@@ -103,6 +116,41 @@ services:
       retries: 3
       start_period: 20s
 
+  backup:
+    build:
+      context: .
+      dockerfile: backup/Dockerfile
+    container_name: geocore_backup
+    restart: always
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    volumes:
+      - moodle_data:/moodledata:ro
+      - backup_logs:/var/log
+    environment:
+      DB_HOST: mariadb
+      MOODLE_DB_NAME: ${MOODLE_DB_NAME}
+      MOODLE_DB_USER: ${MOODLE_DB_USER}
+      MOODLE_DB_PASSWORD: ${MOODLE_DB_PASSWORD}
+      S3_ENDPOINT: ${S3_ENDPOINT:-https://s3.ru-3.storage.selcloud.ru}
+      # ОБЯЗАТЕЛЬНО отдельный бакет от RU — см. шапку файла
+      S3_BUCKET: ${S3_BUCKET:?KZ требует СВОЙ бакет, не тот же что у RU}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-ru-3}
+      # AWS CLI не доверяет цепочке GlobalSign у Selectel (сертификат валиден, не
+      # MITM) — без этого s3-операции падают с CERTIFICATE_VERIFY_FAILED.
+      # См. MIGRATION_KZ.md, "KZ-специфичные гочи".
+      AWS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
+      # SOCKS5-туннель нужен был на FirstVDS (блокировка Telegram). На hoster.kz
+      # Telegram доступен напрямую — по умолчанию без прокси.
+      TELEGRAM_PROXY: ${BACKUP_TELEGRAM_PROXY:-}
+    networks:
+      - geocore_net
+
 networks:
   geocore_net:
     driver: bridge
@@ -111,3 +159,4 @@ volumes:
   mariadb_data:
   moodle_data:
   backend_static:
+  backup_logs:

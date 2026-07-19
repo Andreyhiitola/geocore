@@ -1,6 +1,8 @@
 FROM alpine:3.19
 
-RUN apk add --no-cache bash curl mariadb-client aws-cli
+# ca-certificates — явно: на него указывает AWS_CA_BUNDLE (цепочка GlobalSign
+# у Selectel, см. MIGRATION_KZ.md). Не полагаемся на то, что его дотянет curl.
+RUN apk add --no-cache bash curl mariadb-client aws-cli ca-certificates
 
 COPY scripts/backup.sh /scripts/backup.sh
 COPY backup/entrypoint.sh /entrypoint.sh

@@ -154,7 +154,12 @@ async def startup():
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://geocore-academy.ru"],
+    # Список через запятую; KZ-зеркало задаёт свой домен через env.
+    allow_origins=[
+        o.strip()
+        for o in os.getenv("ALLOWED_ORIGINS", "https://geocore-academy.ru").split(",")
+        if o.strip()
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -211,6 +216,9 @@ SMTP_PORT    = int(os.getenv("SMTP_PORT", "587"))
 SMTP_USER    = os.getenv("SMTP_USER", "")   # noreply@geocore-academy.ru
 SMTP_PASS    = os.getenv("SMTP_PASS", "")   # пароль приложения Яндекс 360
 NOTIFY_EMAIL = os.getenv("NOTIFY_EMAIL", "9624294@gmail.com")
+# Публичный контакт в письмах. KZ-зеркало переопределяет на info@geocore-academy.kz.
+CONTACT_EMAIL = os.getenv("CONTACT_EMAIL", "info@geocore-academy.ru")
+CONTACT_SITE  = os.getenv("CONTACT_SITE", "geocore-academy.ru")
 
 
 @app.get("/api/courses")
@@ -293,7 +301,7 @@ def _send_request_emails(req: CourseRequest) -> None:
         msg_admin = MIMEMultipart()
         msg_admin["From"]     = SENDER
         msg_admin["To"]       = NOTIFY_EMAIL
-        msg_admin["Reply-To"] = "info@geocore-academy.ru"
+        msg_admin["Reply-To"] = CONTACT_EMAIL
         msg_admin["Subject"]  = f"[GeoCore] Заявка: {req.course_name} — {req.company_name}"
         msg_admin.attach(MIMEText(admin_body, "plain", "utf-8"))
         try:
@@ -314,13 +322,13 @@ def _send_request_emails(req: CourseRequest) -> None:
         f"Наш менеджер свяжется с вами в течение 1 рабочего дня.\n\n"
         f"С уважением,\n"
         f"GeoCore Academy\n"
-        f"info@geocore-academy.ru\n"
-        f"geocore-academy.ru\n"
+        f"{CONTACT_EMAIL}\n"
+        f"{CONTACT_SITE}\n"
     )
     msg_client = MIMEMultipart()
     msg_client["From"]     = SENDER
     msg_client["To"]       = req.contact_email
-    msg_client["Reply-To"] = "info@geocore-academy.ru"
+    msg_client["Reply-To"] = CONTACT_EMAIL
     msg_client["Subject"]  = f"Заявка на обучение принята — {req.course_name}"
     msg_client.attach(MIMEText(client_body, "plain", "utf-8"))
     try:
@@ -698,7 +706,7 @@ def _send_accounts_email(to_email: str, accounts: list, course_name: str,
         f"Данные для входа:\n{rows}\n\n"
         f"Ссылка на курс: {link}\n"
         f"Доступ до: {expiry_date or 'не ограничен'}\n\n"
-        f"С уважением,\nGeoCore Academy\ninfo@geocore-academy.ru"
+        f"С уважением,\nGeoCore Academy\n{CONTACT_EMAIL}"
     )
     msg = MIMEMultipart()
     msg["From"]    = f"GeoCore Academy <{SMTP_USER}>"
@@ -1505,6 +1513,12 @@ _CHAT_SYSTEM_PROMPT = """Ты — GeoCore Assistant, образовательн�
 - По окончании курса выдаётся сертификат
 
 НЕ ДЕЛАЙ: не показывай процесс рассуждений, не пиши «Давайте рассмотрим», «Итак», «Хорошо»."""
+
+# Региональные контакты в промпте (KZ-зеркало переопределяет через env).
+_CHAT_SYSTEM_PROMPT = (_CHAT_SYSTEM_PROMPT
+    .replace("info@geocore-academy.ru", CONTACT_EMAIL)
+    .replace("geocore-academy.ru", CONTACT_SITE))
+
 
 
 def _clean_thinking(content: str) -> str:
