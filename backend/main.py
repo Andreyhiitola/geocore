@@ -216,9 +216,6 @@ SMTP_PORT    = int(os.getenv("SMTP_PORT", "587"))
 SMTP_USER    = os.getenv("SMTP_USER", "")   # noreply@geocore-academy.ru
 SMTP_PASS    = os.getenv("SMTP_PASS", "")   # пароль приложения Яндекс 360
 NOTIFY_EMAIL = os.getenv("NOTIFY_EMAIL", "9624294@gmail.com")
-# Личная копия уведомлений. NOTIFY_EMAIL на серверах переопределён на info@ —
-# эта переменная держит адрес, который читается постоянно.
-NOTIFY_COPY_EMAIL = os.getenv("NOTIFY_COPY_EMAIL", "9624294@gmail.com")
 # Публичный контакт в письмах. KZ-зеркало переопределяет на info@geocore-academy.kz.
 CONTACT_EMAIL = os.getenv("CONTACT_EMAIL", "info@geocore-academy.ru")
 CONTACT_SITE  = os.getenv("CONTACT_SITE", "geocore-academy.ru")
@@ -723,38 +720,6 @@ def _send_accounts_email(to_email: str, accounts: list, course_name: str,
         print(f"[email] Ошибка отправки аккаунтов: {e}")
 
 
-def _notify_enrolment(event: str, course_name: str, company_name: str,
-                      usernames: list, expiry_date, course_url: str = "") -> None:
-    """Уведомить администратора о записи на курс / продлении доступа."""
-    if not all([SMTP_HOST, SMTP_USER, SMTP_PASS]):
-        return
-    recipients = [e for e in dict.fromkeys([NOTIFY_EMAIL, NOTIFY_COPY_EMAIL]) if e]
-    if not recipients:
-        return
-    logins = "\n".join(f"  {u}" for u in usernames) or "  —"
-    body = (
-        f"{event}\n"
-        f"{'─' * 44}\n"
-        f"Курс:            {course_name}\n"
-        f"Компания:        {company_name or '—'}\n"
-        f"Аккаунтов:       {len(usernames)}\n"
-        f"Логины:\n{logins}\n"
-        f"Доступ до:       {expiry_date or 'не ограничен'}\n"
-        f"Ссылка на курс:  {course_url or MOODLE_URL}\n\n"
-        f"Пароли — в админке, в карточке заявки."
-    )
-    msg = MIMEMultipart()
-    msg["From"]    = f"GeoCore Academy <{SMTP_USER}>"
-    msg["To"]      = ", ".join(recipients)
-    msg["Subject"] = f"[GeoCore] {event}: {course_name} — {company_name or '—'}"
-    msg.attach(MIMEText(body, "plain", "utf-8"))
-    try:
-        _smtp_send(msg)
-        print(f"[email] Уведомление о записи → {', '.join(recipients)}")
-    except Exception as e:
-        print(f"[email] Ошибка уведомления о записи: {e}")
-
-
 async def _get_moodle_course_id(course_name: str) -> Optional[int]:
     if not MOODLE_TOKEN:
         return None
@@ -1152,15 +1117,6 @@ async def admin_mark_paid(request_id: int,
         req.get("access_expiry_date"),
         course_url,
     )
-    background_tasks.add_task(
-        _notify_enrolment,
-        "Запись на курс",
-        req.get("course_name", ""),
-        req.get("company_name", ""),
-        [a["username"] for a in accounts],
-        req.get("access_expiry_date"),
-        course_url,
-    )
     # Фиксируем доход в USN-app
     background_tasks.add_task(
         _record_income_in_usn,
@@ -1174,7 +1130,6 @@ async def admin_mark_paid(request_id: int,
 @app.post("/api/admin/requests/{request_id}/extend-access")
 async def admin_extend_access(request_id: int,
                               expiry_date: str,
-                              background_tasks: BackgroundTasks,
                               _=Depends(require_admin)):
     """Продлить доступ к курсу: обновить дату в БД и timeend в Moodle для всех аккаунтов заявки."""
     try:
@@ -1242,16 +1197,6 @@ async def admin_extend_access(request_id: int,
                 "UPDATE requests SET access_expiry_date=%s WHERE id=%s",
                 (expiry_date, request_id)
             )
-
-    background_tasks.add_task(
-        _notify_enrolment,
-        "Продление доступа",
-        req.get("course_name", ""),
-        req.get("company_name", ""),
-        [a.get("username", "") for a in accounts],
-        expiry_date,
-        f"{MOODLE_URL}/course/view.php?id={course_id}" if course_id else "",
-    )
 
     result = {"ok": True, "access_expiry_date": expiry_date, "accounts_updated": moodle_updated}
     if moodle_errors:
