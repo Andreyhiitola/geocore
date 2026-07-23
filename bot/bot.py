@@ -2,20 +2,42 @@ import os
 import re
 import json
 import time
+import email
+import imaplib
 import threading
 import subprocess
 import requests
+from email.header import decode_header, make_header
 from datetime import datetime, timedelta
 
 TOKEN = os.environ['TELEGRAM_BOT_TOKEN']
 CHAT_ID = int(os.environ['TELEGRAM_CHAT_ID'])
 API = f"https://api.telegram.org/bot{TOKEN}"
 
-CONTAINERS = ['geocore_db', 'geocore_moodle', 'geocore_frontend', 'geocore_api',
-              'geocore_backup', 'geocore_watchtower', 'geocore_bot',
-              'geocore_usn_api', 'geocore_usn_front']
-ENDPOINTS = ['https://geocore-academy.ru', 'https://courses.geocore-academy.ru',
-             'https://api.geocore-academy.ru/health']
+# Регион ставит подпись в заголовках и разводит состояние двух инсталляций.
+REGION = os.environ.get('BOT_REGION', 'RU')
+
+
+def _csv_env(name: str, default: list) -> list:
+    raw = os.environ.get(name, '')
+    return [x.strip() for x in raw.split(',') if x.strip()] or default
+
+
+CONTAINERS = _csv_env('BOT_CONTAINERS', [
+    'geocore_db', 'geocore_moodle', 'geocore_frontend', 'geocore_api',
+    'geocore_backup', 'geocore_watchtower', 'geocore_bot',
+    'geocore_usn_api', 'geocore_usn_front',
+])
+ENDPOINTS = _csv_env('BOT_ENDPOINTS', [
+    'https://geocore-academy.ru', 'https://courses.geocore-academy.ru',
+    'https://api.geocore-academy.ru/health',
+])
+
+IMAP_HOST     = os.environ.get('IMAP_HOST', '')
+IMAP_USER     = os.environ.get('IMAP_USER', '')
+IMAP_PASS     = os.environ.get('IMAP_PASS', '')
+IMAP_FOLDER   = os.environ.get('IMAP_FOLDER', 'INBOX')
+MAIL_INTERVAL = int(os.environ.get('MAIL_INTERVAL', '120'))
 
 DISK_WARN    = int(os.environ.get('DISK_WARN', '85'))
 RAM_WARN     = int(os.environ.get('RAM_WARN', '90'))
@@ -222,7 +244,7 @@ def status_text():
     containers = get_containers()
 
     lines = [
-        f"*GeoCore VPS* — {datetime.now().strftime('%d.%m.%Y %H:%M')}\n",
+        f"*GeoCore VPS {REGION}* — {datetime.now().strftime('%d.%m.%Y %H:%M')}\n",
         "*Метрики:*",
         f"{led(cpu_pct,  CPU_WARN, 80)} CPU: {cpu_pct}%",
         f"{led(ram_pct,  RAM_WARN, 75)} RAM: {ram_pct}% ({ram_used} / {ram_total} MB)",
@@ -270,6 +292,85 @@ def backup_history_text():
     for dt, filename in sorted(entries, reverse=True):
         lines.append(f"✅ `{dt.strftime('%d.%m.%Y')}` в `{dt.strftime('%H:%M')}` — `{filename}`")
     return '\n'.join(lines)
+
+
+# ── Входящая почта (IMAP) ─────────────────────────────────────────────────────
+
+def _hdr(raw) -> str:
+    """MIME-заголовок → читаемая строка."""
+    if not raw:
+        return ''
+    try:
+        return str(make_header(decode_header(raw)))
+    except Exception:
+        return str(raw)
+
+
+def _check_mail() -> None:
+    """Уведомить о письмах, пришедших с прошлой проверки.
+
+    Читаем через BODY.PEEK — флаг \\Seen не ставится, письмо остаётся
+    непрочитанным в веб-интерфейсе Zoho.
+    """
+    state = _load_state()
+    key = f'last_mail_uid_{REGION}'
+    last_uid = int(state.get(key, 0))
+
+    conn = imaplib.IMAP4_SSL(IMAP_HOST)
+    try:
+        conn.login(IMAP_USER, IMAP_PASS)
+        conn.select(IMAP_FOLDER, readonly=True)
+
+        # UID N:* всегда возвращает хотя бы последнее письмо, поэтому ниже
+        # ещё раз отсекаем по uid > last_uid.
+        typ, data = conn.uid('search', None, f'UID {last_uid + 1}:*')
+        if typ != 'OK':
+            return
+        uids = [int(u) for u in data[0].split()] if data and data[0] else []
+        uids = sorted(u for u in uids if u > last_uid)
+        if not uids:
+            return
+
+        # Первый запуск: запоминаем текущее состояние ящика молча, иначе
+        # прилетит уведомление на каждое письмо в инбоксе.
+        if not last_uid:
+            state[key] = uids[-1]
+            _save_state(state)
+            return
+
+        for uid in uids[-20:]:
+            typ, msg_data = conn.uid(
+                'fetch', str(uid),
+                '(BODY.PEEK[HEADER.FIELDS (FROM SUBJECT DATE)])'
+            )
+            if typ != 'OK' or not msg_data or not msg_data[0]:
+                continue
+            hdrs = email.message_from_bytes(msg_data[0][1])
+            sender  = _hdr(hdrs.get('From'))
+            subject = _hdr(hdrs.get('Subject')) or '(без темы)'
+            send(
+                f"📬 *Новое письмо* — {IMAP_USER}\n\n"
+                f"*От:* {sender}\n"
+                f"*Тема:* {subject}"
+            )
+        state[key] = uids[-1]
+        _save_state(state)
+    finally:
+        try:
+            conn.logout()
+        except Exception:
+            pass
+
+
+def mail_loop() -> None:
+    if not all([IMAP_HOST, IMAP_USER, IMAP_PASS]):
+        return
+    while True:
+        try:
+            _check_mail()
+        except Exception as e:
+            print(f"[mail] {e}", flush=True)
+        time.sleep(MAIL_INTERVAL)
 
 
 # ── Watchdog ──────────────────────────────────────────────────────────────────
@@ -561,6 +662,7 @@ def poll():
 
 
 if __name__ == '__main__':
-    send("🟢 *GeoCore Bot запущен*", keyboard=True)
+    send(f"🟢 *GeoCore Bot {REGION} запущен*", keyboard=True)
     threading.Thread(target=watchdog_loop, daemon=True).start()
+    threading.Thread(target=mail_loop, daemon=True).start()
     poll()

@@ -128,6 +128,15 @@ services:
       RAM_WARN: ${RAM_WARN:-90}
       CPU_WARN: ${CPU_WARN:-95}
       HTTPS_PROXY: ${HTTPS_PROXY:-}
+      # KZ переопределяет регион, список контейнеров и эндпоинты в .env
+      BOT_REGION: ${BOT_REGION:-RU}
+      BOT_CONTAINERS: ${BOT_CONTAINERS:-}
+      BOT_ENDPOINTS: ${BOT_ENDPOINTS:-}
+      # Уведомления о входящей почте (IMAP, только чтение заголовков)
+      IMAP_HOST: ${IMAP_HOST:-}
+      IMAP_USER: ${IMAP_USER:-}
+      IMAP_PASS: ${IMAP_PASS:-}
+      MAIL_INTERVAL: ${MAIL_INTERVAL:-120}
 
   backup:
     build:
