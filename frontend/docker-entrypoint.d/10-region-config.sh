@@ -16,7 +16,7 @@ ROOT="/usr/share/nginx/html"
 subst() {
     find "$ROOT" -type f \
         \( -name '*.html' -o -name '*.js' -o -name '*.json' \) \
-        -exec sed -i "s/$1/$2/g" {} +
+        -exec sed -i "s#$1#$2#g" {} +
 }
 
 if [ "$SITE_DOMAIN" != "$DEFAULT_DOMAIN" ]; then
@@ -27,4 +27,13 @@ fi
 if [ -n "$CONTACT_EMAIL" ] && [ "$CONTACT_EMAIL" != "info@${SITE_DOMAIN}" ]; then
     subst "info@${SITE_DOMAIN}" "${CONTACT_EMAIL}"
     echo "[region-config] contact email -> ${CONTACT_EMAIL}"
+fi
+
+# Рыночный текст (не домен) — на KZ-зеркале правим упоминания рынка/страны на
+# сайте с дефолта "RU" на "KZ". Точные фразы, чтобы не задеть факт. упоминания
+# вроде "ГКЗ (Россия)" в статьях про регуляторику.
+if [ "$SITE_DOMAIN" != "$DEFAULT_DOMAIN" ]; then
+    subst "RU/EN" "KZ/EN"
+    subst "Россия, СНГ и международный рынок" "Казахстан, СНГ и международный рынок"
+    echo "[region-config] market text -> KZ"
 fi
