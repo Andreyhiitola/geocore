@@ -250,11 +250,95 @@ function openPlannedModal(c) {
     <div class="modal-soon-note">
       <div class="modal-soon-icon">📋</div>
       <div>
-        <div class="modal-soon-label">В РАЗРАБОТКЕ</div>
-        <div class="modal-soon-text">Курс запланирован. Чтобы узнать о запуске первыми — напишите нам на <a href="mailto:info@geocore-academy.ru" style="color:var(--gold)">info@geocore-academy.ru</a></div>
+        <div class="modal-soon-label">ОТКРЫВАЕТСЯ ПО МЕРЕ НАБОРА ГРУППЫ</div>
+        <div class="modal-soon-text">Курс в разработке. Оставьте заявку на предзапись — сообщим первыми и предложим формат обучения (онлайн или очно).</div>
       </div>
     </div>
+    <button class="modal-cta" id="gc-interest-btn" style="border:none;cursor:pointer">Записаться в лист ожидания →</button>
   `);
+
+  document.getElementById('gc-interest-btn')
+    .addEventListener('click', () => openInterestForm(c.title));
+}
+
+function openInterestForm(courseTitle) {
+  showModal(`
+    <div class="modal-tag">ПРЕДЗАПИСЬ</div>
+    <h2 class="modal-title">Заявка на предзапись</h2>
+    <p class="modal-desc" style="margin-bottom:8px">${esc(courseTitle)}</p>
+    <form class="req-form" id="gc-interest-form" novalidate>
+      <input type="hidden" name="course_name" value="${esc(courseTitle)}">
+      <label>Имя *</label>
+      <input type="text" name="name" required placeholder="Иван Иванов">
+      <label>Email *</label>
+      <input type="email" name="email" required placeholder="ivan@example.com">
+      <label>Телефон</label>
+      <input type="tel" name="phone" placeholder="+7 700 000 00 00">
+      <label>Формат обучения</label>
+      <select name="format_pref">
+        <option value="">Без предпочтения</option>
+        <option value="online">Онлайн</option>
+        <option value="offline">Очно</option>
+      </select>
+      <label>Компания (если корпоративный интерес)</label>
+      <input type="text" name="company_name" placeholder="Необязательно">
+      <label>Комментарий</label>
+      <textarea name="comment" rows="3" placeholder="Пожелания, вопросы..."></textarea>
+      <div class="req-form-btns">
+        <button type="button" class="req-form-cancel" id="gc-interest-cancel">Отмена</button>
+        <button type="submit" class="modal-cta" style="margin-top:0;border:none;cursor:pointer">Отправить</button>
+      </div>
+    </form>
+    <div class="req-status" id="gc-interest-status"></div>
+  `);
+
+  document.getElementById('gc-interest-cancel').addEventListener('click', () => {
+    const overlay = document.getElementById('gc-modal');
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden', 'true');
+  });
+
+  document.getElementById('gc-interest-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const statusEl = document.getElementById('gc-interest-status');
+    statusEl.style.color = 'var(--text-muted)';
+    statusEl.textContent = 'Отправка...';
+
+    const payload = {
+      course_name:  form.course_name.value,
+      name:         form.name.value,
+      email:        form.email.value,
+      phone:        form.phone.value,
+      format_pref:  form.format_pref.value,
+      company_name: form.company_name.value,
+      comment:      form.comment.value,
+    };
+
+    try {
+      const resp = await fetch('https://api.geocore-academy.ru/api/course-interest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const result = await resp.json();
+      if (resp.ok && result.success) {
+        statusEl.style.color = 'var(--gold)';
+        statusEl.textContent = 'Заявка принята! Сообщим, как только сформируется группа.';
+        setTimeout(() => {
+          const overlay = document.getElementById('gc-modal');
+          overlay.classList.remove('open');
+          overlay.setAttribute('aria-hidden', 'true');
+        }, 3000);
+      } else {
+        throw new Error(result.message || 'Ошибка сервера');
+      }
+    } catch (err) {
+      statusEl.style.color = '#e57373';
+      statusEl.textContent = 'Ошибка отправки. Напишите нам на почту.';
+      console.error('[interest form]', err);
+    }
+  });
 }
 
 // ── API ──────────────────────────────────────────────────────────────────────

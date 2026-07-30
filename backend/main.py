@@ -135,6 +135,9 @@ async def startup():
                     "ALTER TABLE requests ADD COLUMN IF NOT EXISTS contract_status VARCHAR(20) DEFAULT 'not_created'",
                     "ALTER TABLE requests ADD COLUMN IF NOT EXISTS contract_link VARCHAR(512) NULL",
                     "ALTER TABLE requests ADD COLUMN IF NOT EXISTS contract_number VARCHAR(50) NULL",
+                    "ALTER TABLE requests ADD COLUMN IF NOT EXISTS request_type VARCHAR(20) DEFAULT 'order'",
+                    "ALTER TABLE requests ADD COLUMN IF NOT EXISTS phone VARCHAR(50) NULL",
+                    "ALTER TABLE requests ADD COLUMN IF NOT EXISTS format_pref VARCHAR(20) NULL",
                 ]:
                     await cur.execute(_col)
                 await cur.execute("""
@@ -266,6 +269,16 @@ class CourseRequest(BaseModel):
     comment: str = ""
 
 
+class CourseInterestRequest(BaseModel):
+    course_name: str
+    name: str
+    email: str
+    phone: str = ""
+    format_pref: str = ""  # "online" | "offline" | ""
+    company_name: str = ""
+    comment: str = ""
+
+
 def _smtp_send(msg: MIMEMultipart) -> None:
     """Отправить письмо через SMTP. Бросает исключение при ошибке."""
     with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=15) as server:
@@ -336,6 +349,66 @@ def _send_request_emails(req: CourseRequest) -> None:
         print(f"[email] Авто-ответ → {req.contact_email}")
     except Exception as e:
         print(f"[email] Ошибка авто-ответа: {e}")
+
+
+def _format_label(v: str) -> str:
+    return {"online": "Онлайн", "offline": "Очно"}.get(v, v or "без предпочтения")
+
+
+def _send_interest_emails(req: CourseInterestRequest) -> None:
+    """Уведомления по заявке на предзапись (курс ещё не запущен)."""
+    if not all([SMTP_HOST, SMTP_USER, SMTP_PASS]):
+        print("[email] SMTP не настроен — письма о предзаписи не отправлены")
+        return
+
+    SENDER = f"GeoCore Academy <{SMTP_USER}>"
+
+    if NOTIFY_EMAIL:
+        admin_body = (
+            f"Новая заявка на предзапись курса (курс ещё не запущен)\n"
+            f"{'─' * 44}\n"
+            f"Курс:      {req.course_name}\n"
+            f"Имя:       {req.name}\n"
+            f"Email:     {req.email}\n"
+            f"Телефон:   {req.phone or '—'}\n"
+            f"Формат:    {_format_label(req.format_pref)}\n"
+            f"Компания:  {req.company_name or '—'}\n"
+            f"Комментарий: {req.comment or '—'}\n"
+        )
+        msg_admin = MIMEMultipart()
+        msg_admin["From"]     = SENDER
+        msg_admin["To"]       = NOTIFY_EMAIL
+        msg_admin["Reply-To"] = CONTACT_EMAIL
+        msg_admin["Subject"]  = f"[GeoCore] Предзапись: {req.course_name} — {req.name}"
+        msg_admin.attach(MIMEText(admin_body, "plain", "utf-8"))
+        try:
+            _smtp_send(msg_admin)
+            print(f"[email] Уведомление о предзаписи → {NOTIFY_EMAIL}")
+        except Exception as e:
+            print(f"[email] Ошибка уведомления о предзаписи: {e}")
+
+    client_body = (
+        f"Здравствуйте, {req.name}!\n\n"
+        f"Мы получили вашу заявку на курс «{req.course_name}» — он ещё в разработке "
+        f"и откроется по мере набора группы.\n\n"
+        f"Как только наберётся группа, мы напишем вам первыми и предложим формат "
+        f"обучения ({_format_label(req.format_pref)}).\n\n"
+        f"С уважением,\n"
+        f"GeoCore Academy\n"
+        f"{CONTACT_EMAIL}\n"
+        f"{CONTACT_SITE}\n"
+    )
+    msg_client = MIMEMultipart()
+    msg_client["From"]     = SENDER
+    msg_client["To"]       = req.email
+    msg_client["Reply-To"] = CONTACT_EMAIL
+    msg_client["Subject"]  = f"Заявка на предзапись принята — {req.course_name}"
+    msg_client.attach(MIMEText(client_body, "plain", "utf-8"))
+    try:
+        _smtp_send(msg_client)
+        print(f"[email] Авто-ответ о предзаписи → {req.email}")
+    except Exception as e:
+        print(f"[email] Ошибка авто-ответа о предзаписи: {e}")
 
 
 # ── PDF / QR helpers ─────────────────────────────────────────────────────────
@@ -833,6 +906,35 @@ async def create_request(request: CourseRequest, background_tasks: BackgroundTas
 
     background_tasks.add_task(_send_request_emails, request)
     return {"success": True, "message": "Request received"}
+
+
+@app.post("/api/course-interest")
+async def create_course_interest(request: CourseInterestRequest, background_tasks: BackgroundTasks):
+    """Приём заявки на предзапись курса, который ещё в разработке (не заказ, не договор)."""
+    print(f"[INTEREST] {request.model_dump()}")
+
+    try:
+        pool = await get_pool()
+        async with pool.acquire() as conn:
+            async with conn.cursor() as cur:
+                await cur.execute("""
+                    INSERT INTO requests
+                        (course_name, company_name, inn, contact_email,
+                         headcount, employee_name, employee_email, comment,
+                         request_type, phone, format_pref)
+                    VALUES (%s, %s, '', %s, 1, %s, %s, %s, 'interest', %s, %s)
+                """, (
+                    request.course_name, request.company_name, request.email,
+                    request.name, request.email, request.comment,
+                    request.phone, request.format_pref,
+                ))
+        print("[DB] Заявка на предзапись сохранена")
+    except Exception as e:
+        print(f"[DB] Ошибка сохранения предзаписи: {e}")
+        raise HTTPException(status_code=500, detail="Ошибка сохранения заявки, попробуйте позже")
+
+    background_tasks.add_task(_send_interest_emails, request)
+    return {"success": True, "message": "Interest received"}
 
 
 # ── Admin auth ───────────────────────────────────────────────────────────────
