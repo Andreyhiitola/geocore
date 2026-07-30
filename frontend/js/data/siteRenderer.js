@@ -19,8 +19,11 @@ function esc(s) {
 function safeHref(href) {
   const value = String(href ?? '').trim();
   if (!value) return '#';
-  if (/^(https?:|mailto:|#|\/|\.\/|\.\.\/)/i.test(value)) return value;
-  return '#';
+  if (/^(https?:|mailto:)/i.test(value)) return value;
+  // Блокируем прочие схемы вида javascript:/data:/vbscript: — остальное (относительные
+  // пути вроде "pitch.html", "#anchor", "/path") пропускаем как безопасное.
+  if (/^[a-z][a-z0-9+.-]*:/i.test(value)) return '#';
+  return value;
 }
 
 export async function loadSiteData() {
