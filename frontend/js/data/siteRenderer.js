@@ -68,8 +68,8 @@ function renderPlannedCard(c, idx, total) {
   return `<div class="cc cc-planned" data-modal="planned" data-idx="${idx}" role="button" tabindex="0" style="cursor:pointer">${cardInner(card)}</div>`;
 }
 
-const CG_COLS = 3;
-let cgState = null; // { live, soon, planned, rows }
+const PAGE_SIZE_DEFAULT = 12;
+let cgState = null; // { live, soon, planned }
 
 function ensureMoreBar() {
   const grid = document.querySelector('.cg');
@@ -84,35 +84,35 @@ function ensureMoreBar() {
   return bar;
 }
 
-function renderMoreBar(planned, rows) {
+function renderMoreBar(planned, pageSize) {
   const bar = ensureMoreBar();
   if (!bar) return;
-  const shown = Math.min(planned.length, rows * CG_COLS);
-  if (planned.length <= 5 * CG_COLS && rows >= 5) { bar.innerHTML = ''; return; }
+  const shown = Math.min(planned.length, pageSize);
+  if (planned.length <= 12) { bar.innerHTML = ''; return; }
   const opts = [
-    [5, '5 рядов'],
-    [10, '10 рядов'],
+    [12, '12 на странице'],
+    [24, '24 на странице'],
     [Infinity, 'Показать все'],
   ];
   bar.innerHTML = `
     <div class="cg-more-count">Показано ${shown} из ${planned.length} курсов «в разработке»</div>
     <div class="cg-more-btns">
-      ${opts.map(([n, label]) => `<button type="button" class="cg-more-btn${rows === n ? ' active' : ''}" data-rows="${n}">${label}</button>`).join('')}
+      ${opts.map(([n, label]) => `<button type="button" class="cg-more-btn${pageSize === n ? ' active' : ''}" data-size="${n}">${label}</button>`).join('')}
     </div>`;
   bar.querySelectorAll('.cg-more-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      const n = btn.dataset.rows === 'Infinity' ? Infinity : parseInt(btn.dataset.rows);
+      const n = btn.dataset.size === 'Infinity' ? Infinity : parseInt(btn.dataset.size);
       renderCourses(cgState.live, cgState.soon, cgState.planned, n);
     });
   });
 }
 
-export function renderCourses(live, soon, planned, plannedRows = 5) {
+export function renderCourses(live, soon, planned, plannedPageSize = PAGE_SIZE_DEFAULT) {
   const grid = document.querySelector('.cg');
   if (!grid) return;
   cgState = { live, soon, planned };
 
-  const visiblePlanned = planned.slice(0, plannedRows * CG_COLS);
+  const visiblePlanned = planned.slice(0, plannedPageSize);
 
   grid.innerHTML =
     live.map(renderLiveCard).join('') +
@@ -120,7 +120,7 @@ export function renderCourses(live, soon, planned, plannedRows = 5) {
     visiblePlanned.map((c, i) => renderPlannedCard(c, i, visiblePlanned.length)).join('');
 
   ensureModal();
-  renderMoreBar(planned, plannedRows);
+  renderMoreBar(planned, plannedPageSize);
 
   grid.querySelectorAll('[data-modal]').forEach(el => {
     const handler = () => {
