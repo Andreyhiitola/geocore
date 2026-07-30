@@ -68,15 +68,59 @@ function renderPlannedCard(c, idx, total) {
   return `<div class="cc cc-planned" data-modal="planned" data-idx="${idx}" role="button" tabindex="0" style="cursor:pointer">${cardInner(card)}</div>`;
 }
 
-export function renderCourses(live, soon, planned) {
+const CG_COLS = 3;
+let cgState = null; // { live, soon, planned, rows }
+
+function ensureMoreBar() {
+  const grid = document.querySelector('.cg');
+  if (!grid) return null;
+  let bar = document.getElementById('cg-more-bar');
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'cg-more-bar';
+    bar.className = 'cg-more';
+    grid.insertAdjacentElement('afterend', bar);
+  }
+  return bar;
+}
+
+function renderMoreBar(planned, rows) {
+  const bar = ensureMoreBar();
+  if (!bar) return;
+  const shown = Math.min(planned.length, rows * CG_COLS);
+  if (planned.length <= 5 * CG_COLS && rows >= 5) { bar.innerHTML = ''; return; }
+  const opts = [
+    [5, '5 рядов'],
+    [10, '10 рядов'],
+    [Infinity, 'Показать все'],
+  ];
+  bar.innerHTML = `
+    <div class="cg-more-count">Показано ${shown} из ${planned.length} курсов «в разработке»</div>
+    <div class="cg-more-btns">
+      ${opts.map(([n, label]) => `<button type="button" class="cg-more-btn${rows === n ? ' active' : ''}" data-rows="${n}">${label}</button>`).join('')}
+    </div>`;
+  bar.querySelectorAll('.cg-more-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const n = btn.dataset.rows === 'Infinity' ? Infinity : parseInt(btn.dataset.rows);
+      renderCourses(cgState.live, cgState.soon, cgState.planned, n);
+    });
+  });
+}
+
+export function renderCourses(live, soon, planned, plannedRows = 5) {
   const grid = document.querySelector('.cg');
   if (!grid) return;
+  cgState = { live, soon, planned };
+
+  const visiblePlanned = planned.slice(0, plannedRows * CG_COLS);
+
   grid.innerHTML =
     live.map(renderLiveCard).join('') +
     soon.map(renderSoonCard).join('') +
-    planned.map((c, i) => renderPlannedCard(c, i, planned.length)).join('');
+    visiblePlanned.map((c, i) => renderPlannedCard(c, i, visiblePlanned.length)).join('');
 
   ensureModal();
+  renderMoreBar(planned, plannedRows);
 
   grid.querySelectorAll('[data-modal]').forEach(el => {
     const handler = () => {
@@ -84,7 +128,7 @@ export function renderCourses(live, soon, planned) {
       const idx  = parseInt(el.dataset.idx);
       if (type === 'live')    openLiveModal(live[idx]);
       if (type === 'soon')    openSoonModal(soon[idx]);
-      if (type === 'planned') openPlannedModal(planned[idx]);
+      if (type === 'planned') openPlannedModal(visiblePlanned[idx]);
     };
     el.addEventListener('click', handler);
     el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') handler(); });

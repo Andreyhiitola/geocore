@@ -57,6 +57,13 @@ h1.page-title{font-family:'Playfair Display',serif;font-size:clamp(40px,4vw,56px
 
 /* COURSES GRID */
 .cg{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;}
+.cg-more{display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:36px;}
+.cg-more-count{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em;color:var(--text-dim);text-transform:uppercase;}
+.cg-more-btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+.cg-more-btn{background:none;border:1px solid var(--border-dim);color:var(--text-muted);padding:9px 20px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .2s;}
+.cg-more-btn:hover{border-color:var(--gold);color:var(--gold);}
+.cg-more-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.08);}
+
 .cc{background:var(--dark-3);padding:36px 32px;position:relative;overflow:hidden;transition:all .3s;border:1px solid transparent;cursor:pointer;}
 .cc::before{content:'';position:absolute;top:0;left:0;width:3px;height:0;background:var(--gold);transition:height .4s ease;}
 .cc:hover{background:var(--dark-4);border-color:var(--border);transform:translateY(-4px);}
