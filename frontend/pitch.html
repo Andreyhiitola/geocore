@@ -55,6 +55,11 @@ body::before{
   font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:23px;color:var(--text);
 }
 .meta-bar h1 em{font-style:normal;color:var(--gold);}
+.back-home{
+  display:inline-block;font-family:'IBM Plex Mono','SF Mono',monospace;font-size:12px;font-weight:500;
+  letter-spacing:.04em;color:var(--text-muted);text-decoration:none;margin-bottom:8px;
+}
+.back-home:hover{color:var(--gold);}
 .theme-toggle{
   font-family:'IBM Plex Mono','SF Mono',monospace;font-size:13px;font-weight:500;letter-spacing:.05em;
   color:var(--gold);background:transparent;border:1px solid var(--gold-dim);padding:6px 12px;
@@ -324,7 +329,10 @@ h3.block-t{font-family:'Playfair Display',Georgia,serif;font-weight:700;font-siz
 </style>
 
 <div class="meta-bar">
-  <h1>GEOCORE&nbsp;ACADEMY <em>·</em> Презентация</h1>
+  <div>
+    <a class="back-home" href="index.html">← На главную</a>
+    <h1>GEOCORE&nbsp;ACADEMY <em>·</em> Презентация</h1>
+  </div>
   <div class="meta-actions">
     <a class="pdf-link" href="downloads/geocore-pitch-day.pdf" download>☀️ PDF (день)</a>
     <a class="pdf-link" href="downloads/geocore-pitch-night.pdf" download>🌙 PDF (ночь)</a>
