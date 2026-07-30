@@ -58,7 +58,7 @@ def render_text_frame(tf):
     for p in tf.paragraphs:
         align = {1: 'center', 2: 'right', 3: 'justify'}.get(p.alignment, 'left') if p.alignment else 'left'
         runs_html = ''.join(
-            f'<span style="{run_style(r)}">{html.escape(r.text)}</span>' for r in p.runs
+            f'<span style="{html.escape(run_style(r), quote=True)}">{html.escape(r.text)}</span>' for r in p.runs
         ) or '&nbsp;'
         out.append(f'<div style="text-align:{align};min-height:1em;">{runs_html}</div>')
     return ''.join(out)
