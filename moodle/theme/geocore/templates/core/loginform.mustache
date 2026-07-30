@@ -66,6 +66,12 @@
                 style="position:absolute;top:14px;right:14px;background:none;border:none;cursor:pointer;font-size:16px;padding:4px;opacity:0.5;line-height:1;"
                 title="Переключить тему">🌙</button>
 
+        {{! Назад на главный сайт }}
+        <a id="gc-back-home" href="#"
+           style="display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-muted);text-decoration:none;margin-bottom:16px;"
+           onmouseover="this.style.color='#C9A84C'"
+           onmouseout="this.style.color=''">← На главную</a>
+
         {{! Логотип }}
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
             <div style="width:36px;height:36px;background:#C9A84C;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);flex-shrink:0;"></div>
@@ -155,6 +161,12 @@
 
 <script>
 (function() {
+    var backHome = document.getElementById('gc-back-home');
+    if (backHome) {
+        var mainHost = window.location.hostname.replace(/^courses\./, '');
+        backHome.href = window.location.protocol + '//' + mainHost + '/';
+    }
+
     var wrap = document.querySelector('.gc-login-wrap');
     var btn = document.getElementById('gc-theme-toggle');
     var isDark = localStorage.getItem('gc-theme') === 'dark';
