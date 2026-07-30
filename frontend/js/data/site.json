@@ -167,6 +167,10 @@
       {
         "label": "Цены",
         "href": "#pricing"
+      },
+      {
+        "label": "Презентация",
+        "href": "pitch.html"
       }
     ],
     "cta": {
