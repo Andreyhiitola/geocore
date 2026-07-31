@@ -41,7 +41,7 @@ services:
       MOODLE_DB_USER: moodle
       MOODLE_DB_PASSWORD: testpass
       MOODLE_WWWROOT: http://localhost:8082
-      MOODLE_SITE_NAME: Geocore-Academy
+      MOODLE_SITE_NAME: GeoCore-Academy
       MOODLE_SITE_SHORTNAME: geocore-test
       MOODLE_LANG: ru
       MOODLE_ADMIN_USER: admin

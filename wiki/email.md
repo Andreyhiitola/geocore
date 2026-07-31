@@ -6,7 +6,7 @@
 |---------|---------|
 | Транспорт | Gmail SMTP (`smtp.gmail.com:587`) |
 | Авторизация | App Password (не обычный пароль) |
-| From | `GeoCore Academy <9624294@gmail.com>` |
+| From | `GeoCore-Academy <9624294@gmail.com>` |
 | Reply-To | `info@geocore-academy.ru` |
 | Уведомления о заявках | `NOTIFY_EMAIL=info@geocore-academy.ru` |
 

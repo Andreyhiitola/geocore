@@ -48,7 +48,7 @@ def generate_wireframe_convex_hull(
     try:
         hull = ConvexHull(points)
 
-        obj = f"""# GeoCore Academy — Convex Hull Wireframe
+        obj = f"""# GeoCore-Academy — Convex Hull Wireframe
 # Метод: Выпуклая оболочка
 # Скважин: {df['HoleID'].nunique()}
 # Интервалов: {len(df)}

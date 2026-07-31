@@ -1,4 +1,4 @@
-# GeoCore Academy — Протокол рабочей сессии
+# GeoCore-Academy — Протокол рабочей сессии
 
 ---
 

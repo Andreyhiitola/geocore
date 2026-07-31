@@ -1,4 +1,4 @@
-# GeoCore Academy — Руководство по биллингу и аккаунтам Moodle
+# GeoCore-Academy — Руководство по биллингу и аккаунтам Moodle
 
 > Реализовано: 2026-04-21 (сессия 15)  
 > Охватывает: счета на оплату, подтверждение платежей, выдача аккаунтов Moodle, email-уведомления
@@ -238,7 +238,7 @@ docker logs geocore_api --tail 20 -f
 Доступ до: 2026-05-21
 
 С уважением,
-GeoCore Academy
+GeoCore-Academy
 info@geocore-academy.ru
 ```
 

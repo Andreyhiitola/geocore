@@ -1,5 +1,5 @@
 /* ============================================================
-   GeoCore Academy — брендинг SCORM-оболочки CourseLab 3
+   GeoCore-Academy — брендинг SCORM-оболочки CourseLab 3
    Подключается последним в start.html → переопределяет всё.
    Версия: 2.0 (полный редизайн, апрель 2026)
    ============================================================ */
@@ -132,7 +132,7 @@ body > .pinch-zoom-container > .cl-container {
   color: var(--gc-gold) !important;
 }
 
-/* ── Логотип GeoCore Academy (правый верхний угол) ──────────── */
+/* ── Логотип GeoCore-Academy (правый верхний угол) ──────────── */
 /* Добавляется через JS в repack.sh — см. inject-logo блок */
 #gc-logo {
   position: absolute;

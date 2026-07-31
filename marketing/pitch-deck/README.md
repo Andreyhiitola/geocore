@@ -1,4 +1,4 @@
-# Pitch-deck — Geocore-Academy
+# Pitch-deck — GeoCore-Academy
 
 Инвесторская/партнёрская презентация, золото/тёмный фирменный стиль (см. `frontend/index.html` — источник токенов).
 

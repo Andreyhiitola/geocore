@@ -1,4 +1,4 @@
-# GeoCore Academy — Журнал сессий
+# GeoCore-Academy — Журнал сессий
 
 ---
 
@@ -410,7 +410,7 @@ MOODLE_URL=http://localhost:8082 \
 ### Что сделали
 - Email полностью настроен и протестирован:
   - SMTP: Gmail (smtp.gmail.com, App Password) как транспорт
-  - `From: GeoCore Academy <9624294@gmail.com>`, `Reply-To: info@geocore-academy.ru`
+  - `From: GeoCore-Academy <9624294@gmail.com>`, `Reply-To: info@geocore-academy.ru`
   - `NOTIFY_EMAIL=info@geocore-academy.ru` — уведомления о заявках приходят в Zoho
   - Авто-ответ клиенту работает
   - Zoho Free не поддерживает внешний SMTP → при переходе на платный Zoho просто меняем переменные в .env
@@ -473,7 +473,7 @@ MOODLE_URL=http://localhost:8082 \
   - GRRRR05 — переписан текст про Полиметалл на общеотраслевую формулировку (Приказ Минприроды)
   - GRRRR14 — убрано «сотрудник АО Полиметалла», заменено на «главный геолог проекта»
   - GRRRR22 — убраны все упоминания Полиметалл УК и регламентов компании, выводы переписаны нейтрально
-  - Добавлен логотип GeoCore Academy в навигационную панель (Logotip2.png)
+  - Добавлен логотип GeoCore-Academy в навигационную панель (Logotip2.png)
 - Ребрендинг SCORM Leapfrog: убран логотип Полиметалла с обложки (Logotip.png → прозрачный)
 - Оба пакета обновлены на Google Drive (актуальная/), старые → _архив/
 - Курсы в Moodle: Паспортизация id=10, Leapfrog id=11 (пересоздан, старый id=9 удалён)

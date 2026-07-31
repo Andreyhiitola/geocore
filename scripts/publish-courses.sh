@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# GeoCore Academy — pipeline публикации курсов
+# GeoCore-Academy — pipeline публикации курсов
 #
 # Паттерн:
 #   Электронные курсы/ → (approval) → rsync → VPS /opt/geocore/courses/

@@ -1,6 +1,6 @@
 <?php
 /**
- * GeoCore Academy — добавление URL-активности в Moodle курс
+ * GeoCore-Academy — добавление URL-активности в Moodle курс
  * Запускается внутри Docker контейнера geocore_moodle:
  *
  *   docker cp scripts/moodle-add-url.php geocore_moodle:/tmp/

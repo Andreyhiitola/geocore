@@ -1,5 +1,5 @@
 #!/bin/bash
-# GeoCore Academy — healthcheck + Telegram alerts
+# GeoCore-Academy — healthcheck + Telegram alerts
 # Запуск: вручную или через cron на VPS
 # Переменные: TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID из .env
 
@@ -107,7 +107,7 @@ if [[ ${#ERRORS[@]} -eq 0 ]]; then
 else
     log "${#ERRORS[@]} проблем(а) обнаружено — отправляю в Telegram..."
 
-    message="🚨 *GeoCore Academy* — проблемы на \`${HOSTNAME_SHORT}\`
+    message="🚨 *GeoCore-Academy* — проблемы на \`${HOSTNAME_SHORT}\`
 $(date '+%d.%m.%Y %H:%M UTC')
 
 $(printf '• %s\n' "${ERRORS[@]}")"

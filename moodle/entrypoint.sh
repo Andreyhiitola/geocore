@@ -51,7 +51,7 @@ if [ ! -f "${MOODLE_DATA}/.installed" ]; then
         --adminuser=${MOODLE_ADMIN_USER:-admin} \
         --adminpass='${MOODLE_ADMIN_PASS}' \
         --adminemail='${MOODLE_ADMIN_EMAIL:-admin@localhost}' \
-        --fullname='${MOODLE_SITE_NAME:-GeoCore Academy}' \
+        --fullname='${MOODLE_SITE_NAME:-GeoCore-Academy}' \
         --shortname='${MOODLE_SITE_SHORTNAME:-geocore}' \
         --agree-license"
     touch "${MOODLE_DATA}/.installed"

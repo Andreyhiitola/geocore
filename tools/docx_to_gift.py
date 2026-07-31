@@ -37,7 +37,7 @@
 ЗАВИСИМОСТИ:
     pip install python-docx
 
-РАЗРАБОТАН ДЛЯ: GeoCore Academy, апрель 2026
+РАЗРАБОТАН ДЛЯ: GeoCore-Academy, апрель 2026
 =============================================================================
 """
 
@@ -223,7 +223,7 @@ def main():
     questions = parse(doc)
 
     out = [
-        "// GeoCore Academy\n"
+        "// GeoCore-Academy\n"
         "// Конвертировано из DOCX автоматически скриптом tools/docx_to_gift.py\n"
         "// Строки с // ПРОПУЩЕН — проверить вручную в Moodle после импорта\n\n"
     ]

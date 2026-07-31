@@ -1,6 +1,6 @@
 <?php
 /**
- * GeoCore Academy — загрузка SCORM ZIP в Moodle как активность
+ * GeoCore-Academy — загрузка SCORM ZIP в Moodle как активность
  * Запускается внутри контейнера geocore_moodle:
  *
  *   docker exec geocore_moodle php /tmp/moodle-upload-scorm.php \

@@ -1,10 +1,10 @@
 <?php
-// Конфигурация темы GeoCore Academy
+// Конфигурация темы GeoCore-Academy
 // Дочерняя тема на основе Boost — наследует всё, переопределяет стили и шаблоны
 defined('MOODLE_INTERNAL') || die();
 
 $THEME->name        = 'geocore';
-$THEME->fullname    = 'GeoCore Academy';
+$THEME->fullname    = 'GeoCore-Academy';
 $THEME->parents     = ['boost'];
 $THEME->sheets      = [];
 $THEME->enable_dock = false;

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ================================================================
-# GeoCore Academy — переупаковка SCORM с новым брендингом
+# GeoCore-Academy — переупаковка SCORM с новым брендингом
 #
 # Использование:
 #   ./repack.sh <входной.zip> [выходной.zip]
@@ -52,7 +52,7 @@ LOGO_HTML = """<div id="gc-logo" style="position:absolute;top:16px;right:20px;z-
     <polygon points="14,1 26,7.5 26,20.5 14,27 2,20.5 2,7.5" fill="#C9A84C"/>
     <text x="14" y="18" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="9" font-weight="600" fill="#0A0A0B">GC</text>
   </svg>
-  <span style="font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:#C9A84C;letter-spacing:0.04em;text-transform:uppercase;">GeoCore Academy</span>
+  <span style="font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:#C9A84C;letter-spacing:0.04em;text-transform:uppercase;">GeoCore-Academy</span>
 </div>"""
 
 INJECT = f"""<script>

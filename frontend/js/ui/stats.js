@@ -83,7 +83,7 @@ export function updateScriptOnly(holes, method, cutoff, standard) {
   }
   
   const macro = `!**********************************************************************
-!*  GeoCore Academy — Макрос для Datamine Studio RM
+!*  GeoCore-Academy — Макрос для Datamine Studio RM
 !*  ==================================================
 !*  Дата генерации: ${new Date().toLocaleString('ru')}
 !*  Скважин: ${holes.length}
@@ -169,7 +169,7 @@ ${densityRecommendation}
 !**********************************************************************
 
 !PRINT "======================================================================"
-!PRINT "GeoCore Academy — Результаты оценки ресурсов"
+!PRINT "GeoCore-Academy — Результаты оценки ресурсов"
 !PRINT "======================================================================"
 !PRINT "Стандарт: ${standard}"
 !PRINT "Метод: ${method.toUpperCase()}"

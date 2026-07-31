@@ -1,6 +1,6 @@
 <?php
 /**
- * GeoCore Academy — создание курса + URL-активности в Moodle
+ * GeoCore-Academy — создание курса + URL-активности в Moodle
  * Запускается внутри контейнера geocore_moodle:
  *
  *   docker exec geocore_moodle php /tmp/moodle-create-course.php \

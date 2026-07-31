@@ -1,4 +1,4 @@
-# GeoCore Academy — Roadmap
+# GeoCore-Academy — Roadmap
 
 ## В разработке / Запланировано
 

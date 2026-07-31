@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-GeoCore Academy — Конвертер тестов для Moodle
+GeoCore-Academy — Конвертер тестов для Moodle
 Запуск: python3 tools/convert.py
 """
 

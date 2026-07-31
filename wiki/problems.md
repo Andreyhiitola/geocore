@@ -56,9 +56,9 @@ docker compose pull && docker compose up -d
 
 ## Email: письма уходят от имени Gmail-адреса
 
-**Симптом:** В поле From отображается `9624294@gmail.com` вместо `GeoCore Academy`.  
+**Симптом:** В поле From отображается `9624294@gmail.com` вместо `GeoCore-Academy`.  
 **Причина:** Gmail SMTP переписывает From на адрес авторизованного аккаунта.  
-**Решение:** Явно указать `From: GeoCore Academy <9624294@gmail.com>` + `Reply-To: info@geocore-academy.ru`.  
+**Решение:** Явно указать `From: GeoCore-Academy <9624294@gmail.com>` + `Reply-To: info@geocore-academy.ru`.  
 **Где:** `backend/main.py` — функция отправки email.
 
 ---

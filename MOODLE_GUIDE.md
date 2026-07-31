@@ -1,4 +1,4 @@
-# Руководство по управлению Moodle в GeoCore Academy
+# Руководство по управлению Moodle в GeoCore-Academy
 
 ---
 

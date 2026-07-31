@@ -1,4 +1,4 @@
-# GeoCore Academy — Статус проекта
+# GeoCore-Academy — Статус проекта
 
 > Последнее обновление: 27 мая 2026  
 > Репозиторий: https://github.com/Andreyhiitola/geocore  
@@ -140,7 +140,7 @@ MOODLE_DB_USER=moodle
 MOODLE_DB_PASSWORD=       # сильный пароль
 
 MOODLE_WWWROOT=https://courses.geocore-academy.ru
-MOODLE_SITE_NAME=Geocore-Academy
+MOODLE_SITE_NAME=GeoCore-Academy
 MOODLE_SITE_SHORTNAME=geocore
 MOODLE_LANG=ru
 

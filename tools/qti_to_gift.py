@@ -19,7 +19,7 @@
     3. python3 qti_to_gift.py
     4. Импортируй .gift в Moodle: Банк вопросов → Импорт → GIFT
 
-РАЗРАБОТАН ДЛЯ: GeoCore Academy, апрель 2026
+РАЗРАБОТАН ДЛЯ: GeoCore-Academy, апрель 2026
 =============================================================================
 """
 
@@ -138,7 +138,7 @@ def main():
     assessment_title, questions = parse_qti(INPUT)
 
     out = [
-        f"// GeoCore Academy\n"
+        f"// GeoCore-Academy\n"
         f"// Тест: {assessment_title}\n"
         f"// Конвертировано из QTI 1.2 скриптом tools/qti_to_gift.py\n"
         f"// Вопросы с ⚠ содержат картинки — добавить вручную после импорта\n\n"

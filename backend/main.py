@@ -295,7 +295,7 @@ def _send_request_emails(req: CourseRequest) -> None:
         print("[email] SMTP не настроен (SMTP_HOST/USER/PASS) — письма не отправлены")
         return
 
-    SENDER = f"GeoCore Academy <{SMTP_USER}>"
+    SENDER = f"GeoCore-Academy <{SMTP_USER}>"
 
     # ── 1. Уведомление администратору ──────────────────────────────────────
     if NOTIFY_EMAIL:
@@ -334,7 +334,7 @@ def _send_request_emails(req: CourseRequest) -> None:
         f"{'─' * 44}\n\n"
         f"Наш менеджер свяжется с вами в течение 1 рабочего дня.\n\n"
         f"С уважением,\n"
-        f"GeoCore Academy\n"
+        f"GeoCore-Academy\n"
         f"{CONTACT_EMAIL}\n"
         f"{CONTACT_SITE}\n"
     )
@@ -361,7 +361,7 @@ def _send_interest_emails(req: CourseInterestRequest) -> None:
         print("[email] SMTP не настроен — письма о предзаписи не отправлены")
         return
 
-    SENDER = f"GeoCore Academy <{SMTP_USER}>"
+    SENDER = f"GeoCore-Academy <{SMTP_USER}>"
 
     if NOTIFY_EMAIL:
         admin_body = (
@@ -394,7 +394,7 @@ def _send_interest_emails(req: CourseInterestRequest) -> None:
         f"Как только наберётся группа, мы напишем вам первыми и предложим формат "
         f"обучения ({_format_label(req.format_pref)}).\n\n"
         f"С уважением,\n"
-        f"GeoCore Academy\n"
+        f"GeoCore-Academy\n"
         f"{CONTACT_EMAIL}\n"
         f"{CONTACT_SITE}\n"
     )
@@ -779,10 +779,10 @@ def _send_accounts_email(to_email: str, accounts: list, course_name: str,
         f"Данные для входа:\n{rows}\n\n"
         f"Ссылка на курс: {link}\n"
         f"Доступ до: {expiry_date or 'не ограничен'}\n\n"
-        f"С уважением,\nGeoCore Academy\n{CONTACT_EMAIL}"
+        f"С уважением,\nGeoCore-Academy\n{CONTACT_EMAIL}"
     )
     msg = MIMEMultipart()
-    msg["From"]    = f"GeoCore Academy <{SMTP_USER}>"
+    msg["From"]    = f"GeoCore-Academy <{SMTP_USER}>"
     msg["To"]      = to_email
     msg["Subject"] = f"Данные для входа — {course_name}"
     msg.attach(MIMEText(body, "plain", "utf-8"))
@@ -1592,7 +1592,7 @@ async def generate_mac_only(
     return PlainTextResponse(mac, media_type="text/plain")
 
 
-_CHAT_SYSTEM_PROMPT = """Ты — GeoCore Assistant, образовательный AI-ассистент платформы GeoCore Academy (geocore-academy.ru).
+_CHAT_SYSTEM_PROMPT = """Ты — GeoCore Assistant, образовательный AI-ассистент платформы GeoCore-Academy (geocore-academy.ru).
 
 ВАЖНО: Начинай ответ СРАЗУ с текста ответа. Никакого внутреннего монолога, рассуждений вслух, анализа задачи — только финальный ответ на русском языке.
 
@@ -1600,7 +1600,7 @@ _CHAT_SYSTEM_PROMPT = """Ты — GeoCore Assistant, образовательн�
 
 ФОРМАТ: 2–4 предложения, по-русски. Если тема охвачена курсом — упомяни: «Подробнее — в курсе "Название"».
 
-КУРСЫ GEOCORE ACADEMY:
+КУРСЫ GEOCORE-ACADEMY:
 - Геологическое моделирование (Базовый) — структурное и литологическое моделирование, интерпретация скважин
 - Геостатистика (Базовый) — вариограммный анализ, кригинг, оценка ресурсов МПИ
 - Комплексный кейс Тренажёра — полный цикл ГРР на виртуальном месторождении, JORC/CRIRSCO

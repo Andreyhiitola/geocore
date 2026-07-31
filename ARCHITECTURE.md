@@ -4,7 +4,7 @@
 📁 Сохраняем как ARCHITECTURE.md
 bash
 cat > ARCHITECTURE.md << 'EOF'
-# Архитектура GeoCore Academy
+# Архитектура GeoCore-Academy
 
 ## 📁 Полная структура проекта
 geocore/
@@ -270,7 +270,7 @@ MOODLE_DB_PASSWORD=change_me
 
 # Moodle settings
 MOODLE_WWWROOT=https://courses.geocore-academy.ru
-MOODLE_SITE_NAME=GeoCore Academy
+MOODLE_SITE_NAME=GeoCore-Academy
 MOODLE_SITE_SHORTNAME=geocore
 MOODLE_LANG=ru
 

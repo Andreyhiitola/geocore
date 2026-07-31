@@ -1,6 +1,6 @@
 #!/bin/bash
 # ╔══════════════════════════════════════════════════════════════════════════════╗
-# ║  GeoCore Academy — перенос RU → KZ (geocore-academy.ru → .kz)                 ║
+# ║  GeoCore-Academy — перенос RU → KZ (geocore-academy.ru → .kz)                 ║
 # ║                                                                              ║
 # ║  Двухфазный перенос (RU и KZ обычно не имеют прямого SSH между собой):        ║
 # ║                                                                              ║

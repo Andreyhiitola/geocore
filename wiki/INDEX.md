@@ -1,4 +1,4 @@
-# GeoCore Academy — Wiki Index
+# GeoCore-Academy — Wiki Index
 
 > Накопленные знания по проекту. Обновляется LLM в конце каждой сессии.
 > Последнее обновление: 2026-04-24

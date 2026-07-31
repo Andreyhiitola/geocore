@@ -1,6 +1,6 @@
 #!/bin/bash
 # ╔══════════════════════════════════════════════════════════════════════════════╗
-# ║  GeoCore Academy — Restore from Selectel S3                                ║
+# ║  GeoCore-Academy — Restore from Selectel S3                                ║
 # ║                                                                            ║
 # ║  Использование:                                                            ║
 # ║    ./restore.sh                     # интерактивный выбор точки            ║

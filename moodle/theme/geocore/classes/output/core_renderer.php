@@ -1,5 +1,5 @@
 <?php
-// Рендерер темы GeoCore Academy
+// Рендерер темы GeoCore-Academy
 // Наследует рендерер Boost — без этого Moodle не найдёт методы типа firstview_fakeblocks()
 namespace theme_geocore\output;
 

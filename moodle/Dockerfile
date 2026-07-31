@@ -34,7 +34,7 @@ RUN MAJOR=$(echo "${MOODLE_VERSION}" | cut -d. -f1) && \
 
 COPY php.ini /usr/local/etc/php/conf.d/moodle.ini
 
-# Копируем кастомную тему GeoCore Academy
+# Копируем кастомную тему GeoCore-Academy
 # В Moodle 5.x темы живут в public/theme/, в 4.x — в theme/
 COPY theme/geocore /tmp/geocore_theme
 RUN MAJOR=$(echo "${MOODLE_VERSION}" | cut -d. -f1) && \

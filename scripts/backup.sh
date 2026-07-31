@@ -1,5 +1,5 @@
 #!/bin/bash
-# GeoCore Academy — резервное копирование в Selectel S3 (гибридная схема)
+# GeoCore-Academy — резервное копирование в Selectel S3 (гибридная схема)
 #
 #   mysqldump   ──→ daily/weekly/monthly с GFS-ротацией (мало весит, быстро меняется)
 #   moodledata  ──→ s3 sync в moodledata-mirror/ (инкрементально, требует versioning на бакете)

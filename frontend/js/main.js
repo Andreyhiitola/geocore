@@ -1,5 +1,5 @@
 /**
- * GeoCore Academy — main.js
+ * GeoCore-Academy — main.js
  * Точка входа. Инициализация и обработчики событий.
  */
 
@@ -117,7 +117,7 @@ function wireEvents() {
     // Текстовый отчёт
     const stats = document.getElementById('statsOut')?.textContent || '';
     _download(
-      `Отчёт GeoCore Academy\nДата: ${new Date().toLocaleString('ru')}\n\n${stats}`,
+      `Отчёт GeoCore-Academy\nДата: ${new Date().toLocaleString('ru')}\n\n${stats}`,
       'report.txt', 'text/plain'
     );
   });
@@ -126,7 +126,7 @@ function wireEvents() {
   document.getElementById('exportBlockmodelBtn')?.addEventListener('click', () => {
     const blocks = window.currentBlocks || [];
     if (!blocks.length) { alert('Сначала постройте блочную модель'); return; }
-    let content = '! GeoCore Academy — Datamine Block Model\n! Format: X Y Z GRADE CATEGORY\n';
+    let content = '! GeoCore-Academy — Datamine Block Model\n! Format: X Y Z GRADE CATEGORY\n';
     blocks.forEach(b => {
       content += `${b.x} ${b.y} ${b.z} ${b.grade.toFixed(4)} ${b.category}\n`;
     });
@@ -141,7 +141,7 @@ function wireEvents() {
 
     if (!vertices?.length) { alert('Каркас не загружен'); return; }
 
-    let wrl = '#VRML V2.0 utf8\n# GeoCore Academy Wireframe\nShape {\n  geometry IndexedFaceSet {\n    coord Coordinate {\n      point [\n';
+    let wrl = '#VRML V2.0 utf8\n# GeoCore-Academy Wireframe\nShape {\n  geometry IndexedFaceSet {\n    coord Coordinate {\n      point [\n';
     vertices.forEach(v => { wrl += `        ${v[0]} ${v[1]} ${v[2]},\n`; });
     wrl += '      ]\n    }\n    coordIndex [\n';
     (facesData || []).forEach(f => { wrl += `      ${f.v[0]} ${f.v[1]} ${f.v[2]} -1,\n`; });

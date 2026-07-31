@@ -1,4 +1,4 @@
-# GeoCore Academy — Disaster Recovery Runbook
+# GeoCore-Academy — Disaster Recovery Runbook
 
 > Открыл во время инцидента — читай сверху вниз, выполняй по шагам.
 

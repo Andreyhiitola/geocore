@@ -1,6 +1,6 @@
 #!/bin/bash
 # ╔══════════════════════════════════════════════════════════════════════════════╗
-# ║  GeoCore Academy — Bootstrap новой машины + восстановление из S3           ║
+# ║  GeoCore-Academy — Bootstrap новой машины + восстановление из S3           ║
 # ║                                                                            ║
 # ║  Production (новый VPS у провайдера):                                      ║
 # ║    curl -fsSL https://raw.githubusercontent.com/Andreyhiitola/geocore/main/scripts/bootstrap-vps.sh -o /tmp/bootstrap.sh && bash /tmp/bootstrap.sh --prod
@@ -46,7 +46,7 @@ step() { echo -e "\n${CYAN}━━━ $* ━━━${NC}"; }
 
 echo -e "${CYAN}"
 echo "╔══════════════════════════════════════════╗"
-echo "║   GeoCore Academy — Bootstrap VPS        ║"
+echo "║   GeoCore-Academy — Bootstrap VPS        ║"
 echo "╚══════════════════════════════════════════╝"
 echo -e "${NC}"
 

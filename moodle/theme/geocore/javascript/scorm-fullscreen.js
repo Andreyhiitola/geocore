@@ -1,4 +1,4 @@
-// GeoCore Academy — fullscreen для SCORM-плеера.
+// GeoCore-Academy — fullscreen для SCORM-плеера.
 // CSS скрывает хром Moodle, JS вписывает контент CourseLab (фиксированная
 // пиксельная вёрстка) в реальный размер iframe — иначе нижний тулбар
 // SCORM-курса уезжает за видимую область на экранах, где он выше

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# GeoCore Academy — упаковка курсов CourseLab в SCORM и загрузка в Moodle
+# GeoCore-Academy — упаковка курсов CourseLab в SCORM и загрузка в Moodle
 #
 # Паттерн:
 #   <source_dir>/<Курс>/1/start.html  →  imsmanifest.xml + zip  →  Moodle SCORM-активность

@@ -1,4 +1,4 @@
-# GeoCore Academy — стек для KZ (становится основным регионом).
+# GeoCore-Academy — стек для KZ (становится основным регионом).
 # Ядро: mariadb + moodle + frontend + backend + backup.
 # НЕ включает bot / usn / watchtower — экономия RAM (4 ГБ бокс).
 #

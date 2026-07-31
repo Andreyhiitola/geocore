@@ -12,7 +12,7 @@ Moodle XML поддерживает встроенные изображения 
     3. python3 docx_to_moodle_xml.py
     4. Импортируй в Moodle: Банк вопросов → Импорт → Moodle XML
 
-РАЗРАБОТАН ДЛЯ: GeoCore Academy, апрель 2026
+РАЗРАБОТАН ДЛЯ: GeoCore-Academy, апрель 2026
 =============================================================================
 """
 
@@ -235,7 +235,7 @@ def main():
     out = [
         '<?xml version="1.0" encoding="UTF-8"?>',
         '<quiz>',
-        '<!-- GeoCore Academy -->',
+        '<!-- GeoCore-Academy -->',
         '<!-- Конвертировано из DOCX скриптом tools/docx_to_moodle_xml.py -->',
         '',
     ]

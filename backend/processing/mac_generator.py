@@ -59,7 +59,7 @@ def generate_mac(
     
     # Заголовок скрипта
     mac = f"""! ====================================================================
-! GeoCore Academy — Datamine Macro
+! GeoCore-Academy — Datamine Macro
 ! ====================================================================
 ! Дата генерации: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 ! 
@@ -80,7 +80,7 @@ def generate_mac(
 ! ====================================================================
 
 !PRINT "============================================================"
-!PRINT "GeoCore Academy — Datamine Studio RM Macro"
+!PRINT "GeoCore-Academy — Datamine Studio RM Macro"
 !PRINT "Начало обработки: {datetime.now().strftime('%H:%M:%S')}"
 !PRINT "============================================================"
 
@@ -192,7 +192,7 @@ def generate_mac(
 !PRINT "  - blocks_{metal_type}.csv (блоки в формате CSV)"
 !PRINT "============================================================"
 
-!PRINT "GeoCore Academy — Datamine Macro выполнен успешно!"
+!PRINT "GeoCore-Academy — Datamine Macro выполнен успешно!"
 """
     
     return mac
@@ -217,7 +217,7 @@ def generate_mac_simple(
         str: упрощённый .mac скрипт
     """
     
-    return f"""! GeoCore Academy — Simplified Datamine Macro
+    return f"""! GeoCore-Academy — Simplified Datamine Macro
 ! Скважин: {df['HoleID'].nunique()}
 ! Композит: {comp_len}м | Cutoff: {cutoff}
 
@@ -263,7 +263,7 @@ def generate_mac_with_variogram(
             "dip": 70
         }
     
-    return f"""! GeoCore Academy — Kriging Macro with Variogram
+    return f"""! GeoCore-Academy — Kriging Macro with Variogram
 ! Скважин: {df['HoleID'].nunique()}
 ! Вариограмма: Nugget={variogram_params['nugget']}, Sill={variogram_params['sill']}
 ! Range: Major={variogram_params['range_major']}, Semi={variogram_params['range_semi']}, Minor={variogram_params['range_minor']}
@@ -294,7 +294,7 @@ def generate_mac_for_coal(
     Специализированный .mac скрипт для угольных месторождений
     """
     
-    return f"""! GeoCore Academy — Coal Deposit Macro
+    return f"""! GeoCore-Academy — Coal Deposit Macro
 ! Скважин: {df['HoleID'].nunique()}
 ! Тип: Каменный уголь
 ! Плотность: {density} т/м³
@@ -320,7 +320,7 @@ def generate_mac_for_porphyry(
     Специализированный .mac скрипт для медно-порфировых месторождений
     """
     
-    return f"""! GeoCore Academy — Porphyry Copper Macro
+    return f"""! GeoCore-Academy — Porphyry Copper Macro
 ! Скважин: {df['HoleID'].nunique()}
 ! Тип: Медно-порфировое
 ! Cutoff Cu: {cutoff_cu}%, Cutoff Au: {cutoff_au} г/т
