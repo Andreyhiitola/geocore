@@ -7,6 +7,9 @@
  *   planned — только в планах, некликабельные, самые блёклые
  */
 
+// Каждое зеркало (.ru/.kz) обслуживает свой собственный api.<домен> — см. MIGRATION_KZ.md.
+const _API = 'https://api.' + location.hostname.replace(/^www\./, '').split('.').slice(-2).join('.');
+
 function esc(s) {
   return String(s ?? '')
     .replace(/&/g, '&amp;')
@@ -249,7 +252,7 @@ function openRequestForm(courseTitle) {
     };
 
     try {
-      const resp = await fetch('https://api.geocore-academy.ru/api/requests', {
+      const resp = await fetch(`${_API}/api/requests`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -363,7 +366,7 @@ function openInterestForm(courseTitle) {
     };
 
     try {
-      const resp = await fetch('https://api.geocore-academy.ru/api/course-interest', {
+      const resp = await fetch(`${_API}/api/course-interest`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -391,7 +394,7 @@ function openInterestForm(courseTitle) {
 // ── API ──────────────────────────────────────────────────────────────────────
 
 async function fetchCoursesFromAPI() {
-  const resp = await fetch('https://api.geocore-academy.ru/api/courses');
+  const resp = await fetch(`${_API}/api/courses`);
   if (!resp.ok) throw new Error(`API ${resp.status}`);
   const { courses } = await resp.json();
   return courses;

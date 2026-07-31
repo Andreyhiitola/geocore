@@ -1,4 +1,4 @@
-const _API   = 'https://api.geocore-academy.ru';
+const _API   = 'https://api.' + location.hostname.replace(/^www\./, '').split('.').slice(-2).join('.');
 const _TG    = 'https://t.me/geocore_academybot';
 const _EMAIL = 'info@geocore-academy.ru';
 
