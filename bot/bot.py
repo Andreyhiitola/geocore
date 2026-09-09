@@ -516,7 +516,7 @@ def handle(upd):
         except Exception:
             pass
     else:
-        msg  = upd.get('message', {})
+        msg  = upd.get('message') or upd.get('edited_message', {})
         cid  = msg.get('chat', {}).get('id')
         text = msg.get('text', '').strip()
 
@@ -524,12 +524,12 @@ def handle(upd):
     if cid != CHAT_ID:
         if cb:
             return
-        _handle_client(upd.get('message', {}), cid, text)
+        _handle_client(msg, cid, text)
         return
 
     # ── Проверка: admin отвечает клиенту через Reply ──────────────────────────
     if not cb:
-        reply_to = upd.get('message', {}).get('reply_to_message', {})
+        reply_to = msg.get('reply_to_message', {})
         if reply_to and text:
             m = re.search(r'\[cid:(\d+)\]', reply_to.get('text', ''))
             if m:
