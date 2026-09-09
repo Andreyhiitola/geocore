@@ -121,14 +121,12 @@ def _check_token_reminder() -> None:
     )
 
 
-REPLY_KEYBOARD = {
-    'keyboard': [
-        [{'text': '📊 Статус'}, {'text': '💾 Бэкап'}],
-        [{'text': '📋 История бэкапов'}, {'text': '🔑 Токены'}],
-    ],
-    'resize_keyboard': True,
-    'persistent': True,
-}
+MAIN_MENU_KEYBOARD = {'inline_keyboard': [
+    [{'text': '📊 Статус', 'callback_data': 'menu_status'},
+     {'text': '💾 Бэкап', 'callback_data': 'menu_backup'}],
+    [{'text': '📋 История бэкапов', 'callback_data': 'menu_backup_info'},
+     {'text': '🔑 Токены', 'callback_data': 'menu_tokens'}],
+]}
 
 
 STATUS_KEYBOARD = {'inline_keyboard': [[
@@ -149,16 +147,14 @@ CLIENT_KEYBOARD = {
 }
 
 
-def send(text, chat_id=None, keyboard=False, inline=None, reply_markup=None):
+def send(text, chat_id=None, inline=None, reply_markup=None):
     try:
         payload = {
             'chat_id': chat_id or CHAT_ID,
             'text': text,
             'parse_mode': 'Markdown',
         }
-        if keyboard:
-            payload['reply_markup'] = REPLY_KEYBOARD
-        elif reply_markup:
+        if reply_markup:
             payload['reply_markup'] = reply_markup
         if inline:
             payload['reply_markup'] = inline
@@ -561,13 +557,13 @@ def handle(upd):
         return
 
     if text in ('/start', '/help'):
-        send("*GeoCore Bot*\n\n📊 Статус — метрики VPS и статус контейнеров\n💾 Бэкап — запустить бэкап вручную\n🔑 Токены — ротация и напоминания", cid, keyboard=True)
-    elif text in ('/status', '📊 Статус'):
+        send("*GeoCore Bot*\n\n📊 Статус — метрики VPS и статус контейнеров\n💾 Бэкап — запустить бэкап вручную\n🔑 Токены — ротация и напоминания", cid, inline=MAIN_MENU_KEYBOARD)
+    elif text in ('/status', '📊 Статус', 'menu_status'):
         try:
             send(status_text(), cid, inline=STATUS_KEYBOARD)
         except Exception as e:
             send(f"Ошибка: {e}", cid)
-    elif text in ('/backup', '💾 Бэкап'):
+    elif text in ('/backup', '💾 Бэкап', 'menu_backup'):
         mid = send("⏳ *Бэкап запущен*\n\n`[ ]` Дамп БД\n`[ ]` Архив moodledata\n`[ ]` Загрузка в S3\n`[ ]` Ротация", cid)
 
         def run_backup(cid, mid):
@@ -639,12 +635,12 @@ def handle(upd):
                 edit(cid, mid, f"❌ <b>Бэкап завершился с ошибкой</b>\n\nDB: <code>{db_size}</code>\n\n<code>{err}</code>")
 
         threading.Thread(target=run_backup, args=(cid, mid), daemon=True).start()
-    elif text in ('/backup_info', '📋 История бэкапов'):
+    elif text in ('/backup_info', '📋 История бэкапов', 'menu_backup_info'):
         try:
             send(backup_history_text(), cid)
         except Exception as e:
             send(f"Ошибка: {e}", cid)
-    elif text in ('/tokens', '🔑 Токены'):
+    elif text in ('/tokens', '🔑 Токены', 'menu_tokens'):
         send(_tokens_text(), cid, inline=TOKEN_KEYBOARD)
 
 
@@ -662,7 +658,7 @@ def poll():
 
 
 if __name__ == '__main__':
-    send(f"🟢 *GeoCore Bot {REGION} запущен*", keyboard=True)
+    send(f"🟢 *GeoCore Bot {REGION} запущен*")
     threading.Thread(target=watchdog_loop, daemon=True).start()
     threading.Thread(target=mail_loop, daemon=True).start()
     poll()
