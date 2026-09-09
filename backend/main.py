@@ -2,7 +2,7 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException, Form, BackgroundTasks, Depends, Header, Response, Cookie
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, PlainTextResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 import pandas as pd
 import io
 import os
@@ -138,6 +138,8 @@ async def startup():
                     "ALTER TABLE requests ADD COLUMN IF NOT EXISTS request_type VARCHAR(20) DEFAULT 'order'",
                     "ALTER TABLE requests ADD COLUMN IF NOT EXISTS phone VARCHAR(50) NULL",
                     "ALTER TABLE requests ADD COLUMN IF NOT EXISTS format_pref VARCHAR(20) NULL",
+                    "ALTER TABLE requests ADD COLUMN IF NOT EXISTS consent_pd TINYINT(1) DEFAULT 0",
+                    "ALTER TABLE requests ADD COLUMN IF NOT EXISTS consent_pd_at TIMESTAMP NULL",
                 ]:
                     await cur.execute(_col)
                 await cur.execute("""
@@ -267,6 +269,14 @@ class CourseRequest(BaseModel):
     employee_name: str
     employee_email: str
     comment: str = ""
+    consent: bool
+
+    @field_validator("consent")
+    @classmethod
+    def _consent_must_be_true(cls, v: bool) -> bool:
+        if not v:
+            raise ValueError("Требуется согласие на обработку персональных данных")
+        return v
 
 
 class CourseInterestRequest(BaseModel):
@@ -277,6 +287,14 @@ class CourseInterestRequest(BaseModel):
     format_pref: str = ""  # "online" | "offline" | ""
     company_name: str = ""
     comment: str = ""
+    consent: bool
+
+    @field_validator("consent")
+    @classmethod
+    def _consent_must_be_true(cls, v: bool) -> bool:
+        if not v:
+            raise ValueError("Требуется согласие на обработку персональных данных")
+        return v
 
 
 def _smtp_send(msg: MIMEMultipart) -> None:
@@ -892,8 +910,9 @@ async def create_request(request: CourseRequest, background_tasks: BackgroundTas
                 await cur.execute("""
                     INSERT INTO requests
                         (course_name, company_name, inn, contact_email,
-                         headcount, employee_name, employee_email, comment)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                         headcount, employee_name, employee_email, comment,
+                         consent_pd, consent_pd_at)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 1, NOW())
                 """, (
                     request.course_name, request.company_name, request.inn,
                     request.contact_email, request.headcount,
@@ -921,8 +940,9 @@ async def create_course_interest(request: CourseInterestRequest, background_task
                     INSERT INTO requests
                         (course_name, company_name, inn, contact_email,
                          headcount, employee_name, employee_email, comment,
-                         request_type, phone, format_pref)
-                    VALUES (%s, %s, '', %s, 1, %s, %s, %s, 'interest', %s, %s)
+                         request_type, phone, format_pref,
+                         consent_pd, consent_pd_at)
+                    VALUES (%s, %s, '', %s, 1, %s, %s, %s, 'interest', %s, %s, 1, NOW())
                 """, (
                     request.course_name, request.company_name, request.email,
                     request.name, request.email, request.comment,

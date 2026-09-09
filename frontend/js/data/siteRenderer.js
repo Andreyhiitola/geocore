@@ -219,6 +219,11 @@ function openRequestForm(courseTitle) {
       <input type="email" name="employee_email" required placeholder="ivanov@company.ru">
       <label>Комментарий</label>
       <textarea name="comment" rows="3" placeholder="Пожелания, вопросы..."></textarea>
+      <label class="req-consent">
+        <input type="checkbox" name="consent" required>
+        Даю согласие на обработку персональных данных в соответствии с
+        <a href="privacy.html" target="_blank" rel="noopener">Политикой конфиденциальности</a> *
+      </label>
       <div class="req-form-btns">
         <button type="button" class="req-form-cancel" id="gc-req-cancel">Отмена</button>
         <button type="submit" class="modal-cta" style="margin-top:0;border:none;cursor:pointer">Отправить заявку</button>
@@ -237,6 +242,13 @@ function openRequestForm(courseTitle) {
     e.preventDefault();
     const form = e.target;
     const statusEl = document.getElementById('gc-req-status');
+
+    if (!form.consent.checked) {
+      statusEl.style.color = '#e57373';
+      statusEl.textContent = 'Нужно согласие на обработку персональных данных.';
+      return;
+    }
+
     statusEl.style.color = 'var(--text-muted)';
     statusEl.textContent = 'Отправка...';
 
@@ -249,6 +261,7 @@ function openRequestForm(courseTitle) {
       employee_name:  form.employee_name.value,
       employee_email: form.employee_email.value,
       comment:        form.comment.value,
+      consent:        form.consent.checked,
     };
 
     try {
@@ -334,6 +347,11 @@ function openInterestForm(courseTitle) {
       <input type="text" name="company_name" placeholder="Необязательно">
       <label>Комментарий</label>
       <textarea name="comment" rows="3" placeholder="Пожелания, вопросы..."></textarea>
+      <label class="req-consent">
+        <input type="checkbox" name="consent" required>
+        Даю согласие на обработку персональных данных в соответствии с
+        <a href="privacy.html" target="_blank" rel="noopener">Политикой конфиденциальности</a> *
+      </label>
       <div class="req-form-btns">
         <button type="button" class="req-form-cancel" id="gc-interest-cancel">Отмена</button>
         <button type="submit" class="modal-cta" style="margin-top:0;border:none;cursor:pointer">Отправить</button>
@@ -352,6 +370,13 @@ function openInterestForm(courseTitle) {
     e.preventDefault();
     const form = e.target;
     const statusEl = document.getElementById('gc-interest-status');
+
+    if (!form.consent.checked) {
+      statusEl.style.color = '#e57373';
+      statusEl.textContent = 'Нужно согласие на обработку персональных данных.';
+      return;
+    }
+
     statusEl.style.color = 'var(--text-muted)';
     statusEl.textContent = 'Отправка...';
 
@@ -363,6 +388,7 @@ function openInterestForm(courseTitle) {
       format_pref:  form.format_pref.value,
       company_name: form.company_name.value,
       comment:      form.comment.value,
+      consent:      form.consent.checked,
     };
 
     try {
@@ -440,7 +466,28 @@ export function renderFooter(data) {
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 
+function initCookieBanner() {
+  const KEY = 'gcCookieConsent';
+  if (localStorage.getItem(KEY)) return;
+
+  const el = document.createElement('div');
+  el.className = 'cookie-banner';
+  el.innerHTML = `
+    <p>Сайт использует технически необходимые cookie и локальное хранилище браузера
+    для работы интерфейса. Подробнее — в
+    <a href="privacy.html" target="_blank" rel="noopener">Политике конфиденциальности</a>.</p>
+    <button type="button" id="gc-cookie-accept">Принять</button>
+  `;
+  document.body.appendChild(el);
+
+  document.getElementById('gc-cookie-accept').addEventListener('click', () => {
+    localStorage.setItem(KEY, 'accepted');
+    el.remove();
+  });
+}
+
 export async function initSite({ showPlanned = true, showSoon = true } = {}) {
+  initCookieBanner();
   try {
     const data = await loadSiteData();
     renderNav(data);
