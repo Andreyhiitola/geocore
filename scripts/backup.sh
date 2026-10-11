@@ -3,7 +3,9 @@
 #
 #   mysqldump   ──→ daily/weekly/monthly с GFS-ротацией (мало весит, быстро меняется)
 #   moodledata  ──→ s3 sync в moodledata-mirror/ (инкрементально, требует versioning на бакете)
-#                    + раз в месяц холодный полный tar-снапшот в monthly/
+#
+# Месячного tar-снапшота moodledata больше нет (с 11.10.2026): SCORM почти не
+# сжимается, архив весил ~38 ГБ и дублировал mirror — основная статья расходов S3
 #
 # Запускается ежедневно в 02:00 из контейнера geocore_backup
 # Переменные окружения: приходят из docker-compose (.env на VPS)
@@ -30,12 +32,6 @@ TELEGRAM_BOT_TOKEN="${TELEGRAM_BOT_TOKEN:-}"
 TELEGRAM_CHAT_ID="${TELEGRAM_CHAT_ID:-}"
 
 # Папки moodledata, которые пересоздаются автоматически — исключаем из бэкапа
-TAR_EXCLUDES=(
-    --exclude='/moodledata/cache'
-    --exclude='/moodledata/localcache'
-    --exclude='/moodledata/temp'
-    --exclude='/moodledata/trashdir'
-)
 SYNC_EXCLUDES=(
     --exclude 'cache/*'
     --exclude 'localcache/*'
@@ -95,8 +91,8 @@ log "Старт бэкапа за $DATE"
 notify "⏳ *GeoCore Backup запущен*\n$(date '+%d.%m.%Y %H:%M')"
 mkdir -p "$BACKUP_DIR"
 # Чистим BACKUP_DIR при любом завершении (успех, fail() или ERR-trap) — иначе
-# при ошибке загрузки в S3 временные файлы (включая месячный tar.gz moodledata)
-# остаются в /tmp и забивают диск контейнера/хоста
+# при ошибке загрузки в S3 временные файлы остаются в /tmp и забивают диск
+# контейнера/хоста
 trap 'rm -rf "$BACKUP_DIR"' EXIT
 
 # ── 1. Дамп базы данных ──────────────────────────────────────────────────────
@@ -164,20 +160,9 @@ else
     log "WARNING: ошибка синхронизации moodledata — продолжаем (БД уже в S3)"
 fi
 
-# Ежемесячный (1-го числа): холодный полный снапшот moodledata
-if [[ "$DAY_OF_MONTH" == "01" ]]; then
-    MONTH=$(date +%Y-%m)
-    log "Ежемесячный холодный снапшот moodledata ($MONTH)..."
-    MOODLE_SNAPSHOT="$BACKUP_DIR/moodle-${MONTH}.tar.gz"
-    tar -czf "$MOODLE_SNAPSHOT" "${TAR_EXCLUDES[@]}" /moodledata \
-        || fail "Ошибка архивирования moodledata"
-    log "moodledata snapshot: $(du -sh "$MOODLE_SNAPSHOT" | cut -f1)"
-    s3 cp "$MOODLE_SNAPSHOT" "s3://${S3_BUCKET}/monthly/moodle-${MONTH}.tar.gz" || fail "Ошибка загрузки monthly moodle в S3"
-fi
-
 # ── 5. Ротация старых бэкапов БД и USN ────────────────────────────────────────
 # moodledata в ротации не нуждается: mirror живёт постоянно (старые версии — через
-# S3 versioning + lifecycle), а monthly-снапшоты ротируются вместе с db ниже.
+# S3 versioning; lifecycle на Selectel не работает, см. wiki/BACKUP.md).
 # Ротация некритична — ошибки не прерывают бэкап
 log "Ротация daily (оставляем 7)..."
 rotate daily db 7
@@ -188,17 +173,8 @@ rotate weekly db 4
 rotate weekly usn 4
 
 log "Ротация monthly (оставляем 12)..."
+rotate monthly db 12
 rotate monthly usn 12
-s3 ls "s3://${S3_BUCKET}/monthly/" \
-    | awk '{print $4}' \
-    | { grep '^db-' || true; } \
-    | sort \
-    | head -n -12 \
-    | while read -r key; do
-        s3 rm "s3://${S3_BUCKET}/monthly/${key}" || true
-        moodle_key="${key/db-/moodle-}"
-        s3 rm "s3://${S3_BUCKET}/monthly/${moodle_key%.sql.gz}.tar.gz" 2>/dev/null || true
-    done || log "Ротация monthly: пропущена (ошибка S3)"
 
 # ── 6. Финал ─────────────────────────────────────────────────────────────────
 log "Бэкап завершён."

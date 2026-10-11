@@ -86,16 +86,15 @@ done
 
 DB_KEY=""
 MOODLE_KEY=""
-MOODLE_SOURCE=""   # "mirror" (moodledata-mirror/, текущее состояние) | "snapshot" (monthly tar.gz, точка во времени)
+MOODLE_SOURCE=""   # "mirror" (moodledata-mirror/, текущее состояние) | "snapshot" (monthly tar.gz — до 11.10.2026, сейчас не создаётся)
 RESTORE_POINT=""
 
 # Превращает строку "2024-04-20" / "weekly/2024-W15" / "monthly/2024-04"
 # в конкретные S3-ключи DB_KEY/MOODLE_KEY и источник moodledata
 #
-# daily/weekly: БД — точная точка из GFS; moodledata — из ТЕКУЩЕГО mirror
-#               (moodledata синкается инкрементально, отдельных daily/weekly
-#               снапшотов файлов больше нет — см. BACKUP.md)
-# monthly:      БД и moodledata — оба из точки месяца (холодный tar-снапшот)
+# daily/weekly/monthly: БД — точная точка из GFS; moodledata — из ТЕКУЩЕГО
+#               mirror (moodledata синкается инкрементально, снапшотов файлов
+#               больше нет, месячный tar убран 11.10.2026 — см. BACKUP.md)
 resolve_keys() {
     local point="$1"
     if [[ "$point" =~ ^daily/([0-9]{4}-[0-9]{2}-[0-9]{2})$ ]]; then
@@ -115,8 +114,7 @@ resolve_keys() {
     elif [[ "$point" =~ ^monthly/(.+)$ ]]; then
         local id="${BASH_REMATCH[1]}"
         DB_KEY="monthly/db-${id}.sql.gz"
-        MOODLE_KEY="monthly/moodle-${id}.tar.gz"
-        MOODLE_SOURCE="snapshot"
+        MOODLE_SOURCE="mirror"
         RESTORE_POINT="monthly/${id}"
     else
         fail "Неизвестный формат: '${point}'. Примеры: 2024-04-20 | weekly/2024-W15 | monthly/2024-04"

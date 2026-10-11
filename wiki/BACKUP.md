@@ -13,7 +13,6 @@
 ```
 MariaDB (mysqldump) ──→ daily/weekly/monthly/db-*.sql.gz   (GFS-ротация)
 moodledata          ──→ moodledata-mirror/                 (s3 sync --delete, ежедневно)
-moodledata          ──→ monthly/moodle-*.tar.gz            (полный снапшот, только 1-го числа)
 usn.db              ──→ daily/usn-*.db
 ```
 
@@ -21,16 +20,19 @@ usn.db              ──→ daily/usn-*.db
 почти не меняются. Старая схема гнала полный `tar.gz` каждый день и хранила его
 по GFS — до 23 почти идентичных копий по 36 ГБ (~840 ГБ за статичные данные).
 `s3 sync` хранит одно актуальное состояние + версии изменившихся файлов (защита
-через S3 versioning, см. ниже), а ежемесячный `tar.gz` даёт холодную точку
-восстановления "на начало месяца".
+через S3 versioning, см. ниже).
 
-**GFS-ротация (только БД и месячный снапшот moodledata):**
+**Месячный `moodle-*.tar.gz` убран 11.10.2026.** SCORM почти не сжимается — архив
+весил ~38 ГБ, почти столько же, сколько сам moodledata, и дублировал mirror. При
+хранении 12 штук это до ~470 ГБ на бакет — главная статья расходов на S3.
+
+**GFS-ротация (только БД и USN):**
 
 | Папка | Хранится | Когда создаётся |
 |-------|----------|----------------|
 | `daily/` | 7× `db-*.sql.gz` | каждый день |
 | `weekly/` | 4× `db-*.sql.gz` | каждое воскресенье |
-| `monthly/` | 12× `db-*.sql.gz` + 12× `moodle-*.tar.gz` | 1-го числа |
+| `monthly/` | 12× `db-*.sql.gz` | 1-го числа |
 
 `moodledata-mirror/` ротации не подлежит — это живое зеркало с versioning
 (старые версии файлов истекают по lifecycle через `NONCURRENT_DAYS`, см.
@@ -206,9 +208,6 @@ aws --endpoint-url https://s3.ru-3.storage.selcloud.ru s3 ls s3://geocore-backup
 # Зеркало moodledata — текущий размер
 aws --endpoint-url https://s3.ru-3.storage.selcloud.ru \
   s3 ls s3://geocore-backups/moodledata-mirror/ --recursive --summarize | tail -2
-
-# Месячные холодные снапшоты moodledata
-aws --endpoint-url https://s3.ru-3.storage.selcloud.ru s3 ls s3://geocore-backups/monthly/ | grep moodle
 ```
 
 ---
@@ -233,13 +232,10 @@ bash scripts/restore.sh weekly/2026-W15  # конкретная неделя
 
 **Важно (гибридная схема):** moodledata восстанавливается по-разному в зависимости от точки:
 
-- `daily/<date>` и `weekly/<id>` — БД восстанавливается на эту точку, а
+- `daily/<date>`, `weekly/<id>` и `monthly/<id>` — БД восстанавливается на эту точку, а
   **moodledata — из текущего `moodledata-mirror/`** (т.е. на "сейчас", не на
   дату точки). Для разноса по времени между БД и файлами это не страшно —
   файлы Moodle (SCORM-пакеты и т.п.) почти не меняются.
-- `monthly/<id>` — и БД, и moodledata восстанавливаются из **холодного
-  снапшота на 1-е число месяца** (`monthly/moodle-<id>.tar.gz`) — полностью
-  согласованная точка восстановления.
 
 Восстановление moodledata из mirror требует `AWS_ACCESS_KEY_ID` /
 `AWS_SECRET_ACCESS_KEY` в `.env` (используется `amazon/aws-cli` для `s3 sync`
@@ -310,8 +306,7 @@ aws --endpoint-url https://s3.ru-3.storage.selcloud.ru s3api get-bucket-lifecycl
 ## Оптимизация размера бэкапа
 
 `backup.sh` исключает временные папки Moodle — они пересоздаются автоматически.
-Список одинаковый для `s3 sync` (`SYNC_EXCLUDES`, ежедневное зеркало) и для
-`tar.gz` (`TAR_EXCLUDES`, месячный холодный снапшот):
+Список — `SYNC_EXCLUDES` для `s3 sync` (ежедневное зеркало):
 
 | Исключено | Что там | Безопасно? |
 |-----------|---------|-----------|
@@ -323,8 +318,8 @@ aws --endpoint-url https://s3.ru-3.storage.selcloud.ru s3api get-bucket-lifecycl
 
 mysqldump (БД) — каждый раз полный дамп, но он маленький и быстро меняется,
 поэтому GFS-ротация по нему оправдана. moodledata — `s3 sync` инкрементален
-(заливает только изменившиеся/новые файлы), а полный `tar.gz` теперь делается
-только раз в месяц вместо каждого дня — это и есть основная экономия хранилища.
+(заливает только изменившиеся/новые файлы), полных `tar.gz` больше нет вообще
+(ежедневные убраны 11.06.2026, месячные — 11.10.2026).
 
 ---
 

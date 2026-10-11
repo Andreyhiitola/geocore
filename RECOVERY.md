@@ -88,10 +88,9 @@ bash scripts/restore.sh
 Moodle остановится на время restore (~10-15 минут), потом поднимется автоматически.
 
 **Что восстанавливается из какой точки (гибридная схема):**
-- `daily/<date>` или `weekly/<id>` — БД на эту точку, moodledata —
-  из **текущего** `moodledata-mirror/` (не привязано к дате точки).
-- `monthly/<id>` — БД и moodledata из согласованного снапшота на 1-е число
-  месяца (`monthly/moodle-<id>.tar.gz`).
+- `daily/<date>`, `weekly/<id>` или `monthly/<id>` — БД на эту точку,
+  moodledata — из **текущего** `moodledata-mirror/` (не привязано к дате
+  точки; месячный tar-снапшот moodledata убран 11.10.2026).
 
 Подробнее — [`BACKUP.md`](wiki/BACKUP.md#восстановление).
 
