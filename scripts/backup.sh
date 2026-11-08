@@ -37,6 +37,10 @@ SYNC_EXCLUDES=(
     --exclude 'localcache/*'
     --exclude 'temp/*'
     --exclude 'trashdir/*'
+    # Сессии PHP: ~490 файлов/сутки churn, при versioning каждый удалённый оставляет
+    # noncurrent-версию + delete-маркер навсегда (lifecycle на Selectel не работает).
+    # Для восстановления не нужны
+    --exclude 'sessions/*'
 )
 
 # ── Утилиты ──────────────────────────────────────────────────────────────────
