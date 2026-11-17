@@ -8,7 +8,7 @@ import threading
 import subprocess
 import requests
 from email.header import decode_header, make_header
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 TOKEN = os.environ['TELEGRAM_BOT_TOKEN']
 CHAT_ID = int(os.environ['TELEGRAM_CHAT_ID'])
@@ -37,7 +37,9 @@ IMAP_HOST     = os.environ.get('IMAP_HOST', '')
 IMAP_USER     = os.environ.get('IMAP_USER', '')
 IMAP_PASS     = os.environ.get('IMAP_PASS', '')
 IMAP_FOLDER   = os.environ.get('IMAP_FOLDER', 'INBOX')
-MAIL_INTERVAL = int(os.environ.get('MAIL_INTERVAL', '120'))
+# Проверка почты по расписанию: часы по местному времени MAIL_TZ.
+MAIL_HOURS    = sorted({int(h) for h in _csv_env('MAIL_HOURS', ['9', '12', '15', '18'])})
+MAIL_TZ       = os.environ.get('MAIL_TZ', 'Asia/Almaty')
 
 DISK_WARN    = int(os.environ.get('DISK_WARN', '85'))
 RAM_WARN     = int(os.environ.get('RAM_WARN', '90'))
@@ -302,8 +304,13 @@ def _hdr(raw) -> str:
         return str(raw)
 
 
+def _md_safe(text: str) -> str:
+    """Убрать символы Markdown из чужого текста, иначе Telegram отклонит сообщение."""
+    return re.sub(r'[_*`\[\]]', ' ', text)
+
+
 def _check_mail() -> None:
-    """Уведомить о письмах, пришедших с прошлой проверки.
+    """Одним сообщением уведомить о письмах, пришедших с прошлой проверки.
 
     Читаем через BODY.PEEK — флаг \\Seen не ставится, письмо остаётся
     непрочитанным в веб-интерфейсе Zoho.
@@ -334,7 +341,9 @@ def _check_mail() -> None:
             _save_state(state)
             return
 
-        for uid in uids[-20:]:
+        shown = uids[-20:]
+        items = []
+        for uid in shown:
             typ, msg_data = conn.uid(
                 'fetch', str(uid),
                 '(BODY.PEEK[HEADER.FIELDS (FROM SUBJECT DATE)])'
@@ -342,15 +351,17 @@ def _check_mail() -> None:
             if typ != 'OK' or not msg_data or not msg_data[0]:
                 continue
             hdrs = email.message_from_bytes(msg_data[0][1])
-            sender  = _hdr(hdrs.get('From'))
-            subject = _hdr(hdrs.get('Subject')) or '(без темы)'
-            send(
-                f"📬 *Новое письмо* — {IMAP_USER}\n\n"
-                f"*От:* {sender}\n"
-                f"*Тема:* {subject}"
-            )
-        state[key] = uids[-1]
-        _save_state(state)
+            sender  = _md_safe(_hdr(hdrs.get('From')))
+            subject = _md_safe(_hdr(hdrs.get('Subject')) or '(без темы)')
+            items.append(f"• *{subject}*\n  от {sender}")
+
+        text = f"📬 *Новые письма: {len(uids)}* — {IMAP_USER}\n\n" + '\n\n'.join(items)
+        if len(uids) > len(shown):
+            text += f"\n\n…и ещё {len(uids) - len(shown)} (старые не показаны)"
+        # uid двигаем только после успешной отправки, иначе письма потеряются.
+        if send(text):
+            state[key] = uids[-1]
+            _save_state(state)
     finally:
         try:
             conn.logout()
@@ -358,15 +369,35 @@ def _check_mail() -> None:
             pass
 
 
+def _mail_tz():
+    try:
+        from zoneinfo import ZoneInfo
+        return ZoneInfo(MAIL_TZ)
+    except Exception:
+        return timezone(timedelta(hours=5))  # Казахстан: UTC+5 без перехода на лето
+
+
+def _next_mail_run(now: datetime) -> datetime:
+    """Ближайший момент из MAIL_HOURS строго после now (в зоне now)."""
+    for day in (0, 1):
+        for h in MAIL_HOURS:
+            t = (now + timedelta(days=day)).replace(hour=h, minute=0, second=0, microsecond=0)
+            if t > now:
+                return t
+    raise RuntimeError('MAIL_HOURS пуст')
+
+
 def mail_loop() -> None:
     if not all([IMAP_HOST, IMAP_USER, IMAP_PASS]):
         return
+    tz = _mail_tz()
     while True:
+        nxt = _next_mail_run(datetime.now(tz))
+        time.sleep(max(1, (nxt - datetime.now(tz)).total_seconds()))
         try:
             _check_mail()
         except Exception as e:
             print(f"[mail] {e}", flush=True)
-        time.sleep(MAIL_INTERVAL)
 
 
 # ── Watchdog ──────────────────────────────────────────────────────────────────

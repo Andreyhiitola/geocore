@@ -1,6 +1,7 @@
 # GeoCore-Academy — стек для KZ (становится основным регионом).
 # Ядро: mariadb + moodle + frontend + backend + backup.
-# НЕ включает bot / usn / watchtower — экономия RAM (4 ГБ бокс).
+# Бот (мониторинг + оповещения о почте) включён: RU-сервер выведен, KZ единственный.
+# НЕ включает usn / watchtower — экономия RAM (4 ГБ бокс).
 #
 # ВАЖНО про backup: у KZ ОТДЕЛЬНЫЙ бакет (S3_BUCKET в .env). В общий бакет с RU
 # писать нельзя — ключи daily/monthly завязаны только на дату, а `s3 sync --delete`
@@ -89,7 +90,7 @@ services:
     volumes:
       - backend_static:/app/static
     environment:
-      MOODLE_URL: ${MOODLE_WWWROOT:-https://courses.geocore-academy.kz}
+      MOODLE_URL: ${MOODLE_WWWROOT:-https://courses.geocore-academy.kz,https://api.geocore-academy.kz/health}
       MOODLE_TOKEN: ${MOODLE_TOKEN}
       DB_HOST: mariadb
       DB_NAME: ${MOODLE_DB_NAME}
@@ -150,6 +151,33 @@ services:
       TELEGRAM_PROXY: ${BACKUP_TELEGRAM_PROXY:-}
     networks:
       - geocore_net
+
+  bot:
+    build:
+      context: .
+      dockerfile: bot/Dockerfile
+    container_name: geocore_bot
+    restart: always
+    network_mode: host
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /:/rootfs:ro
+      - /opt/geocore/bot_data:/app/data
+    environment:
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
+      DISK_WARN: ${DISK_WARN:-85}
+      RAM_WARN: ${RAM_WARN:-90}
+      CPU_WARN: ${CPU_WARN:-95}
+      BOT_REGION: ${BOT_REGION:-KZ}
+      BOT_CONTAINERS: ${BOT_CONTAINERS:-geocore_db,geocore_moodle,geocore_frontend,geocore_api,geocore_backup,geocore_bot}
+      BOT_ENDPOINTS: ${BOT_ENDPOINTS:-https://geocore-academy.kz,https://courses.geocore-academy.kz,https://api.geocore-academy.kz/health}
+      # Оповещения о новых письмах info@ (IMAP Zoho, только заголовки) 4 раза в день
+      IMAP_HOST: ${IMAP_HOST:-imap.zoho.com}
+      IMAP_USER: ${IMAP_USER:-info@geocore-academy.kz}
+      IMAP_PASS: ${IMAP_PASS:-}
+      MAIL_HOURS: ${MAIL_HOURS:-9,12,15,18}
+      MAIL_TZ: ${MAIL_TZ:-Asia/Almaty}
 
 networks:
   geocore_net:

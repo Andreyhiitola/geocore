@@ -136,7 +136,8 @@ services:
       IMAP_HOST: ${IMAP_HOST:-}
       IMAP_USER: ${IMAP_USER:-}
       IMAP_PASS: ${IMAP_PASS:-}
-      MAIL_INTERVAL: ${MAIL_INTERVAL:-120}
+      MAIL_HOURS: ${MAIL_HOURS:-9,12,15,18}
+      MAIL_TZ: ${MAIL_TZ:-Asia/Almaty}
 
   backup:
     build:
