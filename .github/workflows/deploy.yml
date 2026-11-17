@@ -1,4 +1,4 @@
-name: Сборка и деплой на VPS
+name: Сборка и деплой на KZ
 
 on:
   push:
@@ -47,8 +47,8 @@ jobs:
               sys.exit(1)
           "
 
-      - name: Валидация docker-compose.yml
-        run: docker compose --env-file .env.example config --quiet
+      - name: Валидация docker-compose.demo.yml (KZ-стек)
+        run: docker compose -f docker-compose.demo.yml --env-file .env.example config --quiet
 
   # Pytest для backend
   test-backend:
@@ -84,11 +84,11 @@ jobs:
           filters: |
             moodle:
               - 'moodle/**'
-              - 'docker-compose.yml'
+              - 'docker-compose.demo.yml'
               - '.github/workflows/deploy.yml'
             backend:
               - 'backend/**'
-              - 'docker-compose.yml'
+              - 'docker-compose.demo.yml'
               - '.env.example'
               - '.github/workflows/deploy.yml'
             frontend:
@@ -96,7 +96,7 @@ jobs:
               - 'nginx/**'
               - '.github/workflows/deploy.yml'
             infra:
-              - 'docker-compose.yml'
+              - 'docker-compose.demo.yml'
               - 'docker-compose.test.yml'
               - '.env.example'
               - 'nginx/**'
@@ -177,7 +177,8 @@ jobs:
           build-args: MOODLE_VERSION=${{ env.MOODLE_VERSION }}
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/geocore-moodle:${{ env.MOODLE_VERSION }}
 
-  # Деплой на VPS через SSH
+  # Деплой на KZ-сервер (hoster.kz) через SSH. Секреты VPS_HOST/VPS_USER/VPS_SSH_KEY
+  # указывают на KZ. Всегда `-f docker-compose.demo.yml`, иначе регион откатится на RU.
   # Запускается всегда после build-шагов (даже если они были пропущены)
   deploy:
     runs-on: ubuntu-latest
@@ -202,9 +203,10 @@ jobs:
             cd /opt/geocore
             git pull origin main
             sed -i "s/MOODLE_VERSION=.*/MOODLE_VERSION=${{ env.MOODLE_VERSION }}/" /opt/geocore/.env
-            docker compose pull
-            docker compose up -d frontend backend moodle usn_backend usn_frontend --remove-orphans
-            docker compose up -d --build bot backup --remove-orphans
+            export COMPOSE_FILE=docker-compose.demo.yml
+            docker compose pull frontend backend moodle
+            docker compose up -d frontend backend moodle --remove-orphans
+            docker compose up -d --build bot backup
             docker image prune -f
             echo "==> Задеплоено: $(date)"
 
@@ -218,39 +220,26 @@ jobs:
 
       - name: Проверка backend /health
         run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://api.geocore-academy.ru/health)
-          if [ "$STATUS" != "200" ]; then
-            echo "✗ Backend вернул $STATUS (ожидали 200)" >&2
-            exit 1
-          fi
-          echo "✓ Backend /health OK ($STATUS)"
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://api.geocore-academy.kz/health)
+          [ "$STATUS" = "200" ] || { echo "✗ Backend вернул $STATUS" >&2; exit 1; }
+          echo "✓ Backend /health OK"
 
       - name: Проверка frontend
         run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://geocore-academy.ru/)
-          if [ "$STATUS" != "200" ]; then
-            echo "✗ Frontend вернул $STATUS (ожидали 200)" >&2
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://geocore-academy.kz/)
+          [ "$STATUS" = "200" ] || { echo "✗ Frontend вернул $STATUS" >&2; exit 1; }
+          echo "✓ Frontend OK"
+
+      - name: Проверка региона (нет утечки RU-контента)
+        run: |
+          if curl -s --max-time 15 https://geocore-academy.kz/ | grep -q "geocore-academy\.ru"; then
+            echo "✗ На .kz отдаётся ссылка на geocore-academy.ru: регион откатился на RU" >&2
             exit 1
           fi
-          echo "✓ Frontend OK ($STATUS)"
+          echo "✓ Регион KZ"
 
       - name: Проверка Moodle
         run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://courses.geocore-academy.ru/login/index.php)
-          if [ "$STATUS" != "200" ]; then
-            echo "✗ Moodle вернул $STATUS (ожидали 200)" >&2
-            exit 1
-          fi
-          echo "✓ Moodle OK ($STATUS)"
-
-      - name: Проверка USN /health
-        run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" -u "${USN_BASIC_USER}:${USN_BASIC_PASS}" https://usn.geocore-academy.ru/health)
-          if [ "$STATUS" != "200" ]; then
-            echo "✗ USN health вернул $STATUS (ожидали 200)" >&2
-            exit 1
-          fi
-          echo "✓ USN /health OK ($STATUS)"
-        env:
-          USN_BASIC_USER: ${{ secrets.USN_BASIC_USER }}
-          USN_BASIC_PASS: ${{ secrets.USN_BASIC_PASS }}
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://courses.geocore-academy.kz/login/index.php)
+          [ "$STATUS" = "200" ] || { echo "✗ Moodle вернул $STATUS" >&2; exit 1; }
+          echo "✓ Moodle OK"
