@@ -440,11 +440,11 @@
     }
   ],
   "contacts": {
-    "phone": "+79???777777",
+    "phone": "+77770838039",
     "corp_email": "info@geocore-academy.ru",
     "email": "",
     "telegram": "",
-    "linkedin": ""
+    "linkedin": "https://www.linkedin.com/in/%D0%BA%D0%BE%D0%BD%D1%81%D1%82%D0%B0%D0%BD%D1%82%D0%B8%D0%BD-%D0%B1%D0%BE%D1%80%D1%86%D0%BE%D0%B2-15170151/"
   },
   "footer": {
     "description": "Профессиональное обучение по горно-геологическим системам. Профессиональный консалтинг и экспертиза: геология и горные проекты",
@@ -512,8 +512,8 @@
         "title": "Контакты",
         "links": [
           {
-            "label": "+7 (___) ___-__-__",
-            "href": "tel:+70000000000"
+            "label": "WhatsApp +7 777 083 80 39",
+            "href": "https://wa.me/77770838039"
           },
           {
             "label": "info@geocore-academy.ru",
@@ -525,11 +525,11 @@
           },
           {
             "label": "LinkedIn",
-            "href": "https://linkedin.com/company/geocore-academy"
+            "href": "https://www.linkedin.com/in/%D0%BA%D0%BE%D0%BD%D1%81%D1%82%D0%B0%D0%BD%D1%82%D0%B8%D0%BD-%D0%B1%D0%BE%D1%80%D1%86%D0%BE%D0%B2-15170151/"
           },
           {
             "label": "Корпоративные запросы",
-            "href": "info@geocore-academy.ru"
+            "href": "mailto:info@geocore-academy.ru"
           }
         ]
       }
