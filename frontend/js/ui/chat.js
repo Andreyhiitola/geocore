@@ -4,6 +4,21 @@ const _EMAIL = 'info@geocore-academy.ru';
 
 const _history = [];
 
+// Копирование адреса: Clipboard API, при отказе — запасной способ через textarea
+window.geocoreCopy = function (btn, text) {
+  const done = () => { btn.textContent = 'Скопировано'; };
+  const fallback = () => {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); done(); } catch (e) { btn.textContent = 'Выделите и скопируйте'; }
+    document.body.removeChild(ta);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done, fallback);
+  } else { fallback(); }
+};
+
 function _contactButtons(q) {
   const body = encodeURIComponent(`Здравствуйте!\n\nМой вопрос: ${q}`);
   const subj = encodeURIComponent('Вопрос эксперту GeoCore');
@@ -11,7 +26,9 @@ function _contactButtons(q) {
   return (
     `<span class="chat-cta">Наш эксперт ответит вам лично. Выберите удобный способ:</span>` +
     `<a class="chat-btn wa" href="${_WA}?text=${wa}" target="_blank" rel="noopener">WhatsApp</a>` +
-    `<a class="chat-btn em" href="mailto:${_EMAIL}?subject=${subj}&body=${body}">Email</a>`
+    `<a class="chat-btn em" href="mailto:${_EMAIL}?subject=${subj}&body=${body}">Email</a>` +
+    `<span class="chat-alt">или напишите на <b>${_EMAIL}</b> ` +
+    `<button type="button" class="chat-copy" onclick="geocoreCopy(this,'${_EMAIL}')">Скопировать</button></span>`
   );
 }
 
