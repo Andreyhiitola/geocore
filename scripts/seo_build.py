@@ -35,6 +35,13 @@ PAGES = {
         "priority": "1.0",
     },
     "courses.html": {"url": "/courses.html", "description": None, "priority": "0.9"},
+    "corporate.html": {
+        "url": "/corporate.html",
+        "description": "Корпоративное обучение ГГИС для горнодобывающих компаний: Datamine, Leapfrog, Micromine, "
+                       "стандарты JORC, KAZRC, ГКЗ. Онлайн, под NDA. Первый урок бесплатно.",
+        "jsonld": "service",
+        "priority": "0.8",
+    },
     "privacy.html": {
         "url": "/privacy.html",
         "description": "Политика конфиденциальности GeoCore-Academy: какие данные собираются и как обрабатываются.",
@@ -216,6 +223,12 @@ for name, cfg in PAGES.items():
         ld = {"@context": "https://schema.org", "@graph": [
             ORG, {"@type": "WebSite", "url": BASE + "/", "name": SITE, "inLanguage": "ru",
                   "publisher": {"@id": BASE + "/#org"}}]}
+    if cfg.get("jsonld") == "service":
+        ld = {"@context": "https://schema.org", "@graph": [ORG, {
+            "@type": "Service", "name": "Корпоративное обучение ГГИС", "description": desc,
+            "serviceType": "Обучение горно-геологическим информационным системам",
+            "provider": {"@id": BASE + "/#org"}, "areaServed": "KZ", "inLanguage": "ru",
+            "url": BASE + cfg["url"]}]}
     t = inject(t, meta_block(cfg["url"], title, desc, "website", ld),
                add_description=cfg["description"])
     write(p, t)
