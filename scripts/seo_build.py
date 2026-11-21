@@ -142,6 +142,8 @@ def write(path, text):
     path.write_text(text, encoding="utf-8")
 
 
+BORTSOV_LINKEDIN = "https://www.linkedin.com/in/%D0%BA%D0%BE%D0%BD%D1%81%D1%82%D0%B0%D0%BD%D1%82%D0%B8%D0%BD-%D0%B1%D0%BE%D1%80%D1%86%D0%BE%D0%B2-15170151/"
+
 ORG = {
     "@type": "Organization",
     "@id": BASE + "/#org",
@@ -186,7 +188,7 @@ for a in articles:
         return f'<span class="art-tag">{m.group(2)}</span>'
     t = re.sub(r'<(span|a)[^>]*class="art-tag"[^>]*>([^<]*)</\1>', retag, t)
     url = f"/articles/{a['name']}"
-    author_ld = ({"@type": "Person", "name": "Константин Владимирович Борцов"}
+    author_ld = ({"@type": "Person", "name": "Константин Владимирович Борцов", "sameAs": [BORTSOV_LINKEDIN]}
                  if "Борцов" in a["author"] else {"@id": BASE + "/#org"})
     ld = {"@context": "https://schema.org", "@graph": [ORG, {
         "@type": "Article", "headline": a["h1"], "description": a["desc"],
