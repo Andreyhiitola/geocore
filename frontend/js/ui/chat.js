@@ -1,5 +1,5 @@
 const _API   = 'https://api.' + location.hostname.replace(/^www\./, '').split('.').slice(-2).join('.');
-const _TG    = 'https://t.me/geocore_academybot';
+const _WA    = 'https://wa.me/77770838039';
 const _EMAIL = 'info@geocore-academy.ru';
 
 const _history = [];
@@ -7,9 +7,10 @@ const _history = [];
 function _contactButtons(q) {
   const body = encodeURIComponent(`Здравствуйте!\n\nМой вопрос: ${q}`);
   const subj = encodeURIComponent('Вопрос эксперту GeoCore');
+  const wa   = encodeURIComponent(`Здравствуйте! Вопрос по сайту GeoCore-Academy: ${q}`);
   return (
     `<span class="chat-cta">Наш эксперт ответит вам лично. Выберите удобный способ:</span>` +
-    `<a class="chat-btn tg" href="${_TG}" target="_blank" rel="noopener">Telegram</a>` +
+    `<a class="chat-btn wa" href="${_WA}?text=${wa}" target="_blank" rel="noopener">WhatsApp</a>` +
     `<a class="chat-btn em" href="mailto:${_EMAIL}?subject=${subj}&body=${body}">Email</a>`
   );
 }
