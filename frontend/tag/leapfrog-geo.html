@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leapfrog Geo: материалы и курсы — GeoCore-Academy</title>
+<meta name="description" content="Leapfrog Geo — ПО для неявного 3D-геологического моделирования. Материалы GeoCore-Academy и разбор реального разведочного проекта.">
+<!--seo:start-->
+<link rel="canonical" href="https://geocore-academy.kz/tag/leapfrog-geo.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="GeoCore-Academy">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://geocore-academy.kz/tag/leapfrog-geo.html">
+<meta property="og:title" content="Leapfrog Geo: материалы и курсы — GeoCore-Academy">
+<meta property="og:description" content="Leapfrog Geo — ПО для неявного 3D-геологического моделирования. Материалы GeoCore-Academy и разбор реального разведочного проекта.">
+<meta property="og:image" content="https://geocore-academy.kz/images/og-default.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Leapfrog Geo: материалы и курсы — GeoCore-Academy">
+<meta name="twitter:description" content="Leapfrog Geo — ПО для неявного 3D-геологического моделирования. Материалы GeoCore-Academy и разбор реального разведочного проекта.">
+<meta name="twitter:image" content="https://geocore-academy.kz/images/og-default.jpg">
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Organization", "@id": "https://geocore-academy.kz/#org", "name": "GeoCore-Academy", "url": "https://geocore-academy.kz/", "logo": "https://geocore-academy.kz/images/og-default.jpg", "description": "Информационно-образовательный горно-геологический портал: обучение ГГИС и консалтинг в области оценки месторождений."}, {"@type": "CollectionPage", "name": "Leapfrog Geo: материалы и курсы — GeoCore-Academy", "description": "Leapfrog Geo — ПО для неявного 3D-геологического моделирования. Материалы GeoCore-Academy и разбор реального разведочного проекта.", "url": "https://geocore-academy.kz/tag/leapfrog-geo.html", "inLanguage": "ru", "isPartOf": {"@id": "https://geocore-academy.kz/#org"}, "hasPart": [{"@type": "Article", "headline": "Эпитермальное малосульфидное золоторудное месторождение: от поисков до блочной модели", "url": "https://geocore-academy.kz/articles/bortsov_epithermal_gold.html"}]}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "GeoCore-Academy", "item": "https://geocore-academy.kz/"}, {"@type": "ListItem", "position": 2, "name": "Leapfrog Geo", "item": "https://geocore-academy.kz/tag/leapfrog-geo.html"}]}]}</script>
+<!--seo:end-->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --gold:#C9A84C; --gold-light:#E8C97A; --gold-dim:#7A6230;
+  --dark:#0A0A0B; --dark-2:#111114; --dark-3:#18181D; --dark-4:#1F1F26;
+  --surface:#252530; --text:#E8E6DE; --text-muted:#9A9890; --text-dim:#5C5B56;
+  --border:rgba(201,168,76,0.18); --border-dim:rgba(255,255,255,0.07);
+  --red:#8B3A2A; --green:#2a5a2a;
+}
+html{scroll-behavior:smooth;}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--dark);color:var(--text);line-height:1.7;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.3;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:64px;background:rgba(10,10,11,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.logo-hex{width:28px;height:28px;background:var(--gold);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);}
+.logo-text{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--text);}
+.logo-text span{color:var(--gold);}
+.nav-back{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);text-decoration:none;display:flex;align-items:center;gap:8px;transition:color .2s;}
+.nav-back:hover{color:var(--gold);}
+.nav-cta{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dark);background:var(--gold);padding:9px 20px;text-decoration:none;clip-path:polygon(7px 0%,100% 0%,calc(100% - 7px) 100%,0% 100%);}
+.nav-cta:hover{background:var(--gold-light);}
+
+/* ARTICLE LAYOUT */
+.art-wrap{max-width:780px;margin:0 auto;padding:120px 24px 80px;}
+
+/* HEADER */
+.art-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:10px;margin-bottom:20px;}
+.art-label::before{content:'';width:32px;height:1px;background:var(--gold);}
+h1.art-title{font-family:'Playfair Display',serif;font-size:clamp(32px,4vw,52px);font-weight:900;line-height:1.1;margin-bottom:20px;}
+.art-sub{font-size:17px;font-weight:300;line-height:1.75;color:var(--text-muted);margin-bottom:40px;border-left:3px solid var(--gold);padding-left:20px;}
+.art-meta{display:flex;gap:24px;align-items:center;padding:20px 0;border-top:1px solid var(--border-dim);border-bottom:1px solid var(--border-dim);margin-bottom:56px;}
+.art-meta-item{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);}
+.art-meta-item strong{color:var(--text-muted);}
+.art-tag{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold-dim);padding:3px 8px;}
+
+/* BODY */
+.art-body h2{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;line-height:1.2;margin:56px 0 20px;color:var(--text);}
+.art-body h3{font-family:'Playfair Display',serif;font-size:21px;font-weight:700;margin:40px 0 16px;color:var(--text);}
+.art-body p{font-size:16px;font-weight:300;line-height:1.8;color:var(--text-muted);margin-bottom:20px;}
+.art-body strong{color:var(--text);font-weight:600;}
+.art-body em{color:var(--text-muted);font-style:italic;}
+
+/* FORMULA BOX */
+.formula-box{background:var(--dark-3);border:1px solid var(--border-dim);padding:24px 32px;margin:32px 0;text-align:center;position:relative;}
+.formula-box::before{content:'ВАРИОГРАММА';position:absolute;top:-10px;left:20px;font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.15em;color:var(--text-dim);background:var(--dark-3);padding:0 8px;}
+.formula{font-family:'IBM Plex Mono',monospace;font-size:20px;color:var(--gold);letter-spacing:.05em;}
+.formula-desc{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-dim);margin-top:10px;letter-spacing:.08em;}
+
+/* VISUAL BLOCKS */
+.vis-block{margin:36px 0;background:var(--dark-3);border:1px solid var(--border-dim);overflow:hidden;}
+.vis-header{padding:14px 20px;background:var(--dark-4);border-bottom:1px solid var(--border-dim);display:flex;align-items:center;gap:10px;}
+.vis-dot{width:8px;height:8px;border-radius:50%;}
+.vis-title{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;color:var(--text-dim);}
+.vis-canvas{padding:24px;display:flex;justify-content:center;align-items:center;min-height:180px;}
+.vis-caption{padding:12px 20px;border-top:1px solid var(--border-dim);font-size:12px;font-weight:300;color:var(--text-dim);font-style:italic;}
+
+svg{max-width:100%;height:auto;}
+
+/* LIST STYLES */
+.vario-list{list-style:none;display:flex;flex-direction:column;gap:12px;margin:20px 0 32px;}
+.vario-item{display:flex;gap:14px;align-items:flex-start;padding:14px 18px;background:rgba(139,58,42,.08);border:1px solid rgba(139,58,42,.2);}
+.vario-icon{font-size:18px;min-width:28px;}
+.vario-text{font-size:14px;font-weight:300;line-height:1.6;color:var(--text-muted);}
+.vario-text strong{color:#E87070;}
+
+/* CTA BOX */
+.cta-box{background:var(--dark-4);border:1px solid var(--border);padding:40px;margin:56px 0;text-align:center;}
+.cta-box h3{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;margin-bottom:16px;}
+.cta-box p{font-size:15px;font-weight:300;color:var(--text-muted);margin-bottom:28px;max-width:520px;margin-left:auto;margin-right:auto;}
+.cta-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+.btn-p{display:inline-flex;align-items:center;gap:9px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dark);background:var(--gold);padding:14px 30px;text-decoration:none;clip-path:polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%);transition:all .2s;}
+.btn-p:hover{background:var(--gold-light);}
+.btn-s{display:inline-flex;align-items:center;gap:9px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);border:1px solid var(--border);padding:14px 30px;text-decoration:none;transition:all .2s;}
+.btn-s:hover{border-color:var(--gold);color:var(--gold);}
+
+/* FOOTER */
+footer{background:var(--dark-2);border-top:1px solid var(--border-dim);padding:40px 48px;display:flex;justify-content:space-between;align-items:center;}
+.f-copy{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.07em;color:var(--text-dim);}
+.f-back{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);text-decoration:none;}
+.f-back:hover{color:var(--gold-light);}
+
+/* REVEAL */
+.rv{opacity:0;transform:translateY(24px);transition:opacity .65s ease,transform .65s ease;}
+.rv.vis{opacity:1;transform:none;}
+
+body.light{--dark:#F5F4F0;--dark-2:#ECEAE3;--dark-3:#E4E2D9;--dark-4:#D9D7CE;--surface:#DEDAD0;--text:#1A1916;--text-muted:#4A4840;--text-dim:#8A8880;--border:rgba(201,168,76,0.30);--border-dim:rgba(0,0,0,0.10);}
+body.light nav{background:rgba(245,244,240,.92);}
+.theme-btn{background:none;border:1px solid var(--border-dim);color:var(--text-muted);width:34px;height:34px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;}
+.theme-btn:hover{border-color:var(--gold);color:var(--gold);}
+@media(max-width:768px){nav{padding:0 20px;}.nav-back span{display:none;}footer{flex-direction:column;gap:16px;text-align:center;}}
+</style>
+<style>
+.hub-list{display:grid;gap:16px;margin:8px 0 40px}
+.hub-card{display:block;text-decoration:none;border:1px solid var(--border-dim);background:var(--dark-3);padding:20px 24px;transition:.2s}
+.hub-card:hover{border-color:var(--gold)}
+.hub-card h3{font-family:'Playfair Display',serif;font-size:20px;margin:0 0 8px;color:var(--text)}
+.hub-card p{font-size:14px;font-weight:300;color:var(--text-muted);margin:0 0 10px}
+.hub-card span{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim)}
+.hub-h2{font-family:'Playfair Display',serif;font-size:24px;margin:40px 0 16px;color:var(--text)}
+.hub-cta{display:flex;gap:12px;flex-wrap:wrap;margin:8px 0 8px}
+.hub-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:32px}
+</style>
+</head>
+<body>
+<nav>
+  <a href="../index.html" class="nav-logo"><div class="logo-hex"></div><span class="logo-text">Geo<span>Core</span></span></a>
+  <a href="../index.html#blog" class="nav-back">← <span>Все статьи</span></a>
+  <button class="theme-btn" id="themeBtn">🌙</button>
+  <a href="../courses.html" class="nav-cta">Курсы</a>
+</nav>
+<div class="art-wrap">
+  <div class="art-label">Тема</div>
+  <h1 class="art-title">Leapfrog Geo</h1>
+  <p class="art-sub">Leapfrog Geo — ПО для неявного 3D-геологического моделирования. Материалы GeoCore-Academy и разбор реального разведочного проекта.</p>
+  <div class="hub-cta">
+    <a href="../courses.html" class="btn-s">Курсы GeoCore-Academy</a>
+    <a href="../index.html#consult" class="btn-s">Консультация</a>
+  </div>
+  <h2 class="hub-h2">Материалы</h2>
+  <div class="hub-list">
+<a class="hub-card" href="../articles/bortsov_epithermal_gold.html"><h3>Эпитермальное малосульфидное золоторудное месторождение: от поисков до блочной модели</h3><p>Разбор реального кейса эпитермального малосульфидного золоторудного месторождения. Геология, данные бурения, построение модели в Leapfrog/Datamine, подсчёт запасов.</p><span>К.В. Борцов · 2025</span></a>
+  </div>
+  <div class="hub-tags"><a class="art-tag" href="../tag/datamine.html">Datamine</a><a class="art-tag" href="../tag/jorc.html">JORC</a><a class="art-tag" href="../tag/gkz.html">ГКЗ</a><a class="art-tag" href="../tag/geostatistics.html">Геостатистика</a><a class="art-tag" href="../tag/resource-estimation.html">Оценка ресурсов и запасов</a></div>
+</div>
+<footer>
+  <span class="f-copy">© 2026 GeoCore-Academy</span>
+  <a href="../index.html#blog" class="f-back">← Все статьи блога</a>
+</footer>
+<script>
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('vis');});
+},{threshold:.08,rootMargin:'0px 0px -20px 0px'});
+document.querySelectorAll('.rv').forEach(el=>obs.observe(el));
+const themeBtn=document.getElementById('themeBtn');
+let dark=!localStorage.getItem('geocoreLight');
+function applyTheme(){document.body.classList.toggle('light',!dark);if(themeBtn)themeBtn.textContent=dark?'🌙':'☀️';}
+applyTheme();
+themeBtn?.addEventListener('click',()=>{dark=!dark;localStorage.setItem('geocoreLight',dark?'':'1');applyTheme();});
+</script>
+</body>
+</html>
