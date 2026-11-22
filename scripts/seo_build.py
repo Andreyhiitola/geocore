@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parent.parent
 FE = ROOT / "frontend"
 BASE = "https://geocore-academy.kz"
 SITE = "GeoCore-Academy"
-OG_IMAGE = f"{BASE}/images/og-default.jpg"
+OG_IMAGE = f"{BASE}/images/og-light.jpg"
 TODAY = date.today().isoformat()
 
 # ── страницы верхнего уровня ────────────────────────────────────────────────
@@ -156,7 +156,7 @@ ORG = {
     "@id": BASE + "/#org",
     "name": SITE,
     "url": BASE + "/",
-    "logo": BASE + "/images/og-default.jpg",
+    "logo": BASE + "/images/og-light.jpg",
     "description": "Информационно-образовательный горно-геологический портал: обучение ГГИС и консалтинг "
                    "в области оценки месторождений.",
 }
