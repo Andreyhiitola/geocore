@@ -1,0 +1,287 @@
+{
+  ".claude/settings.local.json": {
+    "mtime": 1782112258.4858024,
+    "ast_hash": "c0fd9478da9ece665732273360e220d2",
+    "semantic_hash": "c0fd9478da9ece665732273360e220d2"
+  },
+  "backend/main.py": {
+    "mtime": 1779474450.1419942,
+    "ast_hash": "24cdd4d297c040c9c507445d5dd6036a",
+    "semantic_hash": "24cdd4d297c040c9c507445d5dd6036a"
+  },
+  "backend/processing/__init__.py": {
+    "mtime": 1775391222.277829,
+    "ast_hash": "0943ce78dff8c1f58d1912a55adea53a",
+    "semantic_hash": "0943ce78dff8c1f58d1912a55adea53a"
+  },
+  "backend/processing/compositor.py": {
+    "mtime": 1774896050.5351336,
+    "ast_hash": "5edbd8c11fb7ba56123993fc8dbdbd07",
+    "semantic_hash": "5edbd8c11fb7ba56123993fc8dbdbd07"
+  },
+  "backend/processing/decluster.py": {
+    "mtime": 1774896632.452319,
+    "ast_hash": "bcf46d800bc7a8b1d376d4520d75dce2",
+    "semantic_hash": "bcf46d800bc7a8b1d376d4520d75dce2"
+  },
+  "backend/processing/mac_generator.py": {
+    "mtime": 1774896394.4852605,
+    "ast_hash": "c12a074c5f0b288b35fdab8807c85bde",
+    "semantic_hash": "c12a074c5f0b288b35fdab8807c85bde"
+  },
+  "backend/processing/validator.py": {
+    "mtime": 1774896027.9514084,
+    "ast_hash": "76ca903a34195d5ade77c41135e6eaa4",
+    "semantic_hash": "76ca903a34195d5ade77c41135e6eaa4"
+  },
+  "backend/processing/wireframe_gen.py": {
+    "mtime": 1774902118.1890197,
+    "ast_hash": "300e34c405e709037723934f8edb7be5",
+    "semantic_hash": "300e34c405e709037723934f8edb7be5"
+  },
+  "backend/tests/__init__.py": {
+    "mtime": 1778306181.9513242,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "backend/tests/test_api.py": {
+    "mtime": 1778306433.2527661,
+    "ast_hash": "bfdc5c71a458634b5956a66476baae79",
+    "semantic_hash": "bfdc5c71a458634b5956a66476baae79"
+  },
+  "backup/entrypoint.sh": {
+    "mtime": 1778178932.793051,
+    "ast_hash": "6030261cede799b40bfe2fc27705849a",
+    "semantic_hash": "6030261cede799b40bfe2fc27705849a"
+  },
+  "bot/bot.py": {
+    "mtime": 1782498253.9696083,
+    "ast_hash": "d6721d7c3c35aaa16257d20ca6b374f0",
+    "semantic_hash": "d6721d7c3c35aaa16257d20ca6b374f0"
+  },
+  "bot/test.py": {
+    "mtime": 1776412117.7638824,
+    "ast_hash": "dafc4112cf9600ab2cf935bdba23f8ed",
+    "semantic_hash": "dafc4112cf9600ab2cf935bdba23f8ed"
+  },
+  "frontend/js/core/model.js": {
+    "mtime": 1774550113.1938846,
+    "ast_hash": "a0579caf916e1ff855aea2cfc2f332fc",
+    "semantic_hash": "a0579caf916e1ff855aea2cfc2f332fc"
+  },
+  "frontend/js/core/threeInit.js": {
+    "mtime": 1774537850.0439875,
+    "ast_hash": "a81138d2065d25b435ed9bb0d9e51a22",
+    "semantic_hash": "a81138d2065d25b435ed9bb0d9e51a22"
+  },
+  "frontend/js/core/visualization.js": {
+    "mtime": 1774558551.0903027,
+    "ast_hash": "161952ed66ab050e2aa9d82053a4c6dc",
+    "semantic_hash": "161952ed66ab050e2aa9d82053a4c6dc"
+  },
+  "frontend/js/data/csvParser.js": {
+    "mtime": 1774528346.2563639,
+    "ast_hash": "fa08116972ebfb652fe1f14419eb5cea",
+    "semantic_hash": "fa08116972ebfb652fe1f14419eb5cea"
+  },
+  "frontend/js/data/objParser.js": {
+    "mtime": 1774528374.0642598,
+    "ast_hash": "bad1230d40326bed19257365ff7592cb",
+    "semantic_hash": "bad1230d40326bed19257365ff7592cb"
+  },
+  "frontend/js/data/site.json": {
+    "mtime": 1782370580.5456462,
+    "ast_hash": "0cc78a191c0929d1814715d083f55eb9",
+    "semantic_hash": "0cc78a191c0929d1814715d083f55eb9"
+  },
+  "frontend/js/data/siteRenderer.js": {
+    "mtime": 1779905560.525119,
+    "ast_hash": "bd5e7fcda97b87f30deea72bf18af400",
+    "semantic_hash": "bd5e7fcda97b87f30deea72bf18af400"
+  },
+  "frontend/js/data/templates.js": {
+    "mtime": 1774555383.3384478,
+    "ast_hash": "de10f3420f538fc564e2b7f2b141564d",
+    "semantic_hash": "de10f3420f538fc564e2b7f2b141564d"
+  },
+  "frontend/js/main.js": {
+    "mtime": 1775759816.6166015,
+    "ast_hash": "535e4a394471acae43beb8ec9352ea86",
+    "semantic_hash": "535e4a394471acae43beb8ec9352ea86"
+  },
+  "frontend/js/ui/chat.js": {
+    "mtime": 1782497840.8549247,
+    "ast_hash": "8af6667e6ad3e9c5d78e12907ee454fb",
+    "semantic_hash": "8af6667e6ad3e9c5d78e12907ee454fb"
+  },
+  "frontend/js/ui/projects.js": {
+    "mtime": 1774528744.5265357,
+    "ast_hash": "0b4bf8830057779fa893eee0608fb2d5",
+    "semantic_hash": "0b4bf8830057779fa893eee0608fb2d5"
+  },
+  "frontend/js/ui/stats.js": {
+    "mtime": 1774529819.7129424,
+    "ast_hash": "0e95ba26d9ece1ffc51ea92aa9174e2d",
+    "semantic_hash": "0e95ba26d9ece1ffc51ea92aa9174e2d"
+  },
+  "frontend/js/ui/variogram.js": {
+    "mtime": 1774556361.2318273,
+    "ast_hash": "6ff2a1724ab9946d68cfa6b5494f8774",
+    "semantic_hash": "6ff2a1724ab9946d68cfa6b5494f8774"
+  },
+  "frontend/js/utils/clipboard.js": {
+    "mtime": 1774528280.8568447,
+    "ast_hash": "506cb4ba184a1d40d9b1059e52cb0b67",
+    "semantic_hash": "506cb4ba184a1d40d9b1059e52cb0b67"
+  },
+  "frontend/js/utils/helpers.js": {
+    "mtime": 1774533072.5169332,
+    "ast_hash": "2403f08f9ca49f101414101d9eeb09c2",
+    "semantic_hash": "2403f08f9ca49f101414101d9eeb09c2"
+  },
+  "moodle/entrypoint.sh": {
+    "mtime": 1775545205.3955388,
+    "ast_hash": "6bd2c93f13cf44d951db8d4d33cb4627",
+    "semantic_hash": "6bd2c93f13cf44d951db8d4d33cb4627"
+  },
+  "moodle/theme/geocore/classes/output/core_renderer.php": {
+    "mtime": 1775502904.434289,
+    "ast_hash": "1048229819a64c75bc4b0bca52376b11",
+    "semantic_hash": "1048229819a64c75bc4b0bca52376b11"
+  },
+  "moodle/theme/geocore/config.php": {
+    "mtime": 1781546643.4593883,
+    "ast_hash": "18e65ccd80f51cfd53959992ef388e3b",
+    "semantic_hash": "18e65ccd80f51cfd53959992ef388e3b"
+  },
+  "moodle/theme/geocore/javascript/scorm-fullscreen.js": {
+    "mtime": 1782106444.6378343,
+    "ast_hash": "ce4eba351be4de91243fb648313bf9ab",
+    "semantic_hash": "ce4eba351be4de91243fb648313bf9ab"
+  },
+  "moodle/theme/geocore/lang/en/theme_geocore.php": {
+    "mtime": 1775487750.6032352,
+    "ast_hash": "4652833e9e8e79929bb7e5cc2916ca55",
+    "semantic_hash": "4652833e9e8e79929bb7e5cc2916ca55"
+  },
+  "moodle/theme/geocore/lang/ru/theme_geocore.php": {
+    "mtime": 1775487761.791162,
+    "ast_hash": "4d4325d1b61c3d86b90efcc58bb6bb2c",
+    "semantic_hash": "4d4325d1b61c3d86b90efcc58bb6bb2c"
+  },
+  "moodle/theme/geocore/lib.php": {
+    "mtime": 1781596665.5292273,
+    "ast_hash": "8fb66dd88ddf6215cfcaf65fd46588ad",
+    "semantic_hash": "8fb66dd88ddf6215cfcaf65fd46588ad"
+  },
+  "moodle/theme/geocore/version.php": {
+    "mtime": 1782109760.675813,
+    "ast_hash": "86671b60e44ffb217393dffe805534e0",
+    "semantic_hash": "86671b60e44ffb217393dffe805534e0"
+  },
+  "scorm-tools/repack.sh": {
+    "mtime": 1775934443.9131002,
+    "ast_hash": "3c6fcf82c274699f7a715b313b1b1776",
+    "semantic_hash": "3c6fcf82c274699f7a715b313b1b1776"
+  },
+  "scripts/backup.sh": {
+    "mtime": 1781468942.579631,
+    "ast_hash": "73686b13ed09efc0b41dbf35963e3484",
+    "semantic_hash": "73686b13ed09efc0b41dbf35963e3484"
+  },
+  "scripts/bootstrap-vps.sh": {
+    "mtime": 1779450360.2819364,
+    "ast_hash": "6a18e76df608918709d489e98c9ad1a5",
+    "semantic_hash": "6a18e76df608918709d489e98c9ad1a5"
+  },
+  "scripts/check_billing.sh": {
+    "mtime": 1776763514.4551945,
+    "ast_hash": "4b17027161205dc745ff5c8ac558c36b",
+    "semantic_hash": "4b17027161205dc745ff5c8ac558c36b"
+  },
+  "scripts/courses-meta.json": {
+    "mtime": 1778835660.4237313,
+    "ast_hash": "211c3609e3004408f6e2300c4a475741",
+    "semantic_hash": "211c3609e3004408f6e2300c4a475741"
+  },
+  "scripts/courses-state.json": {
+    "mtime": 1778838578.7404826,
+    "ast_hash": "7a3ad922f7ee4735ca8a7fba955641fc",
+    "semantic_hash": "7a3ad922f7ee4735ca8a7fba955641fc"
+  },
+  "scripts/healthcheck.sh": {
+    "mtime": 1776283350.693426,
+    "ast_hash": "0cb3568d3dde72f1e10006a95f909d7b",
+    "semantic_hash": "0cb3568d3dde72f1e10006a95f909d7b"
+  },
+  "scripts/make-scorm.sh": {
+    "mtime": 1778961281.24902,
+    "ast_hash": "a3cd5c5d575249e31e0054782da963be",
+    "semantic_hash": "a3cd5c5d575249e31e0054782da963be"
+  },
+  "scripts/moodle-add-url.php": {
+    "mtime": 1778838032.2844484,
+    "ast_hash": "e8416d4bc8771a4927da4dc4d4bd50d9",
+    "semantic_hash": "e8416d4bc8771a4927da4dc4d4bd50d9"
+  },
+  "scripts/moodle-create-course.php": {
+    "mtime": 1778838254.8107867,
+    "ast_hash": "c65d73d15d0df42174a6969e6e0711d1",
+    "semantic_hash": "c65d73d15d0df42174a6969e6e0711d1"
+  },
+  "scripts/moodle-upload-scorm.php": {
+    "mtime": 1778961333.7007864,
+    "ast_hash": "580dfeca94773e2c09b212d7567cd6b6",
+    "semantic_hash": "580dfeca94773e2c09b212d7567cd6b6"
+  },
+  "scripts/publish-courses.sh": {
+    "mtime": 1778843885.1990898,
+    "ast_hash": "cd638f22773e57f31b24cadfdd4a2237",
+    "semantic_hash": "cd638f22773e57f31b24cadfdd4a2237"
+  },
+  "scripts/restore.sh": {
+    "mtime": 1781158006.996575,
+    "ast_hash": "dbd261325a1bf331d23b78d9a473d58a",
+    "semantic_hash": "dbd261325a1bf331d23b78d9a473d58a"
+  },
+  "scripts/setup-bucket.sh": {
+    "mtime": 1781158101.3119433,
+    "ast_hash": "29d6dd52d87dc08356b0e22988b6cf8e",
+    "semantic_hash": "29d6dd52d87dc08356b0e22988b6cf8e"
+  },
+  "scripts/update.sh": {
+    "mtime": 1776783447.0221,
+    "ast_hash": "38d0fe1c7b381ae527eb2daaec39b233",
+    "semantic_hash": "38d0fe1c7b381ae527eb2daaec39b233"
+  },
+  "start_serverpython_9001.sh": {
+    "mtime": 1775735575.4534094,
+    "ast_hash": "ce8daf633fa02a577e845e6610599d01",
+    "semantic_hash": "ce8daf633fa02a577e845e6610599d01"
+  },
+  "tools/convert.py": {
+    "mtime": 1778178933.06505,
+    "ast_hash": "9a186c99fce33980b5e9ab26473447e2",
+    "semantic_hash": "9a186c99fce33980b5e9ab26473447e2"
+  },
+  "tools/docx_to_gift.py": {
+    "mtime": 1776108773.2140207,
+    "ast_hash": "6ffe798e914c7ac2fb6e398d84139995",
+    "semantic_hash": "6ffe798e914c7ac2fb6e398d84139995"
+  },
+  "tools/docx_to_moodle_xml.py": {
+    "mtime": 1776109302.656784,
+    "ast_hash": "4bd13afc557c178e1d788dd1b361dcc9",
+    "semantic_hash": "4bd13afc557c178e1d788dd1b361dcc9"
+  },
+  "tools/qti_to_gift.py": {
+    "mtime": 1776108390.9270942,
+    "ast_hash": "b5b2aa15177c6adf0b9e992c0c92483f",
+    "semantic_hash": "b5b2aa15177c6adf0b9e992c0c92483f"
+  },
+  "tools/qti_to_moodle_xml.py": {
+    "mtime": 1776108485.5303338,
+    "ast_hash": "f63bd9a38be1333c668fc67a445f973c",
+    "semantic_hash": "f63bd9a38be1333c668fc67a445f973c"
+  }
+}

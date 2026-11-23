@@ -1,0 +1,717 @@
+{
+  "communities": {
+    "0": [
+      "frontend_js_core_model",
+      "frontend_js_core_model_classifyjorc",
+      "frontend_js_core_model_getmodelrange",
+      "frontend_js_core_model_interpolateblocks",
+      "frontend_js_core_model_runmodel",
+      "frontend_js_core_threeinit",
+      "frontend_js_core_threeinit_init3d",
+      "frontend_js_core_visualization",
+      "frontend_js_core_visualization_clearoregrp",
+      "frontend_js_core_visualization_drawcoalseams",
+      "frontend_js_core_visualization_drawellipsoidorebody",
+      "frontend_js_core_visualization_getcolorbygrade",
+      "frontend_js_core_visualization_gradetocolor",
+      "frontend_js_core_visualization_ispointinsidewireframe",
+      "frontend_js_core_visualization_oreshellmeshes",
+      "frontend_js_core_visualization_setoreshellvisibility",
+      "frontend_js_core_visualization_visualizeblocks",
+      "frontend_js_core_visualization_visualizeholes",
+      "frontend_js_core_visualization_visualizeorefromvertices",
+      "frontend_js_data_csvparser",
+      "frontend_js_data_csvparser_parsecsv",
+      "frontend_js_data_objparser",
+      "frontend_js_data_objparser_parseobj",
+      "frontend_js_data_templates",
+      "frontend_js_data_templates_currentblocks",
+      "frontend_js_data_templates_currentholes",
+      "frontend_js_data_templates_getcurrentblocks",
+      "frontend_js_data_templates_getcurrentholes",
+      "frontend_js_data_templates_loadtemplate",
+      "frontend_js_data_templates_setcurrentblocks",
+      "frontend_js_data_templates_setcurrentholes",
+      "frontend_js_data_templates_templates",
+      "frontend_js_main",
+      "frontend_js_main_download",
+      "frontend_js_main_wireevents",
+      "frontend_js_ui_projects",
+      "frontend_js_ui_projects_loadprojects",
+      "frontend_js_ui_projects_renderprojects",
+      "frontend_js_ui_projects_saveprojects",
+      "frontend_js_ui_stats",
+      "frontend_js_ui_stats_updatescriptonly",
+      "frontend_js_ui_stats_updateui",
+      "frontend_js_ui_variogram",
+      "frontend_js_ui_variogram_calculatevariogram",
+      "frontend_js_ui_variogram_drawvariogram",
+      "frontend_js_ui_variogram_fitvariogram",
+      "frontend_js_ui_variogram_sphericalmodel",
+      "frontend_js_utils_clipboard",
+      "frontend_js_utils_clipboard_copytoclipboard",
+      "frontend_js_utils_clipboard_fallbackcopy",
+      "frontend_js_utils_helpers",
+      "frontend_js_utils_helpers_calculateaveragegrade",
+      "frontend_js_utils_helpers_cleargroup",
+      "frontend_js_utils_helpers_getparam",
+      "frontend_js_utils_helpers_mulberry32",
+      "frontend_js_utils_helpers_setrunready",
+      "frontend_js_utils_helpers_setstatus"
+    ],
+    "1": [
+      "any",
+      "backend_main_generate_mac_only",
+      "backend_main_generate_wireframe_only",
+      "backend_main_process",
+      "backend_main_py_dataframe",
+      "backend_main_rationale_1289",
+      "backend_main_rationale_1327",
+      "backend_main_rationale_1343",
+      "backend_main_rationale_1425",
+      "backend_main_rationale_1456",
+      "backend_main_read_limited_csv",
+      "backend_main_require_positive",
+      "backend_main_validate",
+      "backend_processing_compositor",
+      "backend_processing_compositor_composite_intervals",
+      "backend_processing_compositor_py_dataframe",
+      "backend_processing_compositor_rationale_5",
+      "backend_processing_init",
+      "backend_processing_mac_generator",
+      "backend_processing_mac_generator_generate_mac",
+      "backend_processing_mac_generator_generate_mac_for_coal",
+      "backend_processing_mac_generator_generate_mac_for_porphyry",
+      "backend_processing_mac_generator_generate_mac_simple",
+      "backend_processing_mac_generator_generate_mac_with_variogram",
+      "backend_processing_mac_generator_py_dataframe",
+      "backend_processing_mac_generator_rationale_207",
+      "backend_processing_mac_generator_rationale_24",
+      "backend_processing_mac_generator_rationale_241",
+      "backend_processing_mac_generator_rationale_293",
+      "backend_processing_mac_generator_rationale_319",
+      "backend_processing_validator",
+      "backend_processing_validator_py_dataframe",
+      "backend_processing_validator_rationale_6",
+      "backend_processing_validator_validate_csv",
+      "backend_processing_wireframe_gen",
+      "backend_processing_wireframe_gen_generate_wireframe_alpha_shape",
+      "backend_processing_wireframe_gen_generate_wireframe_auto",
+      "backend_processing_wireframe_gen_generate_wireframe_by_sections",
+      "backend_processing_wireframe_gen_generate_wireframe_convex_hull",
+      "backend_processing_wireframe_gen_py_dataframe",
+      "backend_processing_wireframe_gen_rationale_108",
+      "backend_processing_wireframe_gen_rationale_118",
+      "backend_processing_wireframe_gen_rationale_20",
+      "backend_processing_wireframe_gen_rationale_84",
+      "backend_processing_wireframe_gen_rationale_95",
+      "backend_processing_wireframe_gen_validate_wireframe",
+      "uploadfile"
+    ],
+    "2": [
+      "bot_bot",
+      "bot_bot_alert",
+      "bot_bot_backup_history_text",
+      "bot_bot_check",
+      "bot_bot_check_token_reminder",
+      "bot_bot_clear",
+      "bot_bot_edit",
+      "bot_bot_get_containers",
+      "bot_bot_get_cpu",
+      "bot_bot_get_disk",
+      "bot_bot_get_logs",
+      "bot_bot_get_ram",
+      "bot_bot_get_uptime",
+      "bot_bot_handle",
+      "bot_bot_handle_client",
+      "bot_bot_led",
+      "bot_bot_load_state",
+      "bot_bot_poll",
+      "bot_bot_save_state",
+      "bot_bot_send",
+      "bot_bot_status_text",
+      "bot_bot_tokens_text",
+      "bot_bot_watchdog_loop"
+    ],
+    "3": [
+      "frontend_js_data_siterenderer",
+      "frontend_js_data_siterenderer_cardinner",
+      "frontend_js_data_siterenderer_ensuremodal",
+      "frontend_js_data_siterenderer_esc",
+      "frontend_js_data_siterenderer_fetchcoursesfromapi",
+      "frontend_js_data_siterenderer_initsite",
+      "frontend_js_data_siterenderer_loadsitedata",
+      "frontend_js_data_siterenderer_moodletocourse",
+      "frontend_js_data_siterenderer_openlivemodal",
+      "frontend_js_data_siterenderer_openplannedmodal",
+      "frontend_js_data_siterenderer_openrequestform",
+      "frontend_js_data_siterenderer_opensoonmodal",
+      "frontend_js_data_siterenderer_rendercourses",
+      "frontend_js_data_siterenderer_renderfooter",
+      "frontend_js_data_siterenderer_renderlivecard",
+      "frontend_js_data_siterenderer_rendernav",
+      "frontend_js_data_siterenderer_renderplannedcard",
+      "frontend_js_data_siterenderer_rendersooncard",
+      "frontend_js_data_siterenderer_safehref",
+      "frontend_js_data_siterenderer_showmodal"
+    ],
+    "4": [
+      "backend_main",
+      "backend_main_admin_get_site_json",
+      "backend_main_admin_login",
+      "backend_main_admin_logout",
+      "backend_main_adminloginrequest",
+      "backend_main_chat_endpoint",
+      "backend_main_chatrequest",
+      "backend_main_clean_thinking",
+      "backend_main_get_courses",
+      "backend_main_health",
+      "backend_main_rationale_1235",
+      "backend_main_rationale_1511",
+      "backend_main_rationale_218",
+      "backend_main_rationale_667",
+      "backend_main_record_income_in_usn",
+      "backend_main_require_admin",
+      "backend_main_root",
+      "billing_guide",
+      "response"
+    ],
+    "5": [
+      "backend_tests_test_api",
+      "backend_tests_test_api_anyio_backend",
+      "backend_tests_test_api_mock_pool",
+      "backend_tests_test_api_test_admin_requests_bearer_auth",
+      "backend_tests_test_api_test_admin_requests_cookie_auth",
+      "backend_tests_test_api_test_admin_requests_no_auth",
+      "backend_tests_test_api_test_admin_requests_wrong_token",
+      "backend_tests_test_api_test_health",
+      "backend_tests_test_api_test_login_valid",
+      "backend_tests_test_api_test_login_wrong_token",
+      "backend_tests_test_api_test_login_wrong_user",
+      "backend_tests_test_api_test_logout",
+      "backend_tests_test_api_test_mac_invalid_style",
+      "backend_tests_test_api_test_mac_valid",
+      "backend_tests_test_api_test_root",
+      "backend_tests_test_api_test_validate_csv_missing_value_column",
+      "backend_tests_test_api_test_validate_csv_too_large",
+      "backend_tests_test_api_test_validate_csv_valid",
+      "backend_tests_test_api_test_validate_not_csv"
+    ],
+    "6": [
+      "backend_main_admin_archive_request",
+      "backend_main_admin_delete_request",
+      "backend_main_admin_get_archive",
+      "backend_main_admin_get_request",
+      "backend_main_admin_get_requests",
+      "backend_main_admin_unarchive_request",
+      "backend_main_admin_update_headcount",
+      "backend_main_admin_update_total_price",
+      "backend_main_get_pool",
+      "backend_main_rationale_882",
+      "backend_main_rationale_896",
+      "backend_main_rationale_929",
+      "backend_main_rationale_939",
+      "backend_main_rationale_949",
+      "backend_main_rationale_959",
+      "backend_main_startup"
+    ],
+    "7": [
+      "backend_processing_decluster",
+      "backend_processing_decluster_apply_declustering",
+      "backend_processing_decluster_calculate_declustered_statistics",
+      "backend_processing_decluster_cell_declustering",
+      "backend_processing_decluster_distance_weighted_declustering",
+      "backend_processing_decluster_polygon_area",
+      "backend_processing_decluster_polygon_declustering",
+      "backend_processing_decluster_py_dataframe",
+      "backend_processing_decluster_rationale_174",
+      "backend_processing_decluster_rationale_22",
+      "backend_processing_decluster_rationale_231",
+      "backend_processing_decluster_rationale_261",
+      "backend_processing_decluster_rationale_294",
+      "backend_processing_decluster_rationale_97"
+    ],
+    "8": [
+      "tools_docx_to_gift",
+      "tools_docx_to_gift_build_gift",
+      "tools_docx_to_gift_gift_escape",
+      "tools_docx_to_gift_is_highlighted",
+      "tools_docx_to_gift_is_new_q_start",
+      "tools_docx_to_gift_main",
+      "tools_docx_to_gift_parse",
+      "tools_docx_to_gift_rationale_1",
+      "tools_docx_to_gift_rationale_122",
+      "tools_docx_to_gift_rationale_135",
+      "tools_docx_to_gift_rationale_76",
+      "tools_docx_to_gift_rationale_84",
+      "tools_docx_to_gift_rationale_91"
+    ],
+    "9": [
+      "tools_convert",
+      "tools_convert_app",
+      "tools_convert_app_build",
+      "tools_convert_app_current_conv",
+      "tools_convert_app_init",
+      "tools_convert_app_on_conv_change",
+      "tools_convert_app_pick_images",
+      "tools_convert_app_pick_input",
+      "tools_convert_app_pick_output",
+      "tools_convert_app_run",
+      "tools_convert_load_module",
+      "tools_readme"
+    ],
+    "10": [
+      "tools_qti_to_moodle_xml",
+      "tools_qti_to_moodle_xml_build_question",
+      "tools_qti_to_moodle_xml_find_image",
+      "tools_qti_to_moodle_xml_find_image_by_ident",
+      "tools_qti_to_moodle_xml_get_mattext",
+      "tools_qti_to_moodle_xml_main",
+      "tools_qti_to_moodle_xml_parse_and_convert",
+      "tools_qti_to_moodle_xml_rationale_1",
+      "tools_qti_to_moodle_xml_rationale_42",
+      "tools_qti_to_moodle_xml_rationale_67",
+      "tools_qti_to_moodle_xml_rationale_88",
+      "tools_qti_to_moodle_xml_xml_file_tag"
+    ],
+    "11": [
+      "scripts_restore",
+      "scripts_restore_cleanup",
+      "scripts_restore_dc",
+      "scripts_restore_fail",
+      "scripts_restore_log",
+      "scripts_restore_notify",
+      "scripts_restore_resolve_keys",
+      "scripts_restore_s3",
+      "scripts_restore_select_backup",
+      "scripts_restore_sh__entry",
+      "scripts_restore_warn"
+    ],
+    "12": [
+      "wiki_backend",
+      "wiki_backup",
+      "wiki_decisions",
+      "wiki_email",
+      "wiki_frontend",
+      "wiki_index",
+      "wiki_infrastructure",
+      "wiki_lab",
+      "wiki_migration",
+      "wiki_moodle",
+      "wiki_problems"
+    ],
+    "13": [
+      "backend_main_admin_extend_access",
+      "backend_main_admin_mark_paid",
+      "backend_main_admin_send_accounts",
+      "backend_main_create_moodle_accounts",
+      "backend_main_generate_secure_password",
+      "backend_main_get_moodle_course_id",
+      "backend_main_rationale_1072",
+      "backend_main_rationale_1126",
+      "backend_main_rationale_1202",
+      "backgroundtasks"
+    ],
+    "14": [
+      "frontend_articles_bortsov_epithermal",
+      "frontend_articles_datamine_jorc",
+      "frontend_articles_jorc_vs_gkz",
+      "frontend_articles_sections_vs_datamine",
+      "frontend_articles_variogramma",
+      "frontend_courses",
+      "frontend_index",
+      "frontend_lab",
+      "frontend_sandbox",
+      "js_data_siterenderer"
+    ],
+    "15": [
+      "tools_docx_to_moodle_xml",
+      "tools_docx_to_moodle_xml_build_xml_question",
+      "tools_docx_to_moodle_xml_extract_image",
+      "tools_docx_to_moodle_xml_is_highlighted",
+      "tools_docx_to_moodle_xml_is_new_q_start",
+      "tools_docx_to_moodle_xml_main",
+      "tools_docx_to_moodle_xml_parse",
+      "tools_docx_to_moodle_xml_rationale_1",
+      "tools_docx_to_moodle_xml_rationale_53",
+      "tools_docx_to_moodle_xml_rationale_87"
+    ],
+    "16": [
+      "tools_qti_to_gift",
+      "tools_qti_to_gift_build_gift",
+      "tools_qti_to_gift_get_text",
+      "tools_qti_to_gift_gift_escape",
+      "tools_qti_to_gift_main",
+      "tools_qti_to_gift_parse_qti",
+      "tools_qti_to_gift_rationale_1",
+      "tools_qti_to_gift_rationale_37",
+      "tools_qti_to_gift_rationale_44",
+      "tools_qti_to_gift_rationale_54"
+    ],
+    "17": [
+      "backend_main_admin_generate_contract",
+      "backend_main_admin_generate_invoice",
+      "backend_main_make_contract_pdf",
+      "backend_main_make_invoice_pdf",
+      "backend_main_make_qr",
+      "backend_main_pdf_font",
+      "backend_main_rationale_1028",
+      "backend_main_rationale_472",
+      "backend_main_rationale_999"
+    ],
+    "18": [
+      "backend_main_courserequest",
+      "backend_main_create_request",
+      "backend_main_rationale_262",
+      "backend_main_rationale_272",
+      "backend_main_rationale_804",
+      "backend_main_send_accounts_email",
+      "backend_main_send_request_emails",
+      "backend_main_smtp_send",
+      "mimemultipart"
+    ],
+    "19": [
+      "scripts_publish_courses",
+      "scripts_publish_courses_dry",
+      "scripts_publish_courses_info",
+      "scripts_publish_courses_log",
+      "scripts_publish_courses_meta",
+      "scripts_publish_courses_moodle",
+      "scripts_publish_courses_sh__entry",
+      "scripts_publish_courses_state_get",
+      "scripts_publish_courses_state_set"
+    ],
+    "20": [
+      "backend_main_admin_put_site_json",
+      "backend_main_admin_update_request",
+      "backend_main_chatmessage",
+      "backend_main_rationale_1261",
+      "backend_main_rationale_914",
+      "backend_main_sitejsonupdate",
+      "backend_main_statusupdate",
+      "basemodel"
+    ],
+    "21": [
+      "scripts_backup",
+      "scripts_backup_fail",
+      "scripts_backup_log",
+      "scripts_backup_notify",
+      "scripts_backup_rotate",
+      "scripts_backup_s3",
+      "scripts_backup_s3_put_locked",
+      "scripts_backup_sh__entry"
+    ],
+    "22": [
+      "scripts_bootstrap_vps",
+      "scripts_bootstrap_vps_compose_dir",
+      "scripts_bootstrap_vps_fail",
+      "scripts_bootstrap_vps_log",
+      "scripts_bootstrap_vps_moodle_url",
+      "scripts_bootstrap_vps_sh__entry",
+      "scripts_bootstrap_vps_step",
+      "scripts_bootstrap_vps_warn"
+    ],
+    "23": [
+      "frontend_js_ui_chat",
+      "frontend_js_ui_chat_contactbuttons",
+      "frontend_js_ui_chat_fetchbotreply",
+      "frontend_js_ui_chat_history",
+      "frontend_js_ui_chat_kw",
+      "frontend_js_ui_chat_localfallback"
+    ],
+    "24": [
+      "scripts_make_scorm",
+      "scripts_make_scorm_info",
+      "scripts_make_scorm_log",
+      "scripts_make_scorm_sh__entry",
+      "scripts_make_scorm_state_get",
+      "scripts_scorm_pipeline"
+    ],
+    "25": [
+      "scripts_check_billing",
+      "scripts_check_billing_fail",
+      "scripts_check_billing_hdr",
+      "scripts_check_billing_ok",
+      "scripts_check_billing_sh__entry"
+    ],
+    "26": [
+      "architecture",
+      "docker_compose",
+      "status",
+      "workflow"
+    ],
+    "27": [
+      "moodle_theme_geocore_javascript_scorm_fullscreen",
+      "moodle_theme_geocore_javascript_scorm_fullscreen_fitscocontent",
+      "moodle_theme_geocore_javascript_scorm_fullscreen_onresize",
+      "moodle_theme_geocore_javascript_scorm_fullscreen_watchscormobject"
+    ],
+    "28": [
+      "scripts_healthcheck",
+      "scripts_healthcheck_log",
+      "scripts_healthcheck_send_telegram",
+      "scripts_healthcheck_sh__entry"
+    ],
+    "29": [
+      "scripts_update",
+      "scripts_update_hdr",
+      "scripts_update_ok",
+      "scripts_update_sh__entry"
+    ],
+    "30": [
+      "moodle_theme_geocore_lib",
+      "moodle_theme_geocore_lib_theme_geocore_get_extra_scss",
+      "moodle_theme_geocore_lib_theme_geocore_page_init"
+    ],
+    "31": [
+      "scripts_setup_bucket",
+      "scripts_setup_bucket_s3api",
+      "scripts_setup_bucket_sh__entry"
+    ],
+    "32": [
+      "backup_entrypoint",
+      "backup_entrypoint_sh__entry"
+    ],
+    "33": [
+      "moodle_dockerfile",
+      "moodle_guide"
+    ],
+    "34": [
+      "moodle_entrypoint",
+      "moodle_entrypoint_sh__entry"
+    ],
+    "35": [
+      "moodle_theme_geocore_classes_output_core_renderer",
+      "moodle_theme_geocore_classes_output_core_renderer_core_renderer"
+    ],
+    "36": [
+      "scorm_tools_repack",
+      "scorm_tools_repack_sh__entry"
+    ],
+    "37": [
+      "start_serverpython_9001",
+      "start_serverpython_9001_sh__entry"
+    ],
+    "38": [
+      "backend_tests_init"
+    ],
+    "39": [
+      "bot_test"
+    ],
+    "40": [
+      "claude"
+    ],
+    "41": [
+      "moodle_theme_geocore_config"
+    ],
+    "42": [
+      "moodle_theme_geocore_lang_en_theme_geocore"
+    ],
+    "43": [
+      "moodle_theme_geocore_lang_ru_theme_geocore"
+    ],
+    "44": [
+      "moodle_theme_geocore_version"
+    ],
+    "45": [
+      "project"
+    ],
+    "46": [
+      "readme"
+    ],
+    "47": [
+      "recovery"
+    ],
+    "48": [
+      "roadmap"
+    ],
+    "49": [
+      "scripts_moodle_add_url"
+    ],
+    "50": [
+      "scripts_moodle_create_course"
+    ],
+    "51": [
+      "scripts_moodle_upload_scorm"
+    ],
+    "52": [
+      "session_log"
+    ],
+    "53": [
+      "tools_test_authoring_guide"
+    ],
+    "54": [
+      "worklog"
+    ]
+  },
+  "cohesion": {
+    "0": 0.10651629072681704,
+    "1": 0.08788159111933395,
+    "2": 0.20553359683794467,
+    "3": 0.20526315789473684,
+    "4": 0.1286549707602339,
+    "5": 0.11695906432748537,
+    "6": 0.125,
+    "7": 0.23076923076923078,
+    "8": 0.21794871794871795,
+    "9": 0.2727272727272727,
+    "10": 0.25757575757575757,
+    "11": 0.4,
+    "12": 0.18181818181818182,
+    "13": 0.2222222222222222,
+    "14": 0.26666666666666666,
+    "15": 0.3111111111111111,
+    "16": 0.28888888888888886,
+    "17": 0.2222222222222222,
+    "18": 0.2777777777777778,
+    "19": 0.3055555555555556,
+    "20": 0.25,
+    "21": 0.6071428571428571,
+    "22": 0.39285714285714285,
+    "23": 0.4666666666666667,
+    "24": 0.4666666666666667,
+    "25": 0.7,
+    "26": 0.5,
+    "27": 0.8333333333333334,
+    "28": 0.8333333333333334,
+    "29": 0.8333333333333334,
+    "30": 0.6666666666666666,
+    "31": 1.0,
+    "32": 1.0,
+    "33": 1.0,
+    "34": 1.0,
+    "35": 2.0,
+    "36": 1.0,
+    "37": 1.0,
+    "38": 1.0,
+    "39": 1.0,
+    "40": 1.0,
+    "41": 1.0,
+    "42": 1.0,
+    "43": 1.0,
+    "44": 1.0,
+    "45": 1.0,
+    "46": 1.0,
+    "47": 1.0,
+    "48": 1.0,
+    "49": 1.0,
+    "50": 1.0,
+    "51": 1.0,
+    "52": 1.0,
+    "53": 1.0,
+    "54": 1.0
+  },
+  "gods": [
+    {
+      "id": "frontend_js_main_wireevents",
+      "label": "wireEvents()",
+      "degree": 20
+    },
+    {
+      "id": "backend_main_get_pool",
+      "label": "get_pool()",
+      "degree": 18
+    },
+    {
+      "id": "backend_main_process",
+      "label": "process()",
+      "degree": 17
+    },
+    {
+      "id": "frontend_js_data_templates_loadtemplate",
+      "label": "loadTemplate()",
+      "degree": 13
+    },
+    {
+      "id": "backend_main_generate_mac_only",
+      "label": "generate_mac_only()",
+      "degree": 11
+    },
+    {
+      "id": "bot_bot_handle",
+      "label": "handle()",
+      "degree": 11
+    },
+    {
+      "id": "wiki_index",
+      "label": "Wiki Index",
+      "degree": 10
+    },
+    {
+      "id": "backend_processing_wireframe_gen_generate_wireframe_convex_hull",
+      "label": "generate_wireframe_convex_hull()",
+      "degree": 9
+    },
+    {
+      "id": "scripts_restore_sh__entry",
+      "label": "restore.sh script",
+      "degree": 9
+    },
+    {
+      "id": "tools_convert_app",
+      "label": "App",
+      "degree": 9
+    }
+  ],
+  "surprises": [
+    {
+      "source": "process()",
+      "target": "apply_declustering()",
+      "source_files": [
+        "backend/main.py",
+        "backend/processing/decluster.py"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; bridges separate communities"
+    },
+    {
+      "source": "process()",
+      "target": "calculate_declustered_statistics()",
+      "source_files": [
+        "backend/main.py",
+        "backend/processing/decluster.py"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; bridges separate communities"
+    },
+    {
+      "source": "validate()",
+      "target": "validate_csv()",
+      "source_files": [
+        "backend/main.py",
+        "backend/processing/validator.py"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source"
+    },
+    {
+      "source": "process()",
+      "target": "composite_intervals()",
+      "source_files": [
+        "backend/main.py",
+        "backend/processing/compositor.py"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source"
+    },
+    {
+      "source": "process()",
+      "target": "generate_mac()",
+      "source_files": [
+        "backend/main.py",
+        "backend/processing/mac_generator.py"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source"
+    }
+  ],
+  "tokens": {
+    "input": 143051,
+    "output": 4337
+  }
+}

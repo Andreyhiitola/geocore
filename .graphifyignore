@@ -1,0 +1,16 @@
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.webp
+*.svg
+*.ico
+node_modules/
+__pycache__/
+.venv/
+venv/
+dist/
+build/
+.git/
+*.pyc
+migrations/
